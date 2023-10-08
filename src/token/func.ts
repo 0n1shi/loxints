@@ -1,4 +1,4 @@
-import { Symbol, Token } from "./type.ts";
+import { singleSymbles, Symbol, Token } from "./type.ts";
 
 export function tokenize(sourceCode: string): Token[] {
   const sourceCodeLength = sourceCode.length;
@@ -13,20 +13,13 @@ export function tokenize(sourceCode: string): Token[] {
     }
 
     const currentChar = sourceCode[cursor];
+    cursor++;
 
-    switch (currentChar) {
-      case Symbol.ParenLeft:
-        tokens.push({
-          symbol: Symbol.ParenLeft,
-          value: null,
-        });
-        break;
-      case Symbol.ParenRight:
-        tokens.push({
-          symbol: Symbol.ParenRight,
-          value: null,
-        });
-        break;
+    if (singleSymbles.includes(currentChar)) {
+      const symbol = singleSymbles.filter((v) => v == currentChar)[0];
+      tokens.push({
+        symbol: symbol as Symbol,
+      });
     }
   }
   return tokens;

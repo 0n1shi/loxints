@@ -69,7 +69,23 @@ export const keywords = [
   Symbol.While,
 ];
 
+export const singleSymbles: string[] = [
+  Symbol.ParenLeft,
+  Symbol.ParenRight,
+  Symbol.BracketLeft,
+  Symbol.BracketRight,
+  Symbol.BraceLeft,
+  Symbol.BraceRight,
+  Symbol.Comma,
+  Symbol.Dot,
+  Symbol.Minus,
+  Symbol.Plus,
+  Symbol.SemiColon,
+  Symbol.Slash,
+  Symbol.Star,
+];
+
 export type Token = {
   symbol: Symbol;
-  value: string | number | null;
+  value?: string | number;
 };
