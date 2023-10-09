@@ -23,7 +23,7 @@ Deno.test("Testing makePrimary()", async (t) => {
   };
   const tests: Test[] = [
     {
-      name: "false",
+      name: "False",
       input: {
         tokens: [{ symbol: Symbol.False }],
       },
@@ -33,7 +33,7 @@ Deno.test("Testing makePrimary()", async (t) => {
       },
     },
     {
-      name: "string",
+      name: "String",
       input: {
         tokens: [{ symbol: Symbol.String, value: "Hello world" }],
       },
@@ -43,7 +43,7 @@ Deno.test("Testing makePrimary()", async (t) => {
       },
     },
     {
-      name: "number with some lefts",
+      name: "Number with some lefts",
       input: {
         tokens: [
           { symbol: Symbol.Number, value: 123 },
@@ -56,7 +56,7 @@ Deno.test("Testing makePrimary()", async (t) => {
       },
     },
     {
-      name: "expression",
+      name: "Expression",
       input: {
         tokens: [
           { symbol: Symbol.ParenLeft },
@@ -91,7 +91,7 @@ Deno.test("Testing makeUnary()", async (t) => {
   };
   const tests: Test[] = [
     {
-      name: "!false",
+      name: "Not false (!false)",
       input: {
         tokens: [{ symbol: Symbol.Bang }, { symbol: Symbol.False }],
       },
@@ -104,7 +104,7 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
     },
     {
-      name: "!!false",
+      name: "Not not false (!!false)",
       input: {
         tokens: [
           { symbol: Symbol.Bang },
@@ -122,6 +122,46 @@ Deno.test("Testing makeUnary()", async (t) => {
             } as Primary,
           } as UnaryWithOperator,
         },
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Minus number (-123)",
+      input: {
+        tokens: [
+          { symbol: Symbol.Minus },
+          {
+            symbol: Symbol.Number,
+            value: 123,
+          },
+        ],
+      },
+      expected: {
+        unary: {
+          operator: UnaryOperator.Minus,
+          unary: {
+            type: PrimaryType.Number,
+            value: 123,
+          } as Primary,
+        } as UnaryWithOperator,
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Number (123)",
+      input: {
+        tokens: [
+          {
+            symbol: Symbol.Number,
+            value: 123,
+          },
+        ],
+      },
+      expected: {
+        unary: {
+          type: PrimaryType.Number,
+          value: 123,
+        } as Primary,
         leftTokens: [],
       },
     },

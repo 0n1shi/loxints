@@ -2,6 +2,9 @@ import { Token } from "../token/type.ts";
 import {
   Equality,
   Expression,
+  Fanctor,
+  FanctorOperator,
+  FanctorWithUnariesAndOperator,
   Primary,
   PrimaryType,
   Unary,
@@ -12,6 +15,34 @@ import { InvalidPrimaryError } from "./error.ts";
 
 export function makeExpression(tokens: Token[]): [Expression, Token[]] {
   return [{} as Expression, tokens];
+}
+
+export function makeFanctor(tokens: Token[]): [Fanctor, Token[]] {
+  let fanctor: Fanctor;
+  let leftTokens: Token[];
+  [fanctor, leftTokens] = makeUnary(tokens);
+
+  let token = leftTokens[0];
+  while (token.symbol == Symbol.Slash || token.symbol == Symbol.Star) {
+    leftTokens = leftTokens.slice(1); // consume "/" or "*"
+
+    const operator = token.symbol == Symbol.Slash
+      ? FanctorOperator.Slash
+      : FanctorOperator.Star;
+
+    let right: Fanctor;
+    [right, leftTokens] = makeUnary(leftTokens);
+
+    fanctor = {
+      left: fanctor,
+      operator: operator,
+      right: right,
+    } as FanctorWithUnariesAndOperator;
+
+    token = leftTokens[0];
+  }
+
+  return [fanctor, leftTokens];
 }
 
 export function makeUnary(tokens: Token[]): [Unary, Token[]] {
