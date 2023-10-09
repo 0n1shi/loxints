@@ -3,7 +3,7 @@ import { isAlphabet, isAplhaNumeric, isDigit } from "./util.ts";
 
 export function tokenize(sourceCode: string): [Token[], LineNumber] {
   const sourceCodeLength = sourceCode.length;
-  let tokens: Token[] = [];
+  const tokens: Token[] = [];
 
   let cursor = 0;
   let lineNumber: LineNumber = 1;
