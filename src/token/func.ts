@@ -1,9 +1,9 @@
-import { LineNumber, Symbol, Token, keywords } from "./type.ts";
+import { keywords, LineNumber, Symbol, Token } from "./type.ts";
 import { isAlphabet, isAplhaNumeric, isDigit } from "./util.ts";
 
 export function tokenize(sourceCode: string): [Token[], LineNumber] {
   const sourceCodeLength = sourceCode.length;
-  const tokens: Token[] = [];
+  let tokens: Token[] = [];
 
   let cursor = 0;
   let lineNumber: LineNumber = 1;
@@ -182,10 +182,16 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
       });
     }
   }
-  for (const token of tokens) {
-    if (keywords.includes(token.symbol)) {
 
+  // keywords
+  tokens = tokens.map((token: Token) => {
+    if (keywords.includes(token.symbol)) {
+      return {
+        symbol: keywords.filter((k) => k == token.symbol)[0],
+      };
     }
-  }
+    return token;
+  });
+
   return [tokens, lineNumber];
 }

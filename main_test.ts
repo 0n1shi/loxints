@@ -120,6 +120,24 @@ Deno.test("Testing tokenize()", async (t) => {
         lineNumber: 3,
       },
     },
+    {
+      name: "Keywords",
+      input: `{
+  var msg = "Hello world";
+}`,
+      expected: {
+        tokens: [
+          { symbol: Symbol.BraceLeft },
+          { symbol: Symbol.Var },
+          { symbol: Symbol.Identifier, value: "msg" },
+          { symbol: Symbol.Equal },
+          { symbol: Symbol.String, value: "Hello world" },
+          { symbol: Symbol.SemiColon },
+          { symbol: Symbol.BraceRight },
+        ],
+        lineNumber: 3,
+      },
+    },
   ];
   for (const test of tests) {
     await t.step(test.name, () => {
