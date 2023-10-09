@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
-import { LineNumber, Symbol, Token } from "./src/token/type.ts";
-import { tokenize } from "./src/token/func.ts";
+import { LineNumber, Symbol, Token } from "../../token/type.ts";
+import { tokenize } from "../../token/func.ts";
 
 Deno.test("Testing tokenize()", async (t) => {
   type Test = {

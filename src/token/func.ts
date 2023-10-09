@@ -184,14 +184,12 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
   }
 
   // keywords
-  tokens = tokens.map((token: Token) => {
-    if (keywords.includes(token.symbol)) {
-      return {
-        symbol: keywords.filter((k) => k == token.symbol)[0],
-      };
+  for (const token of tokens) {
+    if (keywords.includes(token.value as Symbol)) {
+      token.symbol = token.value as Symbol;
+      delete token.value;
     }
-    return token;
-  });
+  }
 
   return [tokens, lineNumber];
 }
