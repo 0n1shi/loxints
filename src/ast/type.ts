@@ -1,7 +1,13 @@
 /**
+ * Expression
+ */
+export type Expression = Equality;
+
+/**
  * Equality
  */
-export type Equality = Comparision | {
+export type Equality = Comparision | EqualityWithComparisionsAndOperator;
+export type EqualityWithComparisionsAndOperator = {
   left: Comparision;
   operator: EqualityOperator;
   right: Comparision;
@@ -14,7 +20,8 @@ export enum EqualityOperator {
 /**
  * Comparision
  */
-export type Comparision = Term | {
+export type Comparision = Term | ComparisionWithTermsAndOperator;
+export type ComparisionWithTermsAndOperator = {
   left: Term;
   operator: ComparisionOperator;
   right: Term;
@@ -29,7 +36,8 @@ export enum ComparisionOperator {
 /**
  * Term
  */
-export type Term = Fanctor | {
+export type Term = Fanctor | FanctorWithUnariesAndOperator;
+export type TermWithFanctorsAndOperator = {
   left: Fanctor;
   operator: TermOperator;
   right: Fanctor;
@@ -42,7 +50,8 @@ export enum TermOperator {
 /**
  * Fanctor
  */
-export type Fanctor = Unary | {
+export type Fanctor = Unary | FanctorWithUnariesAndOperator;
+export type FanctorWithUnariesAndOperator = {
   left: Unary;
   operator: FanctorOperator;
   right: Unary;
@@ -55,10 +64,11 @@ export enum FanctorOperator {
 /**
  * Unary
  */
-export type Unary = {
+export type Unary = UnaryWithOperator | Primary;
+export type UnaryWithOperator = {
   operator: UnaryOperator;
   unary: Unary;
-} | Primary;
+};
 export enum UnaryOperator {
   Bang = 1,
   Minus,
@@ -67,11 +77,15 @@ export enum UnaryOperator {
 /**
  * Primary
  */
-export type Primary = PrimaryType;
+export type Primary = {
+  type: PrimaryType;
+  value?: string | number | Expression;
+};
 export enum PrimaryType {
   String = 1,
   Number,
   True,
   False,
   Nil,
+  Expression,
 }
