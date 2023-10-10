@@ -36,7 +36,7 @@ export enum ComparisionOperator {
 /**
  * Term
  */
-export type Term = Fanctor | FanctorWithUnariesAndOperator;
+export type Term = Fanctor | TermWithFanctorsAndOperator;
 export type TermWithFanctorsAndOperator = {
   left: Fanctor;
   operator: TermOperator;

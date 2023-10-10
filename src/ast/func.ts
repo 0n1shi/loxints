@@ -7,6 +7,9 @@ import {
   FanctorWithUnariesAndOperator,
   Primary,
   PrimaryType,
+  Term,
+  TermOperator,
+  TermWithFanctorsAndOperator,
   Unary,
   UnaryOperator,
 } from "./type.ts";
@@ -17,10 +20,43 @@ export function makeExpression(tokens: Token[]): [Expression, Token[]] {
   return [{} as Expression, tokens];
 }
 
+export function makeTerm(tokens: Token[]): [Term, Token[]] {
+  let term: Term;
+  let leftTokens: Token[];
+  [term, leftTokens] = makeFanctor(tokens);
+
+  if (leftTokens.length == 0) return [term, leftTokens];
+
+  let token = leftTokens[0];
+  while (token.symbol == Symbol.Minus || token.symbol == Symbol.Plus) {
+    leftTokens = leftTokens.slice(1); // consume "-" or "+"
+
+    const operator = token.symbol == Symbol.Minus
+      ? TermOperator.Minus
+      : TermOperator.Plus;
+
+    let right: Term;
+    [right, leftTokens] = makeTerm(leftTokens);
+
+    term = {
+      left: term,
+      operator: operator,
+      right: right,
+    } as TermWithFanctorsAndOperator;
+
+    if (leftTokens.length == 0) break;
+    else token = leftTokens[0];
+  }
+
+  return [term, leftTokens];
+}
+
 export function makeFanctor(tokens: Token[]): [Fanctor, Token[]] {
   let fanctor: Fanctor;
   let leftTokens: Token[];
   [fanctor, leftTokens] = makeUnary(tokens);
+
+  if (leftTokens.length == 0) return [fanctor, leftTokens];
 
   let token = leftTokens[0];
   while (token.symbol == Symbol.Slash || token.symbol == Symbol.Star) {
@@ -39,7 +75,8 @@ export function makeFanctor(tokens: Token[]): [Fanctor, Token[]] {
       right: right,
     } as FanctorWithUnariesAndOperator;
 
-    token = leftTokens[0];
+    if (leftTokens.length == 0) break;
+    else token = leftTokens[0];
   }
 
   return [fanctor, leftTokens];
