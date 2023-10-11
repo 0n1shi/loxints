@@ -1,11 +1,14 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
+  makeComparision,
   makeFanctor,
   makePrimary,
   makeTerm,
   makeUnary,
 } from "../../ast/func.ts";
 import {
+  Comparision,
+  ComparisionOperator,
   Expression,
   Fanctor,
   FanctorOperator,
@@ -19,6 +22,117 @@ import {
   UnaryWithOperator,
 } from "../../ast/type.ts";
 import { Symbol, Token } from "../../token/type.ts";
+
+Deno.test("Testing makeComparision()", async (t) => {
+  type Test = {
+    name: string;
+    input: {
+      tokens: Token[];
+    };
+    expected: {
+      comparision: Comparision;
+      leftTokens: Token[];
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: "Comparision: 3 < 5",
+      input: {
+        tokens: [
+          { symbol: Symbol.Number, value: 3 },
+          { symbol: Symbol.Less },
+          { symbol: Symbol.Number, value: 5 },
+        ],
+      },
+      expected: {
+        comparision: {
+          left: {
+            type: PrimaryType.Number,
+            value: 3,
+          } as Primary,
+          operator: ComparisionOperator.Less,
+          right: {
+            type: PrimaryType.Number,
+            value: 5,
+          } as Primary,
+        },
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Comparision: -3 < 5",
+      input: {
+        tokens: [
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Number, value: 3 },
+          { symbol: Symbol.Less },
+          { symbol: Symbol.Number, value: 5 },
+        ],
+      },
+      expected: {
+        comparision: {
+          left: {
+            operator: UnaryOperator.Minus,
+            unary: {
+              type: PrimaryType.Number,
+              value: 3,
+            } as Primary,
+          } as Unary,
+          operator: ComparisionOperator.Less,
+          right: {
+            type: PrimaryType.Number,
+            value: 5,
+          } as Primary,
+        },
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Comparision: -3 < 5 + 10",
+      input: {
+        tokens: [
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Number, value: 3 },
+          { symbol: Symbol.Less },
+          { symbol: Symbol.Number, value: 5 },
+          { symbol: Symbol.Plus },
+          { symbol: Symbol.Number, value: 10 },
+        ],
+      },
+      expected: {
+        comparision: {
+          left: {
+            operator: UnaryOperator.Minus,
+            unary: {
+              type: PrimaryType.Number,
+              value: 3,
+            } as Primary,
+          } as Unary,
+          operator: ComparisionOperator.Less,
+          right: {
+            left: {
+              type: PrimaryType.Number,
+              value: 5,
+            },
+            operator: TermOperator.Plus,
+            right: {
+              type: PrimaryType.Number,
+              value: 10,
+            },
+          } as Term,
+        },
+        leftTokens: [],
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const [comparision, leftTokens] = makeComparision(test.input.tokens);
+      assertEquals(comparision, test.expected.comparision);
+      assertEquals(leftTokens, test.expected.leftTokens);
+    });
+  }
+});
 
 Deno.test("Testing makeTerm()", async (t) => {
   type Test = {
@@ -80,6 +194,66 @@ Deno.test("Testing makeTerm()", async (t) => {
             type: PrimaryType.Number,
             value: 5,
           } as Primary,
+        },
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Subtraction: -10 - 5",
+      input: {
+        tokens: [
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Number, value: 10 },
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Number, value: 5 },
+        ],
+      },
+      expected: {
+        term: {
+          left: {
+            operator: UnaryOperator.Minus,
+            unary: {
+              type: PrimaryType.Number,
+              value: 10,
+            } as Primary,
+          } as Unary,
+          operator: TermOperator.Minus,
+          right: {
+            type: PrimaryType.Number,
+            value: 5,
+          } as Primary,
+        },
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Subtraction: -10 - -5",
+      input: {
+        tokens: [
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Number, value: 10 },
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Number, value: 5 },
+        ],
+      },
+      expected: {
+        term: {
+          left: {
+            operator: UnaryOperator.Minus,
+            unary: {
+              type: PrimaryType.Number,
+              value: 10,
+            } as Primary,
+          } as Unary,
+          operator: TermOperator.Minus,
+          right: {
+            operator: UnaryOperator.Minus,
+            unary: {
+              type: PrimaryType.Number,
+              value: 5,
+            } as Primary,
+          } as Unary,
         },
         leftTokens: [],
       },

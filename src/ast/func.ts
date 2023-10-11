@@ -1,5 +1,8 @@
 import { Token } from "../token/type.ts";
 import {
+  Comparision,
+  ComparisionOperator,
+  ComparisionWithTermsAndOperator,
   Equality,
   Expression,
   Fanctor,
@@ -18,6 +21,53 @@ import { InvalidPrimaryError } from "./error.ts";
 
 export function makeExpression(tokens: Token[]): [Expression, Token[]] {
   return [{} as Expression, tokens];
+}
+
+export function makeComparision(tokens: Token[]): [Comparision, Token[]] {
+  let comparision: Comparision;
+  let leftTokens: Token[];
+  [comparision, leftTokens] = makeTerm(tokens);
+
+  if (leftTokens.length == 0) return [comparision, leftTokens];
+
+  let token = leftTokens[0];
+  while (
+    token.symbol == Symbol.Greater ||
+    token.symbol == Symbol.GreaterEqual ||
+    token.symbol == Symbol.Less ||
+    token.symbol == Symbol.LessEqual
+  ) {
+    leftTokens = leftTokens.slice(1); // consume "-" or "+"
+
+    let operator: ComparisionOperator;
+    switch (token.symbol) {
+      case Symbol.Greater:
+        operator = ComparisionOperator.Greater;
+        break;
+      case Symbol.GreaterEqual:
+        operator = ComparisionOperator.GreaterEqual;
+        break;
+      case Symbol.Less:
+        operator = ComparisionOperator.Less;
+        break;
+      case Symbol.LessEqual:
+        operator = ComparisionOperator.LessEqual;
+    }
+
+    let right: Comparision;
+    [right, leftTokens] = makeComparision(leftTokens);
+
+    comparision = {
+      left: comparision,
+      operator: operator,
+      right: right,
+    } as ComparisionWithTermsAndOperator;
+
+    if (leftTokens.length == 0) break;
+    else token = leftTokens[0];
+  }
+
+  return [comparision, leftTokens];
 }
 
 export function makeTerm(tokens: Token[]): [Term, Token[]] {
