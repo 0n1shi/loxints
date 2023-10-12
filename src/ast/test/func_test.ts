@@ -8,17 +8,12 @@ import {
 } from "../../ast/func.ts";
 import {
   Comparision,
-  ComparisionOperator,
   Expression,
   Fanctor,
-  FanctorOperator,
-  FanctorWithUnariesAndOperator,
   Primary,
-  PrimaryType,
   Term,
-  TermOperator,
+  UnariesAndOperator,
   Unary,
-  UnaryOperator,
   UnaryWithOperator,
 } from "../../ast/type.ts";
 import { Symbol, Token } from "../../token/type.ts";
@@ -47,12 +42,12 @@ Deno.test("Testing makeComparision()", async (t) => {
       expected: {
         comparision: {
           left: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 3,
           } as Primary,
-          operator: ComparisionOperator.Less,
+          operator: Symbol.Less,
           right: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 5,
           } as Primary,
         },
@@ -72,15 +67,15 @@ Deno.test("Testing makeComparision()", async (t) => {
       expected: {
         comparision: {
           left: {
-            operator: UnaryOperator.Minus,
-            unary: {
-              type: PrimaryType.Number,
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
               value: 3,
             } as Primary,
           } as Unary,
-          operator: ComparisionOperator.Less,
+          operator: Symbol.Less,
           right: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 5,
           } as Primary,
         },
@@ -102,21 +97,21 @@ Deno.test("Testing makeComparision()", async (t) => {
       expected: {
         comparision: {
           left: {
-            operator: UnaryOperator.Minus,
-            unary: {
-              type: PrimaryType.Number,
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
               value: 3,
             } as Primary,
           } as Unary,
-          operator: ComparisionOperator.Less,
+          operator: Symbol.Less,
           right: {
             left: {
-              type: PrimaryType.Number,
+              type: Symbol.Number,
               value: 5,
             },
-            operator: TermOperator.Plus,
+            operator: Symbol.Plus,
             right: {
-              type: PrimaryType.Number,
+              type: Symbol.Number,
               value: 10,
             },
           } as Term,
@@ -158,12 +153,12 @@ Deno.test("Testing makeTerm()", async (t) => {
       expected: {
         term: {
           left: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 10,
           } as Primary,
-          operator: TermOperator.Plus,
+          operator: Symbol.Plus,
           right: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 5,
           } as Primary,
         },
@@ -183,15 +178,15 @@ Deno.test("Testing makeTerm()", async (t) => {
       expected: {
         term: {
           left: {
-            operator: UnaryOperator.Minus,
-            unary: {
-              type: PrimaryType.Number,
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
               value: 10,
             } as Primary,
           } as Unary,
-          operator: TermOperator.Plus,
+          operator: Symbol.Plus,
           right: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 5,
           } as Primary,
         },
@@ -211,15 +206,15 @@ Deno.test("Testing makeTerm()", async (t) => {
       expected: {
         term: {
           left: {
-            operator: UnaryOperator.Minus,
-            unary: {
-              type: PrimaryType.Number,
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
               value: 10,
             } as Primary,
           } as Unary,
-          operator: TermOperator.Minus,
+          operator: Symbol.Minus,
           right: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 5,
           } as Primary,
         },
@@ -240,17 +235,17 @@ Deno.test("Testing makeTerm()", async (t) => {
       expected: {
         term: {
           left: {
-            operator: UnaryOperator.Minus,
-            unary: {
-              type: PrimaryType.Number,
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
               value: 10,
             } as Primary,
           } as Unary,
-          operator: TermOperator.Minus,
+          operator: Symbol.Minus,
           right: {
-            operator: UnaryOperator.Minus,
-            unary: {
-              type: PrimaryType.Number,
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
               value: 5,
             } as Primary,
           } as Unary,
@@ -261,8 +256,8 @@ Deno.test("Testing makeTerm()", async (t) => {
   ];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const [unary, leftTokens] = makeTerm(test.input.tokens);
-      assertEquals(unary, test.expected.term);
+      const [term, leftTokens] = makeTerm(test.input.tokens);
+      assertEquals(term, test.expected.term);
       assertEquals(leftTokens, test.expected.leftTokens);
     });
   }
@@ -287,9 +282,9 @@ Deno.test("Testing makeFanctor()", async (t) => {
       },
       expected: {
         fanctor: {
-          operator: UnaryOperator.Bang,
-          unary: {
-            type: PrimaryType.False,
+          operator: Symbol.Bang,
+          right: {
+            type: Symbol.False,
           } as Primary,
         } as Unary,
         leftTokens: [],
@@ -307,15 +302,15 @@ Deno.test("Testing makeFanctor()", async (t) => {
       expected: {
         fanctor: {
           left: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 125,
           } as Primary,
-          operator: FanctorOperator.Slash,
+          operator: Symbol.Slash,
           right: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 5,
           } as Primary,
-        } as FanctorWithUnariesAndOperator,
+        } as UnariesAndOperator,
         leftTokens: [],
       },
     },
@@ -332,26 +327,26 @@ Deno.test("Testing makeFanctor()", async (t) => {
       expected: {
         fanctor: {
           left: {
-            operator: UnaryOperator.Minus,
-            unary: {
-              type: PrimaryType.Number,
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
               value: 10,
             } as Primary,
           } as Unary,
-          operator: FanctorOperator.Star,
+          operator: Symbol.Star,
           right: {
-            type: PrimaryType.Number,
+            type: Symbol.Number,
             value: 5,
           } as Primary,
-        } as FanctorWithUnariesAndOperator,
+        } as UnariesAndOperator,
         leftTokens: [],
       },
     },
   ];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const [unary, leftTokens] = makeFanctor(test.input.tokens);
-      assertEquals(unary, test.expected.fanctor);
+      const [fanctor, leftTokens] = makeFanctor(test.input.tokens);
+      assertEquals(fanctor, test.expected.fanctor);
       assertEquals(leftTokens, test.expected.leftTokens);
     });
   }
@@ -376,9 +371,9 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
       expected: {
         unary: {
-          operator: UnaryOperator.Bang,
-          unary: { type: PrimaryType.False } as Primary,
-        },
+          operator: Symbol.Bang,
+          right: { type: Symbol.False } as Primary,
+        } as UnaryWithOperator,
         leftTokens: [],
       },
     },
@@ -393,11 +388,11 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
       expected: {
         unary: {
-          operator: UnaryOperator.Bang,
-          unary: {
-            operator: UnaryOperator.Bang,
-            unary: {
-              type: PrimaryType.False,
+          operator: Symbol.Bang,
+          right: {
+            operator: Symbol.Bang,
+            right: {
+              type: Symbol.False,
             } as Primary,
           } as UnaryWithOperator,
         },
@@ -417,9 +412,9 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
       expected: {
         unary: {
-          operator: UnaryOperator.Minus,
-          unary: {
-            type: PrimaryType.Number,
+          operator: Symbol.Minus,
+          right: {
+            type: Symbol.Number,
             value: 123,
           } as Primary,
         } as UnaryWithOperator,
@@ -438,7 +433,7 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
       expected: {
         unary: {
-          type: PrimaryType.Number,
+          type: Symbol.Number,
           value: 123,
         } as Primary,
         leftTokens: [],
@@ -472,7 +467,7 @@ Deno.test("Testing makePrimary()", async (t) => {
         tokens: [{ symbol: Symbol.False }],
       },
       expected: {
-        primary: { type: PrimaryType.False },
+        primary: { type: Symbol.False },
         leftTokens: [],
       },
     },
@@ -482,7 +477,7 @@ Deno.test("Testing makePrimary()", async (t) => {
         tokens: [{ symbol: Symbol.String, value: "Hello world" }],
       },
       expected: {
-        primary: { type: PrimaryType.String, value: "Hello world" },
+        primary: { type: Symbol.String, value: "Hello world" },
         leftTokens: [],
       },
     },
@@ -495,7 +490,7 @@ Deno.test("Testing makePrimary()", async (t) => {
         ],
       },
       expected: {
-        primary: { type: PrimaryType.Number, value: 123 },
+        primary: { type: Symbol.Number, value: 123 },
         leftTokens: [{ symbol: Symbol.Minus }],
       },
     },
@@ -508,7 +503,7 @@ Deno.test("Testing makePrimary()", async (t) => {
         ],
       },
       expected: {
-        primary: { type: PrimaryType.Expression, value: {} as Expression },
+        primary: {} as Expression,
         leftTokens: [],
       },
     },

@@ -1,3 +1,4 @@
+import { Symbol } from "../token/type.ts";
 /**
  * Expression
  */
@@ -6,86 +7,60 @@ export type Expression = Equality;
 /**
  * Equality
  */
-export type Equality = Comparision | EqualityWithComparisionsAndOperator;
-export type EqualityWithComparisionsAndOperator = {
+export type Equality = Comparision | ComparisionsAndOperator;
+export type ComparisionsAndOperator = {
   left: Comparision;
-  operator: EqualityOperator;
+  operator: Symbol.BangEqual | Symbol.EqualEqual;
   right: Comparision;
 };
-export enum EqualityOperator {
-  BangEqual = 1,
-  EqualEqual,
-}
 
 /**
  * Comparision
  */
-export type Comparision = Term | ComparisionWithTermsAndOperator;
-export type ComparisionWithTermsAndOperator = {
+export type Comparision = Term | TermsAndOperator;
+export type TermsAndOperator = {
   left: Term;
-  operator: ComparisionOperator;
+  operator:
+    | Symbol.Greater
+    | Symbol.GreaterEqual
+    | Symbol.Less
+    | Symbol.LessEqual;
   right: Term;
 };
-export enum ComparisionOperator {
-  Greater = 1,
-  GreaterEqual,
-  Less,
-  LessEqual,
-}
 
 /**
  * Term
  */
-export type Term = Fanctor | TermWithFanctorsAndOperator;
-export type TermWithFanctorsAndOperator = {
+export type Term = Fanctor | FanctorsAndOperator;
+export type FanctorsAndOperator = {
   left: Fanctor;
-  operator: TermOperator;
+  operator: Symbol.Minus | Symbol.Plus;
   right: Fanctor;
 };
-export enum TermOperator {
-  Minus = 1,
-  Plus,
-}
 
 /**
  * Fanctor
  */
-export type Fanctor = Unary | FanctorWithUnariesAndOperator;
-export type FanctorWithUnariesAndOperator = {
+export type Fanctor = Unary | UnariesAndOperator;
+export type UnariesAndOperator = {
   left: Unary;
-  operator: FanctorOperator;
+  operator: Symbol.Slash | Symbol.Star;
   right: Unary;
 };
-export enum FanctorOperator {
-  Slash = 1,
-  Star,
-}
 
 /**
  * Unary
  */
 export type Unary = UnaryWithOperator | Primary;
 export type UnaryWithOperator = {
-  operator: UnaryOperator;
-  unary: Unary;
+  operator: Symbol.Bang | Symbol.Minus;
+  right: Unary;
 };
-export enum UnaryOperator {
-  Bang = 1,
-  Minus,
-}
 
 /**
  * Primary
  */
 export type Primary = {
-  type: PrimaryType;
-  value?: string | number | Expression;
+  type: Symbol.String | Symbol.Number | Symbol.True | Symbol.False | Symbol.Nil;
+  value?: string | number;
 };
-export enum PrimaryType {
-  String = 1,
-  Number,
-  True,
-  False,
-  Nil,
-  Expression,
-}
