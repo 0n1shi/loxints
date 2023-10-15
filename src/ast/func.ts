@@ -7,12 +7,18 @@ import {
   Fanctor,
   FanctorsAndOperator,
   Group,
+  OperatorForComparisions,
+  OperatorForFanctors,
+  OperatorForTerms,
+  OperatorForUnaries,
+  OperatorForUnary,
   Primary,
-  PrimaryValue,
+  PrimaryType,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
   Unary,
+  UnaryWithOperator,
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
@@ -30,21 +36,23 @@ export function makeEquality(tokens: Token[]): [Equality, Token[]] {
 
   let token = leftTokens[0];
   while (
-    token.symbol == TokenType.BangEqual ||
-    token.symbol == TokenType.EqualEqual
+    token.type == TokenType.BangEqual ||
+    token.type == TokenType.EqualEqual
   ) {
     leftTokens = leftTokens.slice(1); // consume "-" or "+"
 
-    const operator = token.symbol;
+    const operator = token.type == TokenType.BangEqual
+      ? OperatorForComparisions.BangEqual
+      : OperatorForComparisions.EqualEqual;
 
     let right: Equality;
     [right, leftTokens] = makeComparision(leftTokens);
 
-    equality = {
-      left: equality,
-      operator: operator,
-      right: right,
-    } as ComparisionsAndOperator;
+    equality = new ComparisionsAndOperator(
+      equality as Comparision,
+      operator,
+      right,
+    );
 
     if (leftTokens.length == 0) break;
     else token = leftTokens[0];
@@ -62,23 +70,25 @@ export function makeComparision(tokens: Token[]): [Comparision, Token[]] {
 
   let token = leftTokens[0];
   while (
-    token.symbol == TokenType.Greater ||
-    token.symbol == TokenType.GreaterEqual ||
-    token.symbol == TokenType.Less ||
-    token.symbol == TokenType.LessEqual
+    token.type == TokenType.Greater ||
+    token.type == TokenType.GreaterEqual ||
+    token.type == TokenType.Less ||
+    token.type == TokenType.LessEqual
   ) {
     leftTokens = leftTokens.slice(1); // consume "-" or "+"
 
-    const operator = token.symbol;
+    const operator = token.type == TokenType.Greater
+      ? OperatorForTerms.Greater
+      : token.type == TokenType.GreaterEqual
+      ? OperatorForTerms.GreaterEqual
+      : token.type == TokenType.Less
+      ? OperatorForTerms.Less
+      : OperatorForTerms.LessEqual;
 
     let right: Comparision;
     [right, leftTokens] = makeTerm(leftTokens);
 
-    comparision = {
-      left: comparision,
-      operator: operator,
-      right: right,
-    } as TermsAndOperator;
+    comparision = new TermsAndOperator(comparision as Term, operator, right);
 
     if (leftTokens.length == 0) break;
     else token = leftTokens[0];
@@ -95,19 +105,17 @@ export function makeTerm(tokens: Token[]): [Term, Token[]] {
   if (leftTokens.length == 0) return [term, leftTokens];
 
   let token = leftTokens[0];
-  while (token.symbol == TokenType.Minus || token.symbol == TokenType.Plus) {
+  while (token.type == TokenType.Minus || token.type == TokenType.Plus) {
     leftTokens = leftTokens.slice(1); // consume "-" or "+"
 
-    const operator = token.symbol;
+    const operator = token.type == TokenType.Minus
+      ? OperatorForFanctors.Minus
+      : OperatorForFanctors.Plus;
 
     let right: Term;
     [right, leftTokens] = makeFanctor(leftTokens);
 
-    term = {
-      left: term,
-      operator: operator,
-      right: right,
-    } as FanctorsAndOperator;
+    term = new FanctorsAndOperator(term as Fanctor, operator, right);
 
     if (leftTokens.length == 0) break;
     else token = leftTokens[0];
@@ -124,19 +132,17 @@ export function makeFanctor(tokens: Token[]): [Fanctor, Token[]] {
   if (leftTokens.length == 0) return [fanctor, leftTokens];
 
   let token = leftTokens[0];
-  while (token.symbol == TokenType.Slash || token.symbol == TokenType.Star) {
+  while (token.type == TokenType.Slash || token.type == TokenType.Star) {
     leftTokens = leftTokens.slice(1); // consume "/" or "*"
 
-    const operator = token.symbol;
+    const operator = token.type === TokenType.Slash
+      ? OperatorForUnaries.Slash
+      : OperatorForUnaries.Star;
 
     let right: Fanctor;
     [right, leftTokens] = makeUnary(leftTokens);
 
-    fanctor = {
-      left: fanctor,
-      operator: operator,
-      right: right,
-    } as UnariesAndOperator;
+    fanctor = new UnariesAndOperator(fanctor as Unary, operator, right);
 
     if (leftTokens.length == 0) break;
     else token = leftTokens[0];
@@ -148,10 +154,12 @@ export function makeFanctor(tokens: Token[]): [Fanctor, Token[]] {
 export function makeUnary(tokens: Token[]): [Unary, Token[]] {
   const token = tokens[0];
 
-  if (token.symbol == TokenType.Bang || token.symbol == TokenType.Minus) {
-    const operator = token.symbol;
+  if (token.type == TokenType.Bang || token.type == TokenType.Minus) {
+    const operator = token.type == TokenType.Bang
+      ? OperatorForUnary.Bang
+      : OperatorForUnary.Minus;
     const [unary, leftTokens] = makeUnary(tokens.slice(1));
-    return [{ operator: operator, right: unary }, leftTokens];
+    return [new UnaryWithOperator(operator, unary), leftTokens];
   }
 
   return makePrimary(tokens);
@@ -164,26 +172,26 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
   switch (token.type) {
     case TokenType.False:
       return [{
-        type: TokenType.False,
-      } as PrimaryValue, leftTokens];
+        type: PrimaryType.False,
+      } as Primary, leftTokens];
     case TokenType.True:
       return [{
-        type: TokenType.True,
-      } as PrimaryValue, leftTokens];
+        type: PrimaryType.True,
+      } as Primary, leftTokens];
     case TokenType.Nil:
       return [{
-        type: TokenType.Nil,
-      } as PrimaryValue, leftTokens];
+        type: PrimaryType.Nil,
+      } as Primary, leftTokens];
     case TokenType.Number:
       return [{
-        type: TokenType.Number,
+        type: PrimaryType.Number,
         value: token.value,
-      } as PrimaryValue, leftTokens];
+      } as Primary, leftTokens];
     case TokenType.String:
       return [{
-        type: TokenType.String,
+        type: PrimaryType.String,
         value: token.value,
-      } as PrimaryValue, leftTokens];
+      } as Primary, leftTokens];
   }
 
   // A grouped expression
@@ -192,7 +200,7 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
     let expression: Expression;
     [expression, leftTokens] = makeExpression(leftTokens);
     leftTokens = leftTokens.slice(1); // consume ")"
-    return [new Group(expression), leftTokens];
+    return [new Primary(PrimaryType.Group, new Group(expression)), leftTokens];
   }
 
   throw new InvalidPrimaryError();

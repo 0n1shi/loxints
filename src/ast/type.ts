@@ -1,5 +1,3 @@
-import { TokenType } from "../token/type.ts";
-
 /**
  * Expression
  */
@@ -10,9 +8,10 @@ export type Expression = Equality;
  */
 export type Equality = Comparision | ComparisionsAndOperator;
 
-export type OperatorForComparisions =
-  | TokenType.BangEqual
-  | TokenType.EqualEqual;
+export enum OperatorForComparisions {
+  BangEqual,
+  EqualEqual,
+}
 
 export class ComparisionsAndOperator {
   left: Comparision;
@@ -35,18 +34,19 @@ export class ComparisionsAndOperator {
  */
 export type Comparision = Term | TermsAndOperator;
 
-export type TermOperator =
-  | TokenType.Greater
-  | TokenType.GreaterEqual
-  | TokenType.Less
-  | TokenType.LessEqual;
+export enum OperatorForTerms {
+  Greater,
+  GreaterEqual,
+  Less,
+  LessEqual,
+}
 
 export class TermsAndOperator {
   left: Term;
-  operator: TermOperator;
+  operator: OperatorForTerms;
   right: Term;
 
-  constructor(left: Term, operator: TermOperator, right: Term) {
+  constructor(left: Term, operator: OperatorForTerms, right: Term) {
     this.left = left;
     this.operator = operator;
     this.right = right;
@@ -58,9 +58,10 @@ export class TermsAndOperator {
  */
 export type Term = Fanctor | FanctorsAndOperator;
 
-export type OperatorForFanctors =
-  | TokenType.Minus
-  | TokenType.Plus;
+export enum OperatorForFanctors {
+  Minus,
+  Plus,
+}
 
 export class FanctorsAndOperator {
   left: Fanctor;
@@ -79,9 +80,10 @@ export class FanctorsAndOperator {
  */
 export type Fanctor = Unary | UnariesAndOperator;
 
-export type OperatorForUnaries =
-  | TokenType.Slash
-  | TokenType.Star;
+export enum OperatorForUnaries {
+  Slash,
+  Star,
+}
 
 export class UnariesAndOperator {
   left: Unary;
@@ -100,9 +102,10 @@ export class UnariesAndOperator {
  */
 export type Unary = UnaryWithOperator | Primary;
 
-export type OperatorForUnary =
-  | TokenType.Bang
-  | TokenType.Minus;
+export enum OperatorForUnary {
+  Bang,
+  Minus,
+}
 
 export class UnaryWithOperator {
   operator: OperatorForUnary;
@@ -117,22 +120,22 @@ export class UnaryWithOperator {
 /**
  * Primary
  */
-export type Primary = PrimaryValue | Group;
+export enum PrimaryType {
+  String,
+  Number,
+  True,
+  False,
+  Nil,
+  Group,
+}
 
-export type PrimaryValueType =
-  | TokenType.String
-  | TokenType.Number
-  | TokenType.True
-  | TokenType.False
-  | TokenType.Nil;
-
-export class PrimaryValue {
-  type: PrimaryValueType;
-  value?: string | number | Expression;
+export class Primary {
+  type: PrimaryType;
+  value?: string | number | Group;
 
   constructor(
-    type: PrimaryValueType,
-    value?: string | number,
+    type: PrimaryType,
+    value?: string | number | Group,
   ) {
     this.type = type;
     this.value = value;
