@@ -1,6 +1,7 @@
-import { Unary, Primary } from "../ast/type.ts";
+import { Primary, Unary } from "../ast/type.ts";
 import { EvaluatedValue } from "./type.ts";
 
 export function evaluateUnary(unary: Unary): EvaluatedValue {
-  if (typeof unary == Primary)
+  console.log(typeof 1);
+  return 0;
 }

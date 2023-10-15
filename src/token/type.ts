@@ -1,4 +1,4 @@
-export enum Symbol {
+export enum TokenType {
   // 1 chacter
   ParenLeft = "(",
   ParenRight = ")",
@@ -51,26 +51,26 @@ export enum Symbol {
 }
 
 export const keywords = [
-  Symbol.And,
-  Symbol.Class,
-  Symbol.Else,
-  Symbol.False,
-  Symbol.Fun,
-  Symbol.For,
-  Symbol.If,
-  Symbol.Nil,
-  Symbol.Or,
-  Symbol.Print,
-  Symbol.Return,
-  Symbol.Super,
-  Symbol.This,
-  Symbol.True,
-  Symbol.Var,
-  Symbol.While,
+  TokenType.And,
+  TokenType.Class,
+  TokenType.Else,
+  TokenType.False,
+  TokenType.Fun,
+  TokenType.For,
+  TokenType.If,
+  TokenType.Nil,
+  TokenType.Or,
+  TokenType.Print,
+  TokenType.Return,
+  TokenType.Super,
+  TokenType.This,
+  TokenType.True,
+  TokenType.Var,
+  TokenType.While,
 ];
 
 export type Token = {
-  symbol: Symbol;
+  type: TokenType;
   value?: string | number;
 };
 

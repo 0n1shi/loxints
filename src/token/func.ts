@@ -1,4 +1,4 @@
-import { keywords, LineNumber, Symbol, Token } from "./type.ts";
+import { keywords, LineNumber, TokenType, Token } from "./type.ts";
 import { isAlphabet, isAplhaNumeric, isDigit } from "./util.ts";
 
 export function tokenize(sourceCode: string): [Token[], LineNumber] {
@@ -17,54 +17,54 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
     cursor++;
 
     switch (currentChar) {
-      case Symbol.ParenLeft:
+      case TokenType.ParenLeft:
         tokens.push({
-          symbol: Symbol.ParenLeft,
+          type: TokenType.ParenLeft,
         });
         break;
-      case Symbol.ParenRight:
+      case TokenType.ParenRight:
         tokens.push({
-          symbol: Symbol.ParenRight,
+          type: TokenType.ParenRight,
         });
         break;
-      case Symbol.BraceLeft:
+      case TokenType.BraceLeft:
         tokens.push({
-          symbol: Symbol.BraceLeft,
+          type: TokenType.BraceLeft,
         });
         break;
-      case Symbol.BraceRight:
+      case TokenType.BraceRight:
         tokens.push({
-          symbol: Symbol.BraceRight,
+          type: TokenType.BraceRight,
         });
         break;
-      case Symbol.Comma:
+      case TokenType.Comma:
         tokens.push({
-          symbol: Symbol.Comma,
+          type: TokenType.Comma,
         });
         break;
-      case Symbol.Dot:
+      case TokenType.Dot:
         tokens.push({
-          symbol: Symbol.Dot,
+          type: TokenType.Dot,
         });
         break;
-      case Symbol.Minus:
+      case TokenType.Minus:
         tokens.push({
-          symbol: Symbol.Minus,
+          type: TokenType.Minus,
         });
         break;
-      case Symbol.Plus:
+      case TokenType.Plus:
         tokens.push({
-          symbol: Symbol.Plus,
+          type: TokenType.Plus,
         });
         break;
-      case Symbol.SemiColon:
+      case TokenType.SemiColon:
         tokens.push({
-          symbol: Symbol.SemiColon,
+          type: TokenType.SemiColon,
         });
         break;
-      case Symbol.Star:
+      case TokenType.Star:
         tokens.push({
-          symbol: Symbol.Star,
+          type: TokenType.Star,
         });
         break;
       case "\0":
@@ -79,66 +79,66 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
     const nextChar = cursor < sourceCodeLength ? sourceCode[cursor] : "";
 
     switch (currentChar) {
-      case Symbol.Bang:
-        if (nextChar === Symbol.Equal) {
+      case TokenType.Bang:
+        if (nextChar === TokenType.Equal) {
           tokens.push({
-            symbol: Symbol.BangEqual,
+            type: TokenType.BangEqual,
           });
           cursor++;
         } else {
           tokens.push({
-            symbol: Symbol.Bang,
+            type: TokenType.Bang,
           });
         }
         break;
-      case Symbol.Equal:
-        if (nextChar == Symbol.Equal) {
+      case TokenType.Equal:
+        if (nextChar == TokenType.Equal) {
           tokens.push({
-            symbol: Symbol.EqualEqual,
+            type: TokenType.EqualEqual,
           });
           cursor++;
         } else {
           tokens.push({
-            symbol: Symbol.Equal,
+            type: TokenType.Equal,
           });
         }
         break;
-      case Symbol.Greater:
-        if (nextChar == Symbol.Equal) {
+      case TokenType.Greater:
+        if (nextChar == TokenType.Equal) {
           tokens.push({
-            symbol: Symbol.GreaterEqual,
+            type: TokenType.GreaterEqual,
           });
           cursor++;
         } else {
           tokens.push({
-            symbol: Symbol.Greater,
+            type: TokenType.Greater,
           });
         }
         break;
-      case Symbol.Less:
-        if (nextChar == Symbol.Equal) {
+      case TokenType.Less:
+        if (nextChar == TokenType.Equal) {
           tokens.push({
-            symbol: Symbol.LessEqual,
+            type: TokenType.LessEqual,
           });
           cursor++;
         } else {
           tokens.push({
-            symbol: Symbol.Less,
+            type: TokenType.Less,
           });
         }
         break;
-      case Symbol.Slash:
-        if (nextChar == Symbol.Slash) {
+      case TokenType.Slash:
+        if (nextChar == TokenType.Slash) {
           cursor++;
           while (sourceCode[cursor] != "\n") cursor++;
         } else {
           tokens.push({
-            symbol: Symbol.Slash,
+            type: TokenType.Slash,
           });
         }
     }
 
-    // Symbol.Number
+    // TokenType.Number
     if (isDigit(currentChar)) {
       let value = currentChar;
       let nextChar = sourceCode[cursor];
@@ -148,12 +148,12 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
         nextChar = sourceCode[cursor];
       }
       tokens.push({
-        symbol: Symbol.Number,
+        type: TokenType.Number,
         value: Number(value),
       });
     }
 
-    // Symbol.Identifier
+    // TokenType.Identifier
     if (isAlphabet(currentChar)) {
       let value = currentChar;
       let nextChar = sourceCode[cursor];
@@ -163,12 +163,12 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
         nextChar = sourceCode[cursor];
       }
       tokens.push({
-        symbol: Symbol.Identifier,
+        type: TokenType.Identifier,
         value: value,
       });
     }
 
-    // Symbol.String
+    // TokenType.String
     if (currentChar == '"') {
       let value = "";
       while (sourceCode[cursor] != '"') {
@@ -177,7 +177,7 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
       }
       cursor++; // drop a double quotation at the end.
       tokens.push({
-        symbol: Symbol.String,
+        type: TokenType.String,
         value: value,
       });
     }
@@ -185,8 +185,8 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
 
   // keywords
   for (const token of tokens) {
-    if (keywords.includes(token.value as Symbol)) {
-      token.symbol = token.value as Symbol;
+    if (keywords.includes(token.value as TokenType)) {
+      token.type = token.value as TokenType;
       delete token.value;
     }
   }
