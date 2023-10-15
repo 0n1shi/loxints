@@ -17,7 +17,7 @@ class User {
 }
 
 if (import.meta.main) {
-  const account = new Admin("Mike");
+  const account: Account = new Admin("Mike");
   console.log(account instanceof User);
   console.log(account instanceof Admin);
   const runCommand = new Command()

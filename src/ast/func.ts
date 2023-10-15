@@ -171,27 +171,15 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
 
   switch (token.type) {
     case TokenType.False:
-      return [{
-        type: PrimaryType.False,
-      } as Primary, leftTokens];
+      return [new Primary(PrimaryType.False), leftTokens];
     case TokenType.True:
-      return [{
-        type: PrimaryType.True,
-      } as Primary, leftTokens];
+      return [new Primary(PrimaryType.True), leftTokens];
     case TokenType.Nil:
-      return [{
-        type: PrimaryType.Nil,
-      } as Primary, leftTokens];
+      return [new Primary(PrimaryType.Nil), leftTokens];
     case TokenType.Number:
-      return [{
-        type: PrimaryType.Number,
-        value: token.value,
-      } as Primary, leftTokens];
+      return [new Primary(PrimaryType.Number, token.value), leftTokens];
     case TokenType.String:
-      return [{
-        type: PrimaryType.String,
-        value: token.value,
-      } as Primary, leftTokens];
+      return [new Primary(PrimaryType.String, token.value), leftTokens];
   }
 
   // A grouped expression

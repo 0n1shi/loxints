@@ -9,8 +9,8 @@ export type Expression = Equality;
 export type Equality = Comparision | ComparisionsAndOperator;
 
 export enum OperatorForComparisions {
-  BangEqual,
-  EqualEqual,
+  BangEqual = "!=",
+  EqualEqual = "==",
 }
 
 export class ComparisionsAndOperator {
@@ -35,10 +35,10 @@ export class ComparisionsAndOperator {
 export type Comparision = Term | TermsAndOperator;
 
 export enum OperatorForTerms {
-  Greater,
-  GreaterEqual,
-  Less,
-  LessEqual,
+  Greater = ">",
+  GreaterEqual = ">=",
+  Less = "<",
+  LessEqual = "<=",
 }
 
 export class TermsAndOperator {
@@ -59,8 +59,8 @@ export class TermsAndOperator {
 export type Term = Fanctor | FanctorsAndOperator;
 
 export enum OperatorForFanctors {
-  Minus,
-  Plus,
+  Minus = "-",
+  Plus = "+",
 }
 
 export class FanctorsAndOperator {
@@ -81,8 +81,8 @@ export class FanctorsAndOperator {
 export type Fanctor = Unary | UnariesAndOperator;
 
 export enum OperatorForUnaries {
-  Slash,
-  Star,
+  Slash = "/",
+  Star = "*",
 }
 
 export class UnariesAndOperator {
@@ -103,8 +103,8 @@ export class UnariesAndOperator {
 export type Unary = UnaryWithOperator | Primary;
 
 export enum OperatorForUnary {
-  Bang,
-  Minus,
+  Bang = "!",
+  Minus = "-",
 }
 
 export class UnaryWithOperator {
@@ -121,12 +121,12 @@ export class UnaryWithOperator {
  * Primary
  */
 export enum PrimaryType {
-  String,
-  Number,
-  True,
-  False,
-  Nil,
-  Group,
+  String = "[string]",
+  Number = "[number]",
+  True = "[true]",
+  False = "[false]",
+  Nil = "[nil]",
+  Group = "[group]",
 }
 
 export class Primary {
