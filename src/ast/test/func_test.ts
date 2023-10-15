@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
   makeComparision,
+  makeEquality,
   makeFanctor,
   makePrimary,
   makeTerm,
@@ -8,15 +9,92 @@ import {
 } from "../../ast/func.ts";
 import {
   Comparision,
+  Equality,
   Expression,
   Fanctor,
+  Group,
   Primary,
+  PrimaryValue,
   Term,
   UnariesAndOperator,
   Unary,
   UnaryWithOperator,
 } from "../../ast/type.ts";
 import { Symbol, Token } from "../../token/type.ts";
+
+Deno.test("Testing makeEquality()", async (t) => {
+  type Test = {
+    name: string;
+    input: {
+      tokens: Token[];
+    };
+    expected: {
+      equality: Equality;
+      leftTokens: Token[];
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: "-3 != 5",
+      input: {
+        tokens: [
+          { symbol: Symbol.Minus },
+          { symbol: Symbol.Number, value: 3 },
+          { symbol: Symbol.BangEqual },
+          { symbol: Symbol.Number, value: 5 },
+        ],
+      },
+      expected: {
+        equality: {
+          left: {
+            operator: Symbol.Minus,
+            right: {
+              type: Symbol.Number,
+              value: 3,
+            } as PrimaryValue,
+          } as Unary,
+          operator: Symbol.BangEqual,
+          right: {
+            type: Symbol.Number,
+            value: 5,
+          } as PrimaryValue,
+        },
+        leftTokens: [],
+      },
+    },
+    {
+      name: "3 == 5",
+      input: {
+        tokens: [
+          { symbol: Symbol.Number, value: 3 },
+          { symbol: Symbol.EqualEqual },
+          { symbol: Symbol.Number, value: 5 },
+        ],
+      },
+      expected: {
+        equality: {
+          left: {
+            type: Symbol.Number,
+            value: 3,
+          } as PrimaryValue,
+          operator: Symbol.EqualEqual,
+          right: {
+            type: Symbol.Number,
+            value: 5,
+          } as PrimaryValue,
+        },
+        leftTokens: [],
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const [equality, leftTokens] = makeEquality(test.input.tokens);
+      assertEquals(equality, test.expected.equality);
+      assertEquals(leftTokens, test.expected.leftTokens);
+    });
+  }
+});
 
 Deno.test("Testing makeComparision()", async (t) => {
   type Test = {
@@ -31,7 +109,7 @@ Deno.test("Testing makeComparision()", async (t) => {
   };
   const tests: Test[] = [
     {
-      name: "Comparision: 3 < 5",
+      name: "3 < 5",
       input: {
         tokens: [
           { symbol: Symbol.Number, value: 3 },
@@ -55,7 +133,7 @@ Deno.test("Testing makeComparision()", async (t) => {
       },
     },
     {
-      name: "Comparision: -3 < 5",
+      name: "-3 < 5",
       input: {
         tokens: [
           { symbol: Symbol.Minus },
@@ -83,7 +161,7 @@ Deno.test("Testing makeComparision()", async (t) => {
       },
     },
     {
-      name: "Comparision: -3 < 5 + 10",
+      name: "-3 < 5 + 10",
       input: {
         tokens: [
           { symbol: Symbol.Minus },
@@ -142,7 +220,7 @@ Deno.test("Testing makeTerm()", async (t) => {
   };
   const tests: Test[] = [
     {
-      name: "Addtion: 10 + 5",
+      name: "10 + 5",
       input: {
         tokens: [
           { symbol: Symbol.Number, value: 10 },
@@ -166,7 +244,7 @@ Deno.test("Testing makeTerm()", async (t) => {
       },
     },
     {
-      name: "Addtion: -10 + 5",
+      name: "-10 + 5",
       input: {
         tokens: [
           { symbol: Symbol.Minus },
@@ -194,7 +272,7 @@ Deno.test("Testing makeTerm()", async (t) => {
       },
     },
     {
-      name: "Subtraction: -10 - 5",
+      name: "-10 - 5",
       input: {
         tokens: [
           { symbol: Symbol.Minus },
@@ -222,7 +300,7 @@ Deno.test("Testing makeTerm()", async (t) => {
       },
     },
     {
-      name: "Subtraction: -10 - -5",
+      name: "-10 - -5",
       input: {
         tokens: [
           { symbol: Symbol.Minus },
@@ -276,7 +354,7 @@ Deno.test("Testing makeFanctor()", async (t) => {
   };
   const tests: Test[] = [
     {
-      name: "Not false: !false",
+      name: "!false",
       input: {
         tokens: [{ symbol: Symbol.Bang }, { symbol: Symbol.False }],
       },
@@ -291,7 +369,7 @@ Deno.test("Testing makeFanctor()", async (t) => {
       },
     },
     {
-      name: "Division: 125 / 5",
+      name: "125 / 5",
       input: {
         tokens: [
           { symbol: Symbol.Number, value: 125 },
@@ -315,7 +393,7 @@ Deno.test("Testing makeFanctor()", async (t) => {
       },
     },
     {
-      name: "Multiplication: -10 * 5",
+      name: "-10 * 5",
       input: {
         tokens: [
           { symbol: Symbol.Minus },
@@ -365,7 +443,7 @@ Deno.test("Testing makeUnary()", async (t) => {
   };
   const tests: Test[] = [
     {
-      name: "Not false: !false",
+      name: "!false",
       input: {
         tokens: [{ symbol: Symbol.Bang }, { symbol: Symbol.False }],
       },
@@ -378,7 +456,7 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
     },
     {
-      name: "Not not false: !!false",
+      name: "!!false",
       input: {
         tokens: [
           { symbol: Symbol.Bang },
@@ -400,7 +478,7 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
     },
     {
-      name: "Minus number: -123",
+      name: "-123",
       input: {
         tokens: [
           { symbol: Symbol.Minus },
@@ -422,7 +500,7 @@ Deno.test("Testing makeUnary()", async (t) => {
       },
     },
     {
-      name: "Number: 123",
+      name: "123",
       input: {
         tokens: [
           {
@@ -495,15 +573,26 @@ Deno.test("Testing makePrimary()", async (t) => {
       },
     },
     {
-      name: "Expression",
+      name: "Group (3 + 2)",
       input: {
         tokens: [
           { symbol: Symbol.ParenLeft },
+          { symbol: Symbol.Number, value: 3 },
+          { symbol: Symbol.Plus },
+          { symbol: Symbol.Number, value: 2 },
           { symbol: Symbol.ParenRight },
         ],
       },
       expected: {
-        primary: {} as Expression,
+        primary: {
+          left: Symbol.ParenLeft,
+          middle: {
+            left: { type: Symbol.Number, value: 3 } as PrimaryValue,
+            operator: Symbol.Plus,
+            right: { type: Symbol.Number, value: 2 } as PrimaryValue,
+          } as Expression,
+          right: Symbol.ParenRight,
+        } as Group,
         leftTokens: [],
       },
     },

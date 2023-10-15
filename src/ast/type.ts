@@ -60,7 +60,18 @@ export type UnaryWithOperator = {
 /**
  * Primary
  */
-export type Primary = {
-  type: Symbol.String | Symbol.Number | Symbol.True | Symbol.False | Symbol.Nil;
+export type Primary = PrimaryValue | Group;
+export type PrimaryValue = {
+  type:
+    | Symbol.String
+    | Symbol.Number
+    | Symbol.True
+    | Symbol.False
+    | Symbol.Nil;
   value?: string | number;
+};
+export type Group = {
+  left: Symbol.ParenLeft;
+  middle: Expression;
+  right: Symbol.ParenRight;
 };

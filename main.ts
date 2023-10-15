@@ -1,8 +1,16 @@
-export function add(a: number, b: number): number {
-  return a + b;
-}
+import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 
-// Learn more at https://deno.land/manual/examples/module_metadata#concepts
 if (import.meta.main) {
-  console.log("Add 2 + 3 =", add(2, 3));
+  const runCommand = new Command()
+    .arguments("<file_path:string>")
+    .description("run source code of file path")
+    .action((options: any, file_path: string) => {
+      console.log("run source code");
+    });
+  await new Command()
+    .name("loxints")
+    .version("v0.1.0")
+    .description("light-weight script language")
+    .command("run", runCommand)
+    .parse(Deno.args);
 }

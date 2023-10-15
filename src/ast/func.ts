@@ -1,10 +1,14 @@
 import { Token } from "../token/type.ts";
 import {
   Comparision,
+  ComparisionsAndOperator,
+  Equality,
   Expression,
   Fanctor,
   FanctorsAndOperator,
+  Group,
   Primary,
+  PrimaryValue,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
@@ -14,7 +18,39 @@ import { Symbol } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
 
 export function makeExpression(tokens: Token[]): [Expression, Token[]] {
-  return [{} as Expression, tokens];
+  return makeEquality(tokens);
+}
+
+export function makeEquality(tokens: Token[]): [Equality, Token[]] {
+  let equality: Equality;
+  let leftTokens: Token[];
+  [equality, leftTokens] = makeComparision(tokens);
+
+  if (leftTokens.length == 0) return [equality, leftTokens];
+
+  let token = leftTokens[0];
+  while (
+    token.symbol == Symbol.BangEqual ||
+    token.symbol == Symbol.EqualEqual
+  ) {
+    leftTokens = leftTokens.slice(1); // consume "-" or "+"
+
+    const operator = token.symbol;
+
+    let right: Equality;
+    [right, leftTokens] = makeComparision(leftTokens);
+
+    equality = {
+      left: equality,
+      operator: operator,
+      right: right,
+    } as ComparisionsAndOperator;
+
+    if (leftTokens.length == 0) break;
+    else token = leftTokens[0];
+  }
+
+  return [equality, leftTokens];
 }
 
 export function makeComparision(tokens: Token[]): [Comparision, Token[]] {
@@ -36,7 +72,7 @@ export function makeComparision(tokens: Token[]): [Comparision, Token[]] {
     const operator = token.symbol;
 
     let right: Comparision;
-    [right, leftTokens] = makeComparision(leftTokens);
+    [right, leftTokens] = makeTerm(leftTokens);
 
     comparision = {
       left: comparision,
@@ -65,7 +101,7 @@ export function makeTerm(tokens: Token[]): [Term, Token[]] {
     const operator = token.symbol;
 
     let right: Term;
-    [right, leftTokens] = makeTerm(leftTokens);
+    [right, leftTokens] = makeFanctor(leftTokens);
 
     term = {
       left: term,
@@ -129,25 +165,25 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
     case Symbol.False:
       return [{
         type: Symbol.False,
-      }, leftTokens];
+      } as PrimaryValue, leftTokens];
     case Symbol.True:
       return [{
         type: Symbol.True,
-      }, leftTokens];
+      } as PrimaryValue, leftTokens];
     case Symbol.Nil:
       return [{
         type: Symbol.Nil,
-      }, leftTokens];
+      } as PrimaryValue, leftTokens];
     case Symbol.Number:
       return [{
         type: Symbol.Number,
         value: token.value,
-      }, leftTokens];
+      } as PrimaryValue, leftTokens];
     case Symbol.String:
       return [{
         type: Symbol.String,
         value: token.value,
-      }, leftTokens];
+      } as PrimaryValue, leftTokens];
   }
 
   // A grouped expression
@@ -156,7 +192,11 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
     let expression: Expression;
     [expression, leftTokens] = makeExpression(leftTokens);
     leftTokens = leftTokens.slice(1); // consume ")"
-    return [{} as Expression, leftTokens];
+    return [{
+      left: Symbol.ParenLeft,
+      middle: expression,
+      right: Symbol.ParenRight,
+    } as Group, leftTokens];
   }
 
   throw new InvalidPrimaryError();
