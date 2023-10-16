@@ -5,11 +5,13 @@ export enum ValueType {
   Nil = "[nil]",
 }
 
+export type ValueTypeInTS = string | number | boolean | null;
+
 export class Value {
   type: ValueType;
-  value: string | number | boolean | null;
+  value: ValueTypeInTS;
 
-  constructor(type: ValueType, value: string | number | boolean | null) {
+  constructor(type: ValueType, value: ValueTypeInTS) {
     this.type = type;
     this.value = value;
   }

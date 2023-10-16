@@ -1,16 +1,59 @@
 import {
+  Fanctor,
+  OperatorForUnaries,
   OperatorForUnary,
   Primary,
   PrimaryType,
+  UnariesAndOperator,
   Unary,
-  UnaryWithOperator,
 } from "../ast/type.ts";
 import { Value, ValueType } from "./type.ts";
-import { InvalidPrimaryError } from "./error.ts";
+import { InvalidFanctorError, InvalidPrimaryError } from "./error.ts";
+import { isInstanceOfUnary } from "./util.ts";
+
+export function evaluateFanctor(fanctor: Fanctor): Value {
+  if (isInstanceOfUnary(fanctor)) {
+    return evaluateUnary(fanctor as Unary);
+  }
+
+  const op = (fanctor as UnariesAndOperator).operator;
+  const left = evaluateUnary((fanctor as UnariesAndOperator).left);
+  const right = evaluateUnary((fanctor as UnariesAndOperator).right);
+  switch (op) {
+    case OperatorForUnaries.Star:
+      if (right.type == ValueType.Number) {
+        if (left.type == ValueType.Number) {
+          return new Value(
+            ValueType.Number,
+            (left.value! as number) * (right.value as number),
+          );
+        }
+        if (left.type == ValueType.String) {
+          let txt = "";
+          for (let i = 0; i < (left.value! as number); i++) {
+            txt += left.value as string;
+          }
+          return new Value(ValueType.String, txt);
+        }
+      }
+      throw new InvalidFanctorError(left.value, op, right.value);
+
+  }
+  throw new InvalidFanctorError(left.value, op, right.value);
+}
 
 export function evaluateUnary(unary: Unary): Value {
   if (unary instanceof Primary) {
     return evaluatePrimary(unary);
+  }
+
+  const op = unary.operator;
+  const val = evaluateUnary(unary.right);
+  switch (op) {
+    case OperatorForUnary.Bang:
+      return new Value(val.type, !val.value);
+    case OperatorForUnary.Minus:
+      return new Value(val.type, -val.value!);
   }
 }
 
