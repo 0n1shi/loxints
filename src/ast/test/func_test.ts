@@ -9,11 +9,12 @@ import {
 } from "../../ast/func.ts";
 import {
   Comparision,
+  ComparisionsAndOperator,
   Equality,
-  Expression,
   Fanctor,
   FanctorsAndOperator,
   Group,
+  OperatorForComparisions,
   OperatorForFanctors,
   OperatorForTerms,
   OperatorForUnaries,
@@ -27,81 +28,68 @@ import {
   UnaryWithOperator,
 } from "../../ast/type.ts";
 import { Token, TokenType } from "../../token/type.ts";
-import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
-// Deno.test("Testing makeEquality()", async (t) => {
-//   type Test = {
-//     name: string;
-//     input: {
-//       tokens: Token[];
-//     };
-//     expected: {
-//       equality: Equality;
-//       leftTokens: Token[];
-//     };
-//   };
-//   const tests: Test[] = [
-//     {
-//       name: "-3 != 5",
-//       input: {
-//         tokens: [
-//           { type: TokenType.Minus },
-//           { type: TokenType.Number, value: 3 },
-//           { type: TokenType.BangEqual },
-//           { type: TokenType.Number, value: 5 },
-//         ],
-//       },
-//       expected: {
-//         equality: {
-//           left: {
-//             operator: TokenType.Minus,
-//             right: {
-//               type: TokenType.Number,
-//               value: 3,
-//             } as PrimaryValue,
-//           } as Unary,
-//           operator: TokenType.BangEqual,
-//           right: {
-//             type: TokenType.Number,
-//             value: 5,
-//           } as PrimaryValue,
-//         },
-//         leftTokens: [],
-//       },
-//     },
-//     {
-//       name: "3 == 5",
-//       input: {
-//         tokens: [
-//           { type: TokenType.Number, value: 3 },
-//           { type: TokenType.EqualEqual },
-//           { type: TokenType.Number, value: 5 },
-//         ],
-//       },
-//       expected: {
-//         equality: {
-//           left: {
-//             type: TokenType.Number,
-//             value: 3,
-//           } as PrimaryValue,
-//           operator: TokenType.EqualEqual,
-//           right: {
-//             type: TokenType.Number,
-//             value: 5,
-//           } as PrimaryValue,
-//         },
-//         leftTokens: [],
-//       },
-//     },
-//   ];
-//   for (const test of tests) {
-//     await t.step(test.name, () => {
-//       const [equality, leftTokens] = makeEquality(test.input.tokens);
-//       assertEquals(equality, test.expected.equality);
-//       assertEquals(leftTokens, test.expected.leftTokens);
-//     });
-//   }
-// });
+Deno.test("Testing makeEquality()", async (t) => {
+  type Test = {
+    name: string;
+    input: {
+      tokens: Token[];
+    };
+    expected: {
+      equality: Equality;
+      leftTokens: Token[];
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: "-3 != 5",
+      input: {
+        tokens: [
+          { type: TokenType.Minus },
+          { type: TokenType.Number, value: 3 },
+          { type: TokenType.BangEqual },
+          { type: TokenType.Number, value: 5 },
+        ],
+      },
+      expected: {
+        equality: new ComparisionsAndOperator(
+          new UnaryWithOperator(
+            OperatorForUnary.Minus,
+            new Primary(PrimaryType.Number, 3),
+          ),
+          OperatorForComparisions.BangEqual,
+          new Primary(PrimaryType.Number, 5),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "3 == 5",
+      input: {
+        tokens: [
+          { type: TokenType.Number, value: 3 },
+          { type: TokenType.EqualEqual },
+          { type: TokenType.Number, value: 5 },
+        ],
+      },
+      expected: {
+        equality: new ComparisionsAndOperator(
+          new Primary(PrimaryType.Number, 3),
+          OperatorForComparisions.EqualEqual,
+          new Primary(PrimaryType.Number, 5),
+        ),
+        leftTokens: [],
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const [equality, leftTokens] = makeEquality(test.input.tokens);
+      assertEquals(equality, test.expected.equality);
+      assertEquals(leftTokens, test.expected.leftTokens);
+    });
+  }
+});
 
 Deno.test("Testing makeComparision()", async (t) => {
   type Test = {
@@ -128,7 +116,7 @@ Deno.test("Testing makeComparision()", async (t) => {
         comparision: new TermsAndOperator(
           new Primary(PrimaryType.Number, 3),
           OperatorForTerms.Less,
-          new Primary(PrimaryType.Number, 3),
+          new Primary(PrimaryType.Number, 5),
         ),
         leftTokens: [],
       },
@@ -168,27 +156,18 @@ Deno.test("Testing makeComparision()", async (t) => {
         ],
       },
       expected: {
-        comparision: {
-          left: {
-            operator: TokenType.Minus,
-            right: {
-              type: TokenType.Number,
-              value: 3,
-            } as Primary,
-          } as Unary,
-          operator: TokenType.Less,
-          right: {
-            left: {
-              type: TokenType.Number,
-              value: 5,
-            },
-            operator: TokenType.Plus,
-            right: {
-              type: TokenType.Number,
-              value: 10,
-            },
-          } as Term,
-        },
+        comparision: new TermsAndOperator(
+          new UnaryWithOperator(
+            OperatorForUnary.Minus,
+            new Primary(PrimaryType.Number, 3),
+          ),
+          OperatorForTerms.Less,
+          new FanctorsAndOperator(
+            new Primary(PrimaryType.Number, 5),
+            OperatorForFanctors.Plus,
+            new Primary(PrimaryType.Number, 10),
+          ),
+        ),
         leftTokens: [],
       },
     },
@@ -536,30 +515,48 @@ Deno.test("Testing makePrimary()", async (t) => {
         leftTokens: [{ type: TokenType.Minus } as Token],
       },
     },
-    // {
-    //   name: "Group (3 + 2)",
-    //   input: {
-    //     tokens: [
-    //       { type:TokenType.ParenLeft },
-    //       { type:TokenType.Number, value: 3 },
-    //       { type:TokenType.Plus },
-    //       { type:TokenType.Number, value: 2 },
-    //       { type:TokenType.ParenRight },
-    //     ],
-    //   },
-    //   expected: {
-    //     primary: new Group(new Ex){
-    //       left: TokenType.ParenLeft,
-    //       middle: {
-    //         left: { type: TokenType.Number, value: 3 } as PrimaryValue,
-    //         operator: TokenType.Plus,
-    //         right: { type: TokenType.Number, value: 2 } as PrimaryValue,
-    //       } as Expression,
-    //       right: TokenType.ParenRight,
-    //     } as Group,
-    //     leftTokens: [],
-    //   },
-    // },
+    {
+      name: "Group (3 + 2)",
+      input: {
+        tokens: [
+          { type: TokenType.ParenLeft },
+          { type: TokenType.Number, value: 3 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 2 },
+          { type: TokenType.ParenRight },
+        ],
+      },
+      expected: {
+        primary: new Primary(
+          PrimaryType.Group,
+          new Group(
+            new FanctorsAndOperator(
+              new Primary(PrimaryType.Number, 3),
+              OperatorForFanctors.Plus,
+              new Primary(PrimaryType.Number, 2),
+            ),
+          ),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Left tokens",
+      input: {
+        tokens: [
+          { type: TokenType.Number, value: 3 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 2 },
+        ],
+      },
+      expected: {
+        primary: new Primary(PrimaryType.Number, 3),
+        leftTokens: [
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 2 },
+        ],
+      },
+    },
   ];
   for (const test of tests) {
     await t.step(test.name, () => {
