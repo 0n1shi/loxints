@@ -4,12 +4,17 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
+  Term,
   UnariesAndOperator,
   Unary,
 } from "../ast/type.ts";
 import { Value, ValueType } from "./type.ts";
-import { InvalidFanctorError, InvalidPrimaryError } from "./error.ts";
+import { InvalidFanctorError, InvalidPrimaryError, InvalidTermError } from "./error.ts";
 import { isInstanceOfUnary } from "./util.ts";
+
+export function evaluateTerm(term: Term): Value {
+  throw new 
+}
 
 export function evaluateFanctor(fanctor: Fanctor): Value {
   if (isInstanceOfUnary(fanctor)) {
