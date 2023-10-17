@@ -25,19 +25,26 @@ export function evaluateFanctor(fanctor: Fanctor): Value {
         if (left.type == ValueType.Number) {
           return new Value(
             ValueType.Number,
-            (left.value! as number) * (right.value as number),
+            (left.value as number) * (right.value as number),
           );
         }
         if (left.type == ValueType.String) {
           let txt = "";
-          for (let i = 0; i < (left.value! as number); i++) {
+          for (let i = 0; i < (right.value as number); i++) {
             txt += left.value as string;
           }
           return new Value(ValueType.String, txt);
         }
       }
-      throw new InvalidFanctorError(left.value, op, right.value);
-
+      break;
+    case OperatorForUnaries.Slash:
+      if (left.type == ValueType.Number && right.type == ValueType.Number) {
+        return new Value(
+          ValueType.Number,
+          (left.value as number) / (right.value as number),
+        );
+      }
+      break;
   }
   throw new InvalidFanctorError(left.value, op, right.value);
 }
