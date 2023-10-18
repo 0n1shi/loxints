@@ -1,18 +1,194 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
+  Comparision,
+  ComparisionsAndOperator,
+  Equality,
+  Expression,
   Fanctor,
   FanctorsAndOperator,
+  Group,
+  OperatorForComparisions,
   OperatorForFanctors,
+  OperatorForTerms,
   OperatorForUnaries,
   OperatorForUnary,
   Primary,
   PrimaryType,
+  Term,
+  TermsAndOperator,
   UnariesAndOperator,
   Unary,
   UnaryWithOperator,
 } from "../../ast/type.ts";
 import { Value, ValueType } from "../type.ts";
-import { evaluateFanctor, evaluatePrimary, evaluateUnary } from "../func.ts";
+import {
+  evaluateComparision,
+  evaluateEquality,
+  evaluateFanctor,
+  evaluatePrimary,
+  evaluateTerm,
+  evaluateUnary,
+} from "../func.ts";
+
+Deno.test("Testing evaluateEquality()", async (t) => {
+  type Test = {
+    name: string;
+    input: Equality;
+    expected: Value;
+  };
+  const tests: Test[] = [{
+    name: "3 == 3",
+    input: new ComparisionsAndOperator(
+      new Primary(PrimaryType.Number, 3),
+      OperatorForComparisions.EqualEqual,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, true),
+  }, {
+    name: "3 != 3",
+    input: new ComparisionsAndOperator(
+      new Primary(PrimaryType.Number, 3),
+      OperatorForComparisions.BangEqual,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, false),
+  }, {
+    name: "4 == 3",
+    input: new ComparisionsAndOperator(
+      new Primary(PrimaryType.Number, 4),
+      OperatorForComparisions.EqualEqual,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, false),
+  }, {
+    name: "10 != 3",
+    input: new ComparisionsAndOperator(
+      new Primary(PrimaryType.Number, 10),
+      OperatorForComparisions.BangEqual,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, true),
+  }];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const val = evaluateEquality(test.input);
+      assertEquals(val, test.expected);
+    });
+  }
+});
+
+Deno.test("Testing evaluateComparision()", async (t) => {
+  type Test = {
+    name: string;
+    input: Comparision;
+    expected: Value;
+  };
+  const tests: Test[] = [{
+    name: "3 < 3",
+    input: new TermsAndOperator(
+      new Primary(PrimaryType.Number, 3),
+      OperatorForTerms.Less,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, false),
+  }, {
+    name: "10 > 3",
+    input: new TermsAndOperator(
+      new Primary(PrimaryType.Number, 10),
+      OperatorForTerms.Greater,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, true),
+  }, {
+    name: "10 <= 3",
+    input: new TermsAndOperator(
+      new Primary(PrimaryType.Number, 10),
+      OperatorForTerms.LessEqual,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, false),
+  }, {
+    name: "10 >= 3",
+    input: new TermsAndOperator(
+      new Primary(PrimaryType.Number, 10),
+      OperatorForTerms.GreaterEqual,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Boolean, true),
+  }];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const val = evaluateComparision(test.input);
+      assertEquals(val, test.expected);
+    });
+  }
+});
+
+Deno.test("Testing evaluateTerm()", async (t) => {
+  type Test = {
+    name: string;
+    input: Term;
+    expected: Value;
+  };
+  const tests: Test[] = [{
+    name: "3 + 3",
+    input: new FanctorsAndOperator(
+      new Primary(PrimaryType.Number, 3),
+      OperatorForFanctors.Plus,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.Number, 6),
+  }, {
+    name: '"hello" + 3',
+    input: new FanctorsAndOperator(
+      new Primary(PrimaryType.String, "hello"),
+      OperatorForFanctors.Plus,
+      new Primary(PrimaryType.Number, 3),
+    ),
+    expected: new Value(ValueType.String, "hello3"),
+  }, {
+    name: '3 + "hello"',
+    input: new FanctorsAndOperator(
+      new Primary(PrimaryType.Number, 3),
+      OperatorForFanctors.Plus,
+      new Primary(PrimaryType.String, "hello"),
+    ),
+    expected: new Value(ValueType.String, "3hello"),
+  }, {
+    name: '"hello" + "hello"',
+    input: new FanctorsAndOperator(
+      new Primary(PrimaryType.String, "hello"),
+      OperatorForFanctors.Plus,
+      new Primary(PrimaryType.String, "hello"),
+    ),
+    expected: new Value(ValueType.String, "hellohello"),
+  }, {
+    name: "-8 - 10",
+    input: new FanctorsAndOperator(
+      new UnaryWithOperator(
+        OperatorForUnary.Minus,
+        new Primary(PrimaryType.Number, 8),
+      ),
+      OperatorForFanctors.Minus,
+      new Primary(PrimaryType.Number, 10),
+    ),
+    expected: new Value(ValueType.Number, -18),
+  }, {
+    name: "10 - 2",
+    input: new FanctorsAndOperator(
+      new Primary(PrimaryType.Number, 10),
+      OperatorForFanctors.Minus,
+      new Primary(PrimaryType.Number, 2),
+    ),
+    expected: new Value(ValueType.Number, 8),
+  }];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const val = evaluateTerm(test.input);
+      assertEquals(val, test.expected);
+    });
+  }
+});
 
 Deno.test("Testing evaluateFanctor()", async (t) => {
   type Test = {
@@ -55,6 +231,26 @@ Deno.test("Testing evaluateFanctor()", async (t) => {
       new Primary(PrimaryType.Number, 2),
     ),
     expected: new Value(ValueType.Number, -20),
+  }, {
+    name: "-10 * (3 + 2)",
+    input: new UnariesAndOperator(
+      new UnaryWithOperator(
+        OperatorForUnary.Minus,
+        new Primary(PrimaryType.Number, 10),
+      ),
+      OperatorForUnaries.Star,
+      new Primary(
+        PrimaryType.Group,
+        new Group(
+          new FanctorsAndOperator(
+            new Primary(PrimaryType.Number, 3),
+            OperatorForFanctors.Plus,
+            new Primary(PrimaryType.Number, 2),
+          ),
+        ),
+      ),
+    ),
+    expected: new Value(ValueType.Number, -50),
   }];
   for (const test of tests) {
     await t.step(test.name, () => {
@@ -187,6 +383,18 @@ Deno.test("Testing evaluatePrimary()", async (t) => {
     name: "nil",
     input: new Primary(PrimaryType.Nil),
     expected: new Value(ValueType.Nil, null),
+  }, {
+    name: "group",
+    input: new Primary(
+      PrimaryType.Group,
+      new Group(
+        new UnaryWithOperator(
+          OperatorForUnary.Minus,
+          new Primary(PrimaryType.Number, 3),
+        ),
+      ),
+    ),
+    expected: new Value(ValueType.Number, -3),
   }];
   for (const test of tests) {
     await t.step(test.name, () => {

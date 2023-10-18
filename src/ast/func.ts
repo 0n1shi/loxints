@@ -1,5 +1,6 @@
 import { Token } from "../token/type.ts";
 import {
+  AST,
   Comparision,
   ComparisionsAndOperator,
   Equality,
@@ -22,6 +23,10 @@ import {
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
+
+export function makeAST(tokens: Token[]): [AST, Token[]] {
+  return makeExpression(tokens);
+}
 
 export function makeExpression(tokens: Token[]): [Expression, Token[]] {
   return makeEquality(tokens);

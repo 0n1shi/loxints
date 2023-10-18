@@ -1,3 +1,5 @@
+export type AST = Expression;
+
 /**
  * Expression
  */
