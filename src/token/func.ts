@@ -1,7 +1,8 @@
-import { keywords, LineNumber, TokenType, Token } from "./type.ts";
+import { keywords, LineNumber, Token, TokenType } from "./type.ts";
 import { isAlphabet, isAplhaNumeric, isDigit } from "./util.ts";
 
 export function tokenize(sourceCode: string): [Token[], LineNumber] {
+  console.log(sourceCode);
   const sourceCodeLength = sourceCode.length;
   const tokens: Token[] = [];
 
@@ -14,6 +15,7 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
     }
 
     const currentChar = sourceCode[cursor];
+    console.log(currentChar)
     cursor++;
 
     switch (currentChar) {

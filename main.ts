@@ -4,10 +4,10 @@ import { makeAST } from "./src/ast/func.ts";
 import { evaluateAST } from "./src/eval/func.ts";
 
 if (import.meta.main) {
-  const runCommand = new Command()
+  const run = new Command()
     .arguments("<file_path:string>")
     .description("run source code of file path")
-    .action((options: any, file_path: string) => {
+    .action((_, file_path: string) => {
       const sourceCode = Deno.readTextFileSync(file_path);
       const [tokens, lineNumber] = tokenize(sourceCode);
       const [ast, leftTokens] = makeAST(tokens);
@@ -17,10 +17,23 @@ if (import.meta.main) {
       console.log(`line number: ${lineNumber}`);
       console.log(`left tokens: ${leftTokens}`);
     });
+  const interpret = new Command()
+    .description("start interpreter")
+    .action(() => {
+      while (true) {
+        const sourceCode = prompt(" >");
+        if (sourceCode === null) continue;
+        const [tokens,] = tokenize(sourceCode);
+        const [ast,] = makeAST(tokens);
+        const result = evaluateAST(ast);
+        console.log(result.value);
+      }
+    });
   await new Command()
     .name("loxints")
     .version("v0.1.0")
     .description("light-weight script language")
-    .command("run", runCommand)
+    .command("run", run)
+    .command("int", interpret)
     .parse(Deno.args);
 }
