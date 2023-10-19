@@ -21,10 +21,10 @@ if (import.meta.main) {
     .description("start interpreter")
     .action(() => {
       while (true) {
-        const sourceCode = prompt(" >");
+        const sourceCode = prompt(">");
         if (sourceCode === null) continue;
-        const [tokens,] = tokenize(sourceCode);
-        const [ast,] = makeAST(tokens);
+        const [tokens] = tokenize(sourceCode);
+        const [ast] = makeAST(tokens);
         const result = evaluateAST(ast);
         console.log(result.value);
       }

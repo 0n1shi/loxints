@@ -2,7 +2,6 @@ import { keywords, LineNumber, Token, TokenType } from "./type.ts";
 import { isAlphabet, isAplhaNumeric, isDigit } from "./util.ts";
 
 export function tokenize(sourceCode: string): [Token[], LineNumber] {
-  console.log(sourceCode);
   const sourceCodeLength = sourceCode.length;
   const tokens: Token[] = [];
 
@@ -15,7 +14,6 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
     }
 
     const currentChar = sourceCode[cursor];
-    console.log(currentChar)
     cursor++;
 
     switch (currentChar) {
@@ -144,7 +142,7 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
     if (isDigit(currentChar)) {
       let value = currentChar;
       let nextChar = sourceCode[cursor];
-      while (isDigit(nextChar) || nextChar == ".") {
+      while (nextChar !== undefined && (isDigit(nextChar) || nextChar == ".")) {
         value += nextChar;
         cursor++;
         nextChar = sourceCode[cursor];
@@ -159,7 +157,9 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
     if (isAlphabet(currentChar)) {
       let value = currentChar;
       let nextChar = sourceCode[cursor];
-      while (isAplhaNumeric(nextChar) || nextChar == "_") {
+      while (
+        nextChar !== undefined && (isAplhaNumeric(nextChar) || nextChar == "_")
+      ) {
         value += nextChar;
         cursor++;
         nextChar = sourceCode[cursor];
