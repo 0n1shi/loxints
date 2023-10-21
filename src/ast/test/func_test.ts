@@ -4,6 +4,8 @@ import {
   makeEquality,
   makeFanctor,
   makePrimary,
+  makeProgram,
+  makeStatement,
   makeTerm,
   makeUnary,
 } from "../../ast/func.ts";
@@ -11,6 +13,7 @@ import {
   Comparision,
   ComparisionsAndOperator,
   Equality,
+  ExpressionStatement,
   Fanctor,
   FanctorsAndOperator,
   Group,
@@ -21,6 +24,9 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
+  PrintStatement,
+  Program,
+  Statement,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
@@ -28,6 +34,123 @@ import {
   UnaryWithOperator,
 } from "../../ast/type.ts";
 import { Token, TokenType } from "../../token/type.ts";
+
+Deno.test("Testing makeProgram()", async (t) => {
+  type Test = {
+    name: string;
+    input: {
+      tokens: Token[];
+    };
+    expected: {
+      program: Program;
+      leftTokens: Token[];
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: 'print 10 + 5; print "hello world.";',
+      input: {
+        tokens: [
+          { type: TokenType.Print },
+          { type: TokenType.Number, value: 10 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 5 },
+          { type: TokenType.SemiColon },
+          { type: TokenType.Print },
+          { type: TokenType.String, value: "hello world." },
+          { type: TokenType.SemiColon },
+        ],
+      },
+      expected: {
+        program: new Program([
+          new PrintStatement(
+            new FanctorsAndOperator(
+              new Primary(PrimaryType.Number, 10),
+              OperatorForFanctors.Plus,
+              new Primary(PrimaryType.Number, 5),
+            ),
+          ),
+          new PrintStatement(
+            new Primary(PrimaryType.String, "hello world."),
+          ),
+        ]),
+        leftTokens: [],
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const [program, leftTokens] = makeProgram(test.input.tokens);
+      assertEquals(program, test.expected.program);
+      assertEquals(leftTokens, test.expected.leftTokens);
+    });
+  }
+});
+
+Deno.test("Testing makeStatement()", async (t) => {
+  type Test = {
+    name: string;
+    input: {
+      tokens: Token[];
+    };
+    expected: {
+      statment: Statement;
+      leftTokens: Token[];
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: "print 10 + 5;",
+      input: {
+        tokens: [
+          { type: TokenType.Print },
+          { type: TokenType.Number, value: 10 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 5 },
+          { type: TokenType.SemiColon },
+        ],
+      },
+      expected: {
+        statment: new PrintStatement(
+          new FanctorsAndOperator(
+            new Primary(PrimaryType.Number, 10),
+            OperatorForFanctors.Plus,
+            new Primary(PrimaryType.Number, 5),
+          ),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "10 + 5;",
+      input: {
+        tokens: [
+          { type: TokenType.Number, value: 10 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 5 },
+          { type: TokenType.SemiColon },
+        ],
+      },
+      expected: {
+        statment: new ExpressionStatement(
+          new FanctorsAndOperator(
+            new Primary(PrimaryType.Number, 10),
+            OperatorForFanctors.Plus,
+            new Primary(PrimaryType.Number, 5),
+          ),
+        ),
+        leftTokens: [],
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const [statment, leftTokens] = makeStatement(test.input.tokens);
+      assertEquals(statment, test.expected.statment);
+      assertEquals(leftTokens, test.expected.leftTokens);
+    });
+  }
+});
 
 Deno.test("Testing makeEquality()", async (t) => {
   type Test = {

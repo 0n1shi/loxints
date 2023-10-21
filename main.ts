@@ -1,7 +1,7 @@
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 import { tokenize } from "./src/token/func.ts";
 import { makeAST } from "./src/ast/func.ts";
-import { evaluateAST } from "./src/eval/func.ts";
+import { evaluateStatement, executeProgram } from "./src/eval/func.ts";
 
 if (import.meta.main) {
   const run = new Command()
@@ -11,9 +11,9 @@ if (import.meta.main) {
       const sourceCode = Deno.readTextFileSync(file_path);
       const [tokens, lineNumber] = tokenize(sourceCode);
       const [ast, leftTokens] = makeAST(tokens);
-      const result = evaluateAST(ast);
-      console.log(`type of result: ${result.type}`);
-      console.log(`val of result: ${result.value}`);
+      console.log("-------------- output --------------");
+      executeProgram(ast);
+      console.log("--------------- meta ---------------");
       console.log(`line number: ${lineNumber}`);
       console.log(`left tokens: ${leftTokens}`);
     });
@@ -25,8 +25,10 @@ if (import.meta.main) {
         if (sourceCode === null) continue;
         const [tokens] = tokenize(sourceCode);
         const [ast] = makeAST(tokens);
-        const result = evaluateAST(ast);
-        console.log(result.value);
+        for (const stmt of ast.statements) {
+          const result = evaluateStatement(stmt);
+          console.log(`${result.type} ${result.value}`);
+        }
       }
     });
   await new Command()

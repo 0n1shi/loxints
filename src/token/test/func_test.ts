@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
-import { LineNumber, TokenType, Token } from "../../token/type.ts";
+import { LineNumber, Token, TokenType } from "../../token/type.ts";
 import { tokenize } from "../../token/func.ts";
 
 Deno.test("Testing tokenize()", async (t) => {
@@ -17,10 +17,10 @@ Deno.test("Testing tokenize()", async (t) => {
       input: "{ . -  }",
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.Dot },
-          {type: TokenType.Minus },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Dot },
+          { type: TokenType.Minus },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 1,
       },
@@ -30,12 +30,12 @@ Deno.test("Testing tokenize()", async (t) => {
       input: "{ != == <= >= }",
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.BangEqual },
-          {type: TokenType.EqualEqual },
-          {type: TokenType.LessEqual },
-          {type: TokenType.GreaterEqual },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.BangEqual },
+          { type: TokenType.EqualEqual },
+          { type: TokenType.LessEqual },
+          { type: TokenType.GreaterEqual },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 1,
       },
@@ -47,10 +47,10 @@ Deno.test("Testing tokenize()", async (t) => {
 }`,
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.Dot },
-          {type: TokenType.Minus },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Dot },
+          { type: TokenType.Minus },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 3,
       },
@@ -62,8 +62,8 @@ Deno.test("Testing tokenize()", async (t) => {
 }`,
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 3,
       },
@@ -76,12 +76,12 @@ Deno.test("Testing tokenize()", async (t) => {
 }`,
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.Number, value: 123 },
-          {type: TokenType.Comma },
-          {type: TokenType.Number, value: 123.5 },
-          {type: TokenType.Comma },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Number, value: 123 },
+          { type: TokenType.Comma },
+          { type: TokenType.Number, value: 123.5 },
+          { type: TokenType.Comma },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 4,
       },
@@ -93,12 +93,12 @@ Deno.test("Testing tokenize()", async (t) => {
 }`,
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.Identifier, value: "msg" },
-          {type: TokenType.Equal },
-          {type: TokenType.Number, value: 123 },
-          {type: TokenType.SemiColon },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.Number, value: 123 },
+          { type: TokenType.SemiColon },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 3,
       },
@@ -110,12 +110,12 @@ Deno.test("Testing tokenize()", async (t) => {
 }`,
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.Identifier, value: "msg" },
-          {type: TokenType.Equal },
-          {type: TokenType.String, value: "Hello world" },
-          {type: TokenType.SemiColon },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.String, value: "Hello world" },
+          { type: TokenType.SemiColon },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 3,
       },
@@ -127,15 +127,46 @@ Deno.test("Testing tokenize()", async (t) => {
 }`,
       expected: {
         tokens: [
-          {type: TokenType.BraceLeft },
-          {type: TokenType.Var },
-          {type: TokenType.Identifier, value: "msg" },
-          {type: TokenType.Equal },
-          {type: TokenType.String, value: "Hello world" },
-          {type: TokenType.SemiColon },
-          {type: TokenType.BraceRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Var },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.String, value: "Hello world" },
+          { type: TokenType.SemiColon },
+          { type: TokenType.BraceRight },
         ],
         lineNumber: 3,
+      },
+    },
+    {
+      name: "Print statement",
+      input: `print 10 + 5;`,
+      expected: {
+        tokens: [
+          { type: TokenType.Print },
+          { type: TokenType.Number, value: 10 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 5 },
+          { type: TokenType.SemiColon },
+        ],
+        lineNumber: 1,
+      },
+    },
+    {
+      name: "statements",
+      input: `10 + 5; 1 + 2;`,
+      expected: {
+        tokens: [
+          { type: TokenType.Number, value: 10 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 5 },
+          { type: TokenType.SemiColon },
+          { type: TokenType.Number, value: 1 },
+          { type: TokenType.Plus },
+          { type: TokenType.Number, value: 2 },
+          { type: TokenType.SemiColon },
+        ],
+        lineNumber: 1,
       },
     },
   ];

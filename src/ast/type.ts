@@ -1,4 +1,36 @@
-export type AST = Expression;
+export type AST = Program;
+
+/**
+ * Program
+ */
+export class Program {
+  statements: Statement[];
+
+  constructor(stmts: Statement[]) {
+    this.statements = stmts;
+  }
+}
+
+/**
+ * Statement
+ */
+export type Statement = ExpressionStatement | PrintStatement;
+
+export class ExpressionStatement {
+  expression: Expression;
+
+  constructor(e: Expression) {
+    this.expression = e;
+  }
+}
+
+export class PrintStatement {
+  expression: Expression;
+
+  constructor(e: Expression) {
+    this.expression = e;
+  }
+}
 
 /**
  * Expression

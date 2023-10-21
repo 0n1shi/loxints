@@ -5,6 +5,7 @@ import {
   ComparisionsAndOperator,
   Equality,
   Expression,
+  ExpressionStatement,
   Fanctor,
   FanctorsAndOperator,
   Group,
@@ -15,6 +16,9 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
+  PrintStatement,
+  Program,
+  Statement,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
@@ -25,7 +29,30 @@ import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
-  return makeExpression(tokens);
+  return makeProgram(tokens);
+}
+
+export function makeProgram(tokens: Token[]): [Program, Token[]] {
+  const statements: Statement[] = [];
+  while (tokens.length > 0) {
+    let stmt: Statement;
+    [stmt, tokens] = makeStatement(tokens);
+    statements.push(stmt);
+  }
+  return [new Program(statements), []];
+}
+
+export function makeStatement(tokens: Token[]): [Statement, Token[]] {
+  const first = tokens[0];
+  if (first.type == TokenType.Print) {
+    const otherTokens = tokens.slice(1);
+    let [expression, leftTokens] = makeExpression(otherTokens);
+    leftTokens = leftTokens.slice(1);
+    return [new PrintStatement(expression), leftTokens];
+  }
+  let [expression, leftTokens] = makeExpression(tokens);
+  leftTokens = leftTokens.slice(1);
+  return [new ExpressionStatement(expression), leftTokens];
 }
 
 export function makeExpression(tokens: Token[]): [Expression, Token[]] {

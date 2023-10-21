@@ -6,7 +6,7 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
   const tokens: Token[] = [];
 
   let cursor = 0;
-  let lineNumber: LineNumber = 0;
+  let lineNumber: LineNumber = 1;
 
   while (true) {
     if (cursor >= sourceCodeLength) {

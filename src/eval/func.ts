@@ -4,6 +4,7 @@ import {
   ComparisionsAndOperator,
   Equality,
   Expression,
+  ExpressionStatement,
   Fanctor,
   FanctorsAndOperator,
   Group,
@@ -14,6 +15,9 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
+  PrintStatement,
+  Program,
+  Statement,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
@@ -32,8 +36,23 @@ import {
   isInstanceOfUnary,
 } from "./util.ts";
 
-export function evaluateAST(ast: AST): Value {
-  return evaluateExpression(ast as Expression);
+export function execute(ast: AST) {
+  return executeProgram(ast as Program);
+}
+
+export function executeProgram(program: Program) {
+  for (const stmt of program.statements) {
+    evaluateStatement(stmt);
+  }
+}
+
+export function evaluateStatement(statement: Statement): Value {
+  const expr = evaluateExpression(statement.expression);
+  if (statement instanceof PrintStatement) {
+    console.log(expr.value);
+    return new Value(ValueType.Nil, null);
+  }
+  return expr;
 }
 
 export function evaluateExpression(expression: Expression): Value {
