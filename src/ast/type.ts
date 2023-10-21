@@ -4,10 +4,25 @@ export type AST = Program;
  * Program
  */
 export class Program {
-  statements: Statement[];
+  declarations: Declaration[];
 
-  constructor(stmts: Statement[]) {
-    this.statements = stmts;
+  constructor(declarations: Declaration[]) {
+    this.declarations = declarations;
+  }
+}
+
+/**
+ * Declaration
+ */
+export type Declaration = VariableDeclaration | Statement;
+
+export class VariableDeclaration {
+  identifier: string;
+  expression?: Expression;
+
+  constructor(identifier: string, expression?: Expression) {
+    this.identifier = identifier;
+    this.expression = expression;
   }
 }
 
@@ -160,6 +175,7 @@ export enum PrimaryType {
   True = "[true]",
   False = "[false]",
   Nil = "[nil]",
+  Identifier = "[Identifier]",
   Group = "[group]",
 }
 

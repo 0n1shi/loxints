@@ -3,6 +3,7 @@ import {
   AST,
   Comparision,
   ComparisionsAndOperator,
+  Declaration,
   Equality,
   Expression,
   ExpressionStatement,
@@ -24,6 +25,7 @@ import {
   UnariesAndOperator,
   Unary,
   UnaryWithOperator,
+  VariableDeclaration,
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
@@ -33,21 +35,43 @@ export function makeAST(tokens: Token[]): [AST, Token[]] {
 }
 
 export function makeProgram(tokens: Token[]): [Program, Token[]] {
-  const statements: Statement[] = [];
+  const declarations: Declaration[] = [];
   while (tokens.length > 0) {
-    let stmt: Statement;
-    [stmt, tokens] = makeStatement(tokens);
-    statements.push(stmt);
+    let declaration: Declaration;
+    [declaration, tokens] = makeDeclaration(tokens);
+    declarations.push(declaration);
   }
-  return [new Program(statements), []];
+  return [new Program(declarations), []];
+}
+
+export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
+  const first = tokens[0];
+
+  // variable declaration
+  if (first.type == TokenType.Var) {
+    const identifider = tokens[1].value as string; // must be variable name
+    let leftTokens = tokens.slice(2); // consume "VAR" and [IDENTIFIER]
+    const nextToken = leftTokens[0];
+
+    // with initial value
+    let expression: Expression | undefined = undefined;
+    if (nextToken !== undefined && nextToken.type == TokenType.Equal) {
+      leftTokens = leftTokens.slice(1); // consume "="
+      [expression, leftTokens] = makeExpression(leftTokens);
+      leftTokens = leftTokens.slice(1); // consume ";"
+    }
+    return [new VariableDeclaration(identifider, expression), leftTokens];
+  }
+
+  return makeStatement(tokens);
 }
 
 export function makeStatement(tokens: Token[]): [Statement, Token[]] {
   const first = tokens[0];
   if (first.type == TokenType.Print) {
-    const otherTokens = tokens.slice(1);
+    const otherTokens = tokens.slice(1); // consume "print"
     let [expression, leftTokens] = makeExpression(otherTokens);
-    leftTokens = leftTokens.slice(1);
+    leftTokens = leftTokens.slice(1); // consume ";"
     return [new PrintStatement(expression), leftTokens];
   }
   let [expression, leftTokens] = makeExpression(tokens);
@@ -212,6 +236,8 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
       return [new Primary(PrimaryType.Number, token.value), leftTokens];
     case TokenType.String:
       return [new Primary(PrimaryType.String, token.value), leftTokens];
+    case TokenType.Identifier:
+      return [new Primary(PrimaryType.Identifier, token.value), leftTokens];
   }
 
   // A grouped expression

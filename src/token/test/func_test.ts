@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import { LineNumber, Token, TokenType } from "../../token/type.ts";
 import { tokenize } from "../../token/func.ts";
+import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 Deno.test("Testing tokenize()", async (t) => {
   type Test = {
@@ -165,6 +166,19 @@ Deno.test("Testing tokenize()", async (t) => {
           { type: TokenType.Plus },
           { type: TokenType.Number, value: 2 },
           { type: TokenType.SemiColon },
+        ],
+        lineNumber: 1,
+      },
+    },
+    {
+      name: "variable declaration",
+      input: `var msg = "hello world."`,
+      expected: {
+        tokens: [
+          { type: TokenType.Var },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.String, value: "hello world." },
         ],
         lineNumber: 1,
       },

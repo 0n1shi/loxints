@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
   makeComparision,
+  makeDeclaration,
   makeEquality,
   makeFanctor,
   makePrimary,
@@ -12,6 +13,7 @@ import {
 import {
   Comparision,
   ComparisionsAndOperator,
+  Declaration,
   Equality,
   ExpressionStatement,
   Fanctor,
@@ -32,6 +34,7 @@ import {
   UnariesAndOperator,
   Unary,
   UnaryWithOperator,
+  VariableDeclaration,
 } from "../../ast/type.ts";
 import { Token, TokenType } from "../../token/type.ts";
 
@@ -77,11 +80,91 @@ Deno.test("Testing makeProgram()", async (t) => {
         leftTokens: [],
       },
     },
+    {
+      name: 'var msg = "hello world"; print msg',
+      input: {
+        tokens: [
+          { type: TokenType.Var },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.String, value: "hello world" },
+          { type: TokenType.SemiColon },
+          { type: TokenType.Print },
+          { type: TokenType.Identifier, value: "msg" },
+        ],
+      },
+      expected: {
+        program: new Program([
+          new VariableDeclaration(
+            "msg",
+            new Primary(PrimaryType.String, "hello world"),
+          ),
+          new PrintStatement(
+            new Primary(PrimaryType.Identifier, "msg"),
+          ),
+        ]),
+        leftTokens: [],
+      },
+    },
   ];
   for (const test of tests) {
     await t.step(test.name, () => {
       const [program, leftTokens] = makeProgram(test.input.tokens);
       assertEquals(program, test.expected.program);
+      assertEquals(leftTokens, test.expected.leftTokens);
+    });
+  }
+});
+
+Deno.test("Testing makeDeclaration()", async (t) => {
+  type Test = {
+    name: string;
+    input: {
+      tokens: Token[];
+    };
+    expected: {
+      declaration: Declaration;
+      leftTokens: Token[];
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: "var msg;",
+      input: {
+        tokens: [
+          { type: TokenType.Var },
+          { type: TokenType.Identifier, value: "msg" },
+        ],
+      },
+      expected: {
+        declaration: new VariableDeclaration("msg"),
+        leftTokens: [],
+      },
+    },
+    {
+      name: 'var msg = "hello world";',
+      input: {
+        tokens: [
+          { type: TokenType.Var },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.String, value: "hello world" },
+          { type: TokenType.SemiColon },
+        ],
+      },
+      expected: {
+        declaration: new VariableDeclaration(
+          "msg",
+          new Primary(PrimaryType.String, "hello world"),
+        ),
+        leftTokens: [],
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const [statment, leftTokens] = makeDeclaration(test.input.tokens);
+      assertEquals(statment, test.expected.declaration);
       assertEquals(leftTokens, test.expected.leftTokens);
     });
   }
@@ -659,6 +742,21 @@ Deno.test("Testing makePrimary()", async (t) => {
               new Primary(PrimaryType.Number, 2),
             ),
           ),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "Identifier",
+      input: {
+        tokens: [
+          { type: TokenType.Identifier, value: "msg" },
+        ],
+      },
+      expected: {
+        primary: new Primary(
+          PrimaryType.Identifier,
+          "msg",
         ),
         leftTokens: [],
       },
