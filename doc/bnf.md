@@ -1,10 +1,16 @@
 # BNF
 
 ```txt
-program             -> statement* EOF ;
+program             -> declaration* EOF ;
+
+# declaration
+declaration         -> variableDeclaration
+                    | statement
+variableDeclaration -> "var" IDENTIFIER ( "=" expression)? ";" ;
 
 # statement
-statement           -> expressionStatement | printStatement
+statement           -> expressionStatement
+                    | printStatement
 expressionStatement -> expression ";" ;
 printStatement      -> "print" expression ";" ;
 
@@ -14,6 +20,13 @@ equality            -> comparision ( ("!=" | "==") comparision )* ;
 comparision         -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term                -> fanctor ( ( "-" | "+" ) fanctor )* ;
 fanctor             -> unary ( ( "/" | "*" ) unary )* ;
-unary               -> ( "!" | "-" ) unary | primary
-primary             -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
+unary               -> ( "!" | "-" ) unary
+                    | primary
+primary             -> NUMBER
+                    | STRING
+                    | "true"
+                    | "false"
+                    | "nil"
+                    | IDENTIFIER
+                    | "(" expression ")"
 ```
