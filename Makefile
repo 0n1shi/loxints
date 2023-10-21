@@ -1,14 +1,14 @@
 
-.PHONY: clean test
+.PHONY: test
 
-test:
+test_all:
 	deno test src/
 
 test_token:
-	deno test src/ast
+	deno test src/token
 
 test_ast:
 	deno test src/ast
 
 test_eval:
-	deno test src/ast
+	deno test src/eval
