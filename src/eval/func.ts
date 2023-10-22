@@ -2,6 +2,7 @@ import {
   AST,
   Comparision,
   ComparisionsAndOperator,
+  Declaration,
   Equality,
   Expression,
   ExpressionStatement,
@@ -22,8 +23,9 @@ import {
   TermsAndOperator,
   UnariesAndOperator,
   Unary,
+  VariableDeclaration,
 } from "../ast/type.ts";
-import { Value, ValueType } from "./type.ts";
+import { Environment, Value, ValueType } from "./type.ts";
 import {
   InvalidComparision,
   InvalidFanctorError,
@@ -37,19 +39,32 @@ import {
 } from "./util.ts";
 
 export function execute(ast: AST) {
-  return executeProgram(ast as Program);
+  const environment: Environment = new Map<string, Value>();
+  return executeProgram(ast as Program, environment);
 }
 
-export function executeProgram(program: Program) {
-  for (const stmt of program.statements) {
-    evaluateStatement(stmt);
+export function executeProgram(program: Program, environment: Environment) {
+  for (const declaration of program.declarations) {
+    executeDeclaration(declaration, environment);
   }
+}
+
+export function executeDeclaration(
+  declaration: Declaration,
+  environment: Environment,
+): Value {
+  if (declaration instanceof VariableDeclaration) {
+    const val = evaluateExpression(declaration.expression!);
+    environment.set(declaration.identifier, val);
+    return new Value(ValueType.Nil, null);
+  }
+  return evaluateStatement(declaration as Statement);
 }
 
 export function evaluateStatement(statement: Statement): Value {
   const expr = evaluateExpression(statement.expression);
   if (statement instanceof PrintStatement) {
-    console.log(expr.value);
+    console.log(expr.value); // print
     return new Value(ValueType.Nil, null);
   }
   return expr;

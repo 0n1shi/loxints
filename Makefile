@@ -1,7 +1,7 @@
 
 .PHONY: test
 
-test_all:
+test:
 	deno test src/
 
 test_token:

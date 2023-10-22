@@ -16,3 +16,5 @@ export class Value {
     this.value = value;
   }
 }
+
+export type Environment = Map<string, Value>;
