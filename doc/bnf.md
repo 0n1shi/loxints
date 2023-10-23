@@ -15,7 +15,9 @@ expressionStatement -> expression ";" ;
 printStatement      -> "print" expression ";" ;
 
 # expression
-expression          -> equality ;
+expression          -> assignment ;
+assignment          -> IDENTIFIER "=" assignment
+                    | equality ;
 equality            -> comparision ( ("!=" | "==") comparision )* ;
 comparision         -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term                -> fanctor ( ( "-" | "+" ) fanctor )* ;

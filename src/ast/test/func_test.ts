@@ -1,5 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
+  makeAssignment,
   makeComparision,
   makeDeclaration,
   makeEquality,
@@ -11,6 +12,8 @@ import {
   makeUnary,
 } from "../../ast/func.ts";
 import {
+  Assignment,
+  AssignmentWithIdentifier,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -37,6 +40,8 @@ import {
   VariableDeclaration,
 } from "../../ast/type.ts";
 import { Token, TokenType } from "../../token/type.ts";
+import { longest } from "https://deno.land/x/cliffy@v1.0.0-rc.3/table/_utils.ts";
+import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 Deno.test("Testing makeProgram()", async (t) => {
   type Test = {
@@ -230,6 +235,96 @@ Deno.test("Testing makeStatement()", async (t) => {
     await t.step(test.name, () => {
       const [statment, leftTokens] = makeStatement(test.input.tokens);
       assertEquals(statment, test.expected.statment);
+      assertEquals(leftTokens, test.expected.leftTokens);
+    });
+  }
+});
+
+Deno.test("Testing makeAssignment()", async (t) => {
+  type Test = {
+    name: string;
+    input: {
+      tokens: Token[];
+    };
+    expected: {
+      assignment: Assignment;
+      leftTokens: Token[];
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: "a = 10",
+      input: {
+        tokens: [
+          { type: TokenType.Identifier, value: "a" },
+          { type: TokenType.Equal },
+          { type: TokenType.Number, value: 10 },
+        ],
+      },
+      expected: {
+        assignment: new AssignmentWithIdentifier(
+          "a",
+          new Primary(PrimaryType.Number, 10),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "a = -10",
+      input: {
+        tokens: [
+          { type: TokenType.Identifier, value: "a" },
+          { type: TokenType.Equal },
+          { type: TokenType.Minus },
+          { type: TokenType.Number, value: 10 },
+        ],
+      },
+      expected: {
+        assignment: new AssignmentWithIdentifier(
+          "a",
+          new UnaryWithOperator(
+            OperatorForUnary.Minus,
+            new Primary(PrimaryType.Number, 10),
+          ),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "a = (1 == 1)",
+      input: {
+        tokens: [
+          { type: TokenType.Identifier, value: "a" },
+          { type: TokenType.Equal },
+          { type: TokenType.ParenLeft },
+          { type: TokenType.Number, value: 1 },
+          { type: TokenType.EqualEqual },
+          { type: TokenType.Number, value: 1 },
+          { type: TokenType.ParenRight },
+        ],
+      },
+      expected: {
+        assignment: new AssignmentWithIdentifier(
+          "a",
+          new Primary(
+            PrimaryType.Group,
+            new Group(
+              new ComparisionsAndOperator(
+                new Primary(PrimaryType.Number, 1),
+                OperatorForComparisions.EqualEqual,
+                new Primary(PrimaryType.Number, 1),
+              ),
+            ),
+          ),
+        ),
+        leftTokens: [],
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const [equality, leftTokens] = makeAssignment(test.input.tokens);
+      assertEquals(equality, test.expected.assignment);
       assertEquals(leftTokens, test.expected.leftTokens);
     });
   }

@@ -50,7 +50,19 @@ export class PrintStatement {
 /**
  * Expression
  */
-export type Expression = Equality;
+export type Expression = Assignment;
+
+export type Assignment = AssignmentWithIdentifier | Equality;
+
+export class AssignmentWithIdentifier {
+  identifier: string;
+  assignment: Assignment;
+
+  constructor(identifier: string, assignment: Assignment) {
+    this.identifier = identifier;
+    this.assignment = assignment;
+  }
+}
 
 /**
  * Equality

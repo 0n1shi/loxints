@@ -1,9 +1,10 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
+  Assignment,
+  AssignmentWithIdentifier,
   Comparision,
   ComparisionsAndOperator,
   Equality,
-  Expression,
   Fanctor,
   FanctorsAndOperator,
   Group,
@@ -22,6 +23,7 @@ import {
 } from "../../ast/type.ts";
 import { Environment, Value, ValueType } from "../type.ts";
 import {
+  evaluateAssignment,
   evaluateComparision,
   evaluateEquality,
   evaluateFanctor,
@@ -29,6 +31,76 @@ import {
   evaluateTerm,
   evaluateUnary,
 } from "../func.ts";
+
+Deno.test("Testing evaluateAssignment()", async (t) => {
+  type Test = {
+    name: string;
+    input: Assignment;
+    expected: {
+      identifier: string;
+      val: Value;
+    };
+  };
+  const tests: Test[] = [
+    {
+      name: "a = 10",
+      input: new AssignmentWithIdentifier(
+        "a",
+        new Primary(PrimaryType.Number, 10),
+      ),
+      expected: {
+        identifier: "a",
+        val: new Value(ValueType.Number, 10),
+      },
+    },
+    {
+      name: "a = -10",
+      input: new AssignmentWithIdentifier(
+        "a",
+        new UnaryWithOperator(
+          OperatorForUnary.Minus,
+          new Primary(PrimaryType.Number, 10),
+        ),
+      ),
+      expected: {
+        identifier: "a",
+        val: new Value(ValueType.Number, -10),
+      },
+    },
+    {
+      name: "a = 10 + 1",
+      input: new AssignmentWithIdentifier(
+        "a",
+        new FanctorsAndOperator(
+          new Primary(PrimaryType.Number, 10),
+          OperatorForFanctors.Plus,
+          new Primary(PrimaryType.Number, 1),
+        ),
+      ),
+      expected: {
+        identifier: "a",
+        val: new Value(ValueType.Number, 11),
+      },
+    },
+  ];
+  for (const test of tests) {
+    await t.step(test.name, () => {
+      const env: Environment = new Map<string, Value>();
+      env.set(test.expected.identifier, new Value(ValueType.Number, -1));
+
+      evaluateAssignment(test.input, env);
+
+      assertEquals(
+        test.expected.val.type,
+        env.get(test.expected.identifier)?.type,
+      );
+      assertEquals(
+        test.expected.val.value,
+        env.get(test.expected.identifier)?.value,
+      );
+    });
+  }
+});
 
 Deno.test("Testing evaluateEquality()", async (t) => {
   type Test = {

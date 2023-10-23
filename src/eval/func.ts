@@ -1,4 +1,6 @@
 import {
+  Assignment,
+  AssignmentWithIdentifier,
   AST,
   Comparision,
   ComparisionsAndOperator,
@@ -78,7 +80,22 @@ export function evaluateExpression(
   expression: Expression,
   environment: Environment,
 ): Value {
-  return evaluateEquality(expression, environment);
+  return evaluateAssignment(expression, environment);
+}
+
+export function evaluateAssignment(
+  assignment: Assignment,
+  environment: Environment,
+): Value {
+  if (assignment instanceof AssignmentWithIdentifier) {
+    if (!environment.has(assignment.identifier)) {
+      throw new UndefinedVariableError(assignment.identifier);
+    }
+    const val = evaluateAssignment(assignment.assignment, environment);
+    environment.set(assignment.identifier, val);
+    return val;
+  }
+  return evaluateEquality(assignment as Equality, environment);
 }
 
 export function evaluateEquality(

@@ -1,0 +1,4 @@
+var msg = "hello";
+print msg;
+msg = "good night";
+print msg;

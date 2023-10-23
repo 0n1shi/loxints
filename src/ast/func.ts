@@ -1,5 +1,7 @@
 import { Token } from "../token/type.ts";
 import {
+  Assignment,
+  AssignmentWithIdentifier,
   AST,
   Comparision,
   ComparisionsAndOperator,
@@ -29,6 +31,7 @@ import {
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
+import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -80,6 +83,23 @@ export function makeStatement(tokens: Token[]): [Statement, Token[]] {
 }
 
 export function makeExpression(tokens: Token[]): [Expression, Token[]] {
+  return makeAssignment(tokens);
+}
+
+export function makeAssignment(tokens: Token[]): [Assignment, Token[]] {
+  const firstToken = tokens[0];
+  const secondToken = tokens[1];
+  if (
+    firstToken?.type == TokenType.Identifier &&
+    secondToken?.type == TokenType.Equal
+  ) {
+    const [assignment, leftTokens] = makeAssignment(tokens.slice(2)); // consume [IDENTIFIER] and "="
+    return [
+      new AssignmentWithIdentifier(firstToken.value as string, assignment),
+      leftTokens,
+    ];
+  }
+
   return makeEquality(tokens);
 }
 
