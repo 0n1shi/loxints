@@ -249,5 +249,5 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
     return [new Primary(PrimaryType.Group, new Group(expression)), leftTokens];
   }
 
-  throw new InvalidPrimaryError();
+  throw new InvalidPrimaryError(token);
 }

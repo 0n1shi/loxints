@@ -1,7 +1,8 @@
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 import { tokenize } from "./src/token/func.ts";
 import { makeAST } from "./src/ast/func.ts";
-import { evaluateStatement, executeProgram } from "./src/eval/func.ts";
+import { execute, executeProgram } from "./src/eval/func.ts";
+import { Environment, Value } from "./src/eval/type.ts";
 
 if (import.meta.main) {
   const run = new Command()
@@ -12,7 +13,7 @@ if (import.meta.main) {
       const [tokens, lineNumber] = tokenize(sourceCode);
       const [ast, leftTokens] = makeAST(tokens);
       console.log("-------------- output --------------");
-      executeProgram(ast);
+      execute(ast);
       console.log("--------------- meta ---------------");
       console.log(`line number: ${lineNumber}`);
       console.log(`left tokens: ${leftTokens}`);
@@ -20,15 +21,13 @@ if (import.meta.main) {
   const interpret = new Command()
     .description("start interpreter")
     .action(() => {
+      const environment: Environment = new Map<string, Value>();
       while (true) {
         const sourceCode = prompt(">");
         if (sourceCode === null) continue;
         const [tokens] = tokenize(sourceCode);
         const [ast] = makeAST(tokens);
-        for (const stmt of ast.statements) {
-          const result = evaluateStatement(stmt);
-          console.log(`${result.type} ${result.value}`);
-        }
+        executeProgram(ast, environment);
       }
     });
   await new Command()

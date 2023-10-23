@@ -27,9 +27,10 @@ import {
 } from "../ast/type.ts";
 import { Environment, Value, ValueType } from "./type.ts";
 import {
-  InvalidComparision,
+  InvalidComparisionError,
   InvalidFanctorError,
   InvalidTermError,
+  UndefinedVariableError,
 } from "./error.ts";
 import {
   isInstanceOfComparision,
@@ -54,15 +55,18 @@ export function executeDeclaration(
   environment: Environment,
 ): Value {
   if (declaration instanceof VariableDeclaration) {
-    const val = evaluateExpression(declaration.expression!);
+    const val = evaluateExpression(declaration.expression!, environment);
     environment.set(declaration.identifier, val);
     return new Value(ValueType.Nil, null);
   }
-  return evaluateStatement(declaration as Statement);
+  return evaluateStatement(declaration as Statement, environment);
 }
 
-export function evaluateStatement(statement: Statement): Value {
-  const expr = evaluateExpression(statement.expression);
+export function evaluateStatement(
+  statement: Statement,
+  environment: Environment,
+): Value {
+  const expr = evaluateExpression(statement.expression, environment);
   if (statement instanceof PrintStatement) {
     console.log(expr.value); // print
     return new Value(ValueType.Nil, null);
@@ -70,19 +74,29 @@ export function evaluateStatement(statement: Statement): Value {
   return expr;
 }
 
-export function evaluateExpression(expression: Expression): Value {
-  return evaluateEquality(expression);
+export function evaluateExpression(
+  expression: Expression,
+  environment: Environment,
+): Value {
+  return evaluateEquality(expression, environment);
 }
 
-export function evaluateEquality(equality: Equality): Value {
+export function evaluateEquality(
+  equality: Equality,
+  environment: Environment,
+): Value {
   if (isInstanceOfComparision(equality)) {
-    return evaluateComparision(equality as Comparision);
+    return evaluateComparision(equality as Comparision, environment);
   }
 
   const op = (equality as ComparisionsAndOperator).operator;
-  const left = evaluateComparision((equality as ComparisionsAndOperator).left);
+  const left = evaluateComparision(
+    (equality as ComparisionsAndOperator).left,
+    environment,
+  );
   const right = evaluateComparision(
     (equality as ComparisionsAndOperator).right,
+    environment,
   );
   switch (op) {
     case OperatorForComparisions.BangEqual:
@@ -92,14 +106,23 @@ export function evaluateEquality(equality: Equality): Value {
   }
 }
 
-export function evaluateComparision(comparision: Comparision): Value {
+export function evaluateComparision(
+  comparision: Comparision,
+  environment: Environment,
+): Value {
   if (isInstanceOfTerm(comparision)) {
-    return evaluateTerm(comparision as Term);
+    return evaluateTerm(comparision as Term, environment);
   }
 
   const op = (comparision as TermsAndOperator).operator;
-  const left = evaluateTerm((comparision as TermsAndOperator).left);
-  const right = evaluateTerm((comparision as TermsAndOperator).right);
+  const left = evaluateTerm(
+    (comparision as TermsAndOperator).left,
+    environment,
+  );
+  const right = evaluateTerm(
+    (comparision as TermsAndOperator).right,
+    environment,
+  );
 
   if (left.type == ValueType.Number && right.type == ValueType.Number) {
     switch (op) {
@@ -126,17 +149,20 @@ export function evaluateComparision(comparision: Comparision): Value {
     }
   }
 
-  throw new InvalidComparision(left.value, op, right.value);
+  throw new InvalidComparisionError(left.value, op, right.value);
 }
 
-export function evaluateTerm(term: Term): Value {
+export function evaluateTerm(term: Term, environment: Environment): Value {
   if (isInstanceOfFanctor(term)) {
-    return evaluateFanctor(term as Fanctor);
+    return evaluateFanctor(term as Fanctor, environment);
   }
 
   const op = (term as FanctorsAndOperator).operator;
-  const left = evaluateFanctor((term as FanctorsAndOperator).left);
-  const right = evaluateFanctor((term as FanctorsAndOperator).right);
+  const left = evaluateFanctor((term as FanctorsAndOperator).left, environment);
+  const right = evaluateFanctor(
+    (term as FanctorsAndOperator).right,
+    environment,
+  );
 
   switch (op) {
     case OperatorForFanctors.Plus:
@@ -177,14 +203,20 @@ export function evaluateTerm(term: Term): Value {
   throw new InvalidTermError(left.value, op, right.value);
 }
 
-export function evaluateFanctor(fanctor: Fanctor): Value {
+export function evaluateFanctor(
+  fanctor: Fanctor,
+  environment: Environment,
+): Value {
   if (isInstanceOfUnary(fanctor)) {
-    return evaluateUnary(fanctor as Unary);
+    return evaluateUnary(fanctor as Unary, environment);
   }
 
   const op = (fanctor as UnariesAndOperator).operator;
-  const left = evaluateUnary((fanctor as UnariesAndOperator).left);
-  const right = evaluateUnary((fanctor as UnariesAndOperator).right);
+  const left = evaluateUnary((fanctor as UnariesAndOperator).left, environment);
+  const right = evaluateUnary(
+    (fanctor as UnariesAndOperator).right,
+    environment,
+  );
 
   switch (op) {
     case OperatorForUnaries.Star:
@@ -217,13 +249,13 @@ export function evaluateFanctor(fanctor: Fanctor): Value {
   throw new InvalidFanctorError(left.value, op, right.value);
 }
 
-export function evaluateUnary(unary: Unary): Value {
+export function evaluateUnary(unary: Unary, environment: Environment): Value {
   if (unary instanceof Primary) {
-    return evaluatePrimary(unary);
+    return evaluatePrimary(unary, environment);
   }
 
   const op = unary.operator;
-  const right = evaluateUnary(unary.right);
+  const right = evaluateUnary(unary.right, environment);
 
   switch (op) {
     case OperatorForUnary.Bang:
@@ -233,7 +265,10 @@ export function evaluateUnary(unary: Unary): Value {
   }
 }
 
-export function evaluatePrimary(primary: Primary): Value {
+export function evaluatePrimary(
+  primary: Primary,
+  environment: Environment,
+): Value {
   switch (primary.type) {
     case PrimaryType.Number:
       return new Value(ValueType.Number, primary.value as number);
@@ -245,7 +280,17 @@ export function evaluatePrimary(primary: Primary): Value {
       return new Value(ValueType.Boolean, false);
     case PrimaryType.Nil:
       return new Value(ValueType.Nil, null);
+    case PrimaryType.Identifier: {
+      const val = environment.get(primary.value as string);
+      if (val === undefined) {
+        throw new UndefinedVariableError(primary.value as string);
+      }
+      return val;
+    }
     case PrimaryType.Group:
-      return evaluateExpression((primary.value as Group).expression);
+      return evaluateExpression(
+        (primary.value as Group).expression,
+        environment,
+      );
   }
 }

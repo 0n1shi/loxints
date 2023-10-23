@@ -1,5 +1,6 @@
 
-.PHONY: test
+all:
+	deno compile --unstable --allow-read --output bin/lox main.ts
 
 test:
 	deno test src/
