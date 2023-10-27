@@ -3,6 +3,7 @@ import {
   Assignment,
   AssignmentWithIdentifier,
   AST,
+  Block,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -31,7 +32,6 @@ import {
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
-import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -71,12 +71,31 @@ export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
 
 export function makeStatement(tokens: Token[]): [Statement, Token[]] {
   const first = tokens[0];
+
+  // print statement
   if (first.type == TokenType.Print) {
     const otherTokens = tokens.slice(1); // consume "print"
     let [expression, leftTokens] = makeExpression(otherTokens);
     leftTokens = leftTokens.slice(1); // consume ";"
     return [new PrintStatement(expression), leftTokens];
   }
+
+  // block
+  if (first.type == TokenType.BraceLeft) {
+    let leftTokens = tokens.slice(1); // consume "{"
+    let nextToken = leftTokens[0];
+    const declarations: Declaration[] = [];
+    while (nextToken && nextToken.type != TokenType.BraceRight) {
+      let declaration: Declaration;
+      [declaration, leftTokens] = makeDeclaration(leftTokens);
+      declarations.push(declaration);
+      nextToken = leftTokens[0];
+    }
+    leftTokens = leftTokens.slice(1); // consume "}"
+    return [new Block(declarations), leftTokens];
+  }
+
+  // statement
   let [expression, leftTokens] = makeExpression(tokens);
   leftTokens = leftTokens.slice(1);
   return [new ExpressionStatement(expression), leftTokens];

@@ -5,14 +5,16 @@ program             -> declaration* EOF ;
 
 # declaration
 declaration         -> variableDeclaration
-                    | statement
+                    | statement ;
 variableDeclaration -> "var" IDENTIFIER ( "=" expression)? ";" ;
 
 # statement
 statement           -> expressionStatement
                     | printStatement
+                    | block ;
 expressionStatement -> expression ";" ;
 printStatement      -> "print" expression ";" ;
+block               -> "{" declaration* "}" ;
 
 # expression
 expression          -> assignment ;

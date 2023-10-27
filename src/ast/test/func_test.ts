@@ -14,6 +14,7 @@ import {
 import {
   Assignment,
   AssignmentWithIdentifier,
+  Block,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -40,8 +41,6 @@ import {
   VariableDeclaration,
 } from "../../ast/type.ts";
 import { Token, TokenType } from "../../token/type.ts";
-import { longest } from "https://deno.land/x/cliffy@v1.0.0-rc.3/table/_utils.ts";
-import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 Deno.test("Testing makeProgram()", async (t) => {
   type Test = {
@@ -227,6 +226,31 @@ Deno.test("Testing makeStatement()", async (t) => {
             new Primary(PrimaryType.Number, 5),
           ),
         ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: `{
+        var msg = "hello world"; 
+      }`,
+      input: {
+        tokens: [
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Var },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.String, value: "hello world" },
+          { type: TokenType.SemiColon },
+          { type: TokenType.BraceRight },
+        ],
+      },
+      expected: {
+        statment: new Block([
+          new VariableDeclaration(
+            "msg",
+            new Primary(PrimaryType.String, "hello world"),
+          ),
+        ]),
         leftTokens: [],
       },
     },

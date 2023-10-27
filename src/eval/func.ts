@@ -2,6 +2,7 @@ import {
   Assignment,
   AssignmentWithIdentifier,
   AST,
+  Block,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -42,7 +43,7 @@ import {
 } from "./util.ts";
 
 export function execute(ast: AST) {
-  const environment: Environment = new Map<string, Value>();
+  const environment: Environment = new Environment();
   return executeProgram(ast as Program, environment);
 }
 
@@ -68,6 +69,14 @@ export function evaluateStatement(
   statement: Statement,
   environment: Environment,
 ): Value {
+  if (statement instanceof Block) {
+    const env = new Environment(environment);
+    for (const declaration of statement.declarations) {
+      executeDeclaration(declaration, env);
+    }
+    return new Value(ValueType.Nil, null);
+  }
+
   const expr = evaluateExpression(statement.expression, environment);
   if (statement instanceof PrintStatement) {
     console.log(expr.value); // print

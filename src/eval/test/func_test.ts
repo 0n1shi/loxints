@@ -2,6 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
   Assignment,
   AssignmentWithIdentifier,
+  Block,
   Comparision,
   ComparisionsAndOperator,
   Equality,
@@ -15,11 +16,13 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
+  Statement,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
   Unary,
   UnaryWithOperator,
+  VariableDeclaration,
 } from "../../ast/type.ts";
 import { Environment, Value, ValueType } from "../type.ts";
 import {
@@ -28,9 +31,11 @@ import {
   evaluateEquality,
   evaluateFanctor,
   evaluatePrimary,
+  evaluateStatement,
   evaluateTerm,
   evaluateUnary,
 } from "../func.ts";
+import { assert } from "https://deno.land/std@0.198.0/assert/assert.ts";
 
 Deno.test("Testing evaluateAssignment()", async (t) => {
   type Test = {
@@ -85,7 +90,7 @@ Deno.test("Testing evaluateAssignment()", async (t) => {
   ];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Map<string, Value>();
+      const env: Environment = new Environment();
       env.set(test.expected.identifier, new Value(ValueType.Number, -1));
 
       evaluateAssignment(test.input, env);
@@ -142,7 +147,7 @@ Deno.test("Testing evaluateEquality()", async (t) => {
     expected: new Value(ValueType.Boolean, true),
   }];
   for (const test of tests) {
-    const env: Environment = new Map<string, Value>();
+    const env: Environment = new Environment();
     await t.step(test.name, () => {
       const val = evaluateEquality(test.input, env);
       assertEquals(val, test.expected);
@@ -191,7 +196,7 @@ Deno.test("Testing evaluateComparision()", async (t) => {
   }];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Map<string, Value>();
+      const env: Environment = new Environment();
       const val = evaluateComparision(test.input, env);
       assertEquals(val, test.expected);
     });
@@ -258,7 +263,7 @@ Deno.test("Testing evaluateTerm()", async (t) => {
   }];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Map<string, Value>();
+      const env: Environment = new Environment();
       const val = evaluateTerm(test.input, env);
       assertEquals(val, test.expected);
     });
@@ -329,7 +334,7 @@ Deno.test("Testing evaluateFanctor()", async (t) => {
   }];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Map<string, Value>();
+      const env: Environment = new Environment();
       const val = evaluateFanctor(test.input, env);
       assertEquals(val, test.expected);
     });
@@ -379,7 +384,7 @@ Deno.test("Testing evaluateUnary()", async (t) => {
   }];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Map<string, Value>();
+      const env: Environment = new Environment();
       const val = evaluateUnary(test.input, env);
       assertEquals(val, test.expected);
     });
@@ -429,7 +434,7 @@ Deno.test("Testing evaluateUnary()", async (t) => {
   }];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Map<string, Value>();
+      const env: Environment = new Environment();
       const val = evaluateUnary(test.input, env);
       assertEquals(val, test.expected);
     });
@@ -476,7 +481,7 @@ Deno.test("Testing evaluatePrimary()", async (t) => {
   }];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Map<string, Value>();
+      const env: Environment = new Environment();
       const val = evaluatePrimary(test.input, env);
       assertEquals(val, test.expected);
     });

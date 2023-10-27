@@ -29,21 +29,29 @@ export class VariableDeclaration {
 /**
  * Statement
  */
-export type Statement = ExpressionStatement | PrintStatement;
+export type Statement = ExpressionStatement | PrintStatement | Block;
 
 export class ExpressionStatement {
   expression: Expression;
 
-  constructor(e: Expression) {
-    this.expression = e;
+  constructor(expression: Expression) {
+    this.expression = expression;
   }
 }
 
 export class PrintStatement {
   expression: Expression;
 
-  constructor(e: Expression) {
-    this.expression = e;
+  constructor(expression: Expression) {
+    this.expression = expression;
+  }
+}
+
+export class Block {
+  declarations: Declaration[];
+
+  constructor(declarations: Declaration[]) {
+    this.declarations = declarations;
   }
 }
 

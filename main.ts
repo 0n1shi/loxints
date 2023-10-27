@@ -21,7 +21,7 @@ if (import.meta.main) {
   const interpret = new Command()
     .description("start interpreter")
     .action(() => {
-      const environment: Environment = new Map<string, Value>();
+      const environment = new Environment();
       while (true) {
         const sourceCode = prompt(">");
         if (sourceCode === null) continue;

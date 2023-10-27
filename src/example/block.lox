@@ -1,0 +1,7 @@
+var msg1 = "msg 1";
+print msg1;
+{
+  var msg1 = "msg 1 in block";
+  print msg1;
+}
+print msg1;
