@@ -1,0 +1,5 @@
+var msg = "msg";
+{
+  print msg;
+}
+print msg;
