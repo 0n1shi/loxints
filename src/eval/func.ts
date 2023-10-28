@@ -8,10 +8,10 @@ import {
   Declaration,
   Equality,
   Expression,
-  ExpressionStatement,
   Fanctor,
   FanctorsAndOperator,
   Group,
+  IfStatement,
   OperatorForComparisions,
   OperatorForFanctors,
   OperatorForTerms,
@@ -69,6 +69,15 @@ export function evaluateStatement(
   statement: Statement,
   environment: Environment,
 ): Value {
+  if (statement instanceof IfStatement) {
+    const val = evaluateExpression(statement.expression, environment);
+    if (val.value) {
+      evaluateStatement(statement.trueStatement, environment);
+    } else if (statement.falseStatement) {
+      evaluateStatement(statement.falseStatement, environment);
+    }
+    return new Value(ValueType.Nil, null);
+  }
   if (statement instanceof Block) {
     const env = new Environment(environment);
     for (const declaration of statement.declarations) {

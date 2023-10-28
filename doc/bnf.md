@@ -10,9 +10,11 @@ variableDeclaration -> "var" IDENTIFIER ( "=" expression)? ";" ;
 
 # statement
 statement           -> expressionStatement
+                    | ifStatement
                     | printStatement
                     | block ;
 expressionStatement -> expression ";" ;
+ifStatement         -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStatement      -> "print" expression ";" ;
 block               -> "{" declaration* "}" ;
 

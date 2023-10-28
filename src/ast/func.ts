@@ -13,6 +13,7 @@ import {
   Fanctor,
   FanctorsAndOperator,
   Group,
+  IfStatement,
   OperatorForComparisions,
   OperatorForFanctors,
   OperatorForTerms,
@@ -80,6 +81,28 @@ export function makeStatement(tokens: Token[]): [Statement, Token[]] {
     return [new PrintStatement(expression), leftTokens];
   }
 
+  // if statement
+  if (first.type == TokenType.If) {
+    const otherTokens = tokens.slice(2); // consume "if" and "("
+    let [expression, leftTokens] = makeExpression(otherTokens);
+    leftTokens = leftTokens.slice(1); // consume ")";
+
+    let trueStatement: Statement;
+    [trueStatement, leftTokens] = makeStatement(leftTokens); // true statement
+
+    const nextToken = leftTokens[0];
+    let falseStatement: Statement | undefined = undefined;
+    if (nextToken && nextToken.type == TokenType.Else) {
+      leftTokens = leftTokens.slice(1); // consume "else"
+      [falseStatement, leftTokens] = makeStatement(leftTokens);
+    }
+
+    return [
+      new IfStatement(expression, trueStatement, falseStatement),
+      leftTokens,
+    ];
+  }
+
   // block
   if (first.type == TokenType.BraceLeft) {
     let leftTokens = tokens.slice(1); // consume "{"
@@ -95,7 +118,7 @@ export function makeStatement(tokens: Token[]): [Statement, Token[]] {
     return [new Block(declarations), leftTokens];
   }
 
-  // statement
+  // expression statement
   let [expression, leftTokens] = makeExpression(tokens);
   leftTokens = leftTokens.slice(1);
   return [new ExpressionStatement(expression), leftTokens];

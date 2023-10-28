@@ -23,6 +23,7 @@ import {
   Fanctor,
   FanctorsAndOperator,
   Group,
+  IfStatement,
   OperatorForComparisions,
   OperatorForFanctors,
   OperatorForTerms,
@@ -251,6 +252,39 @@ Deno.test("Testing makeStatement()", async (t) => {
             new Primary(PrimaryType.String, "hello world"),
           ),
         ]),
+        leftTokens: [],
+      },
+    },
+    {
+      name: `if (true) {
+        msg = "hello world"; 
+      }`,
+      input: {
+        tokens: [
+          { type: TokenType.If },
+          { type: TokenType.ParenLeft },
+          { type: TokenType.True },
+          { type: TokenType.ParenRight },
+          { type: TokenType.BraceLeft },
+          { type: TokenType.Identifier, value: "msg" },
+          { type: TokenType.Equal },
+          { type: TokenType.String, value: "hello world" },
+          { type: TokenType.SemiColon },
+          { type: TokenType.BraceRight },
+        ],
+      },
+      expected: {
+        statment: new IfStatement(
+          new Primary(PrimaryType.True),
+          new Block([
+            new ExpressionStatement(
+              new AssignmentWithIdentifier(
+                "msg",
+                new Primary(PrimaryType.String, "hello world"),
+              ),
+            ),
+          ]),
+        ),
         leftTokens: [],
       },
     },

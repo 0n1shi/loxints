@@ -29,13 +29,33 @@ export class VariableDeclaration {
 /**
  * Statement
  */
-export type Statement = ExpressionStatement | PrintStatement | Block;
+export type Statement =
+  | ExpressionStatement
+  | IfStatement
+  | PrintStatement
+  | Block;
 
 export class ExpressionStatement {
   expression: Expression;
 
   constructor(expression: Expression) {
     this.expression = expression;
+  }
+}
+
+export class IfStatement {
+  expression: Expression;
+  trueStatement: Statement;
+  falseStatement?: Statement;
+
+  constructor(
+    expression: Expression,
+    trueStatement: Statement,
+    falseStatement?: Statement,
+  ) {
+    this.expression = expression;
+    this.trueStatement = trueStatement;
+    this.falseStatement = falseStatement;
   }
 }
 
