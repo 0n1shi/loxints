@@ -1,0 +1,7 @@
+if (true) {
+  if (false) {
+    print "true -> true";
+  } else {
+    print "true -> false";
+  }
+}
