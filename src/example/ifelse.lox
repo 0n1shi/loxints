@@ -1,0 +1,7 @@
+var msg = "";
+if (1 + 1 < 1) {
+  msg = "hello world (true)";
+} else {
+  msg = "hello world (false)";
+}
+print msg;

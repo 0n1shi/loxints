@@ -35,7 +35,6 @@ import {
   evaluateTerm,
   evaluateUnary,
 } from "../func.ts";
-import { assert } from "https://deno.land/std@0.198.0/assert/assert.ts";
 
 Deno.test("Testing evaluateAssignment()", async (t) => {
   type Test = {
@@ -91,7 +90,7 @@ Deno.test("Testing evaluateAssignment()", async (t) => {
   for (const test of tests) {
     await t.step(test.name, () => {
       const env: Environment = new Environment();
-      env.set(test.expected.identifier, new Value(ValueType.Number, -1));
+      env.put(test.expected.identifier, new Value(ValueType.Number, -1));
 
       evaluateAssignment(test.input, env);
 

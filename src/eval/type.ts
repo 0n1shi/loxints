@@ -1,3 +1,5 @@
+import { UndefinedVariableError } from "./error.ts";
+
 export enum ValueType {
   String = "[string]",
   Number = "[number]",
@@ -40,8 +42,21 @@ export class Environment {
     return undefined;
   }
 
-  set(key: string, value: Value): Environment {
+  add(key: string, value: Value): Environment {
     this.variables.set(key, value);
     return this;
+  }
+
+  put(key: string, value: Value): Environment {
+    if (this.variables.has(key)) {
+      this.variables.set(key, value);
+      return this;
+    }
+    if (this.parent) {
+      this.parent.put(key, value);
+      return this;
+    }
+
+    throw new UndefinedVariableError(key);
   }
 }

@@ -59,7 +59,7 @@ export function executeDeclaration(
 ): Value {
   if (declaration instanceof VariableDeclaration) {
     const val = evaluateExpression(declaration.expression!, environment);
-    environment.set(declaration.identifier, val);
+    environment.add(declaration.identifier, val);
     return new Value(ValueType.Nil, null);
   }
   return evaluateStatement(declaration as Statement, environment);
@@ -110,7 +110,7 @@ export function evaluateAssignment(
       throw new UndefinedVariableError(assignment.identifier);
     }
     const val = evaluateAssignment(assignment.assignment, environment);
-    environment.set(assignment.identifier, val);
+    environment.put(assignment.identifier, val);
     return val;
   }
   return evaluateEquality(assignment as Equality, environment);
