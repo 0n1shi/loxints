@@ -21,7 +21,9 @@ block               -> "{" declaration* "}" ;
 # expression
 expression          -> assignment ;
 assignment          -> IDENTIFIER "=" assignment
-                    | equality ;
+                    | logic_or ;
+logic_or            -> logic_and ( "or" logic_and )* ;
+logic_and           -> equality ( "and" equality )* ;
 equality            -> comparision ( ("!=" | "==") comparision )* ;
 comparision         -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term                -> fanctor ( ( "-" | "+" ) fanctor )* ;

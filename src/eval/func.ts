@@ -6,12 +6,16 @@ import {
   Comparision,
   ComparisionsAndOperator,
   Declaration,
+  EqualitiesWithAnd,
   Equality,
   Expression,
   Fanctor,
   FanctorsAndOperator,
   Group,
   IfStatement,
+  LogicAnd,
+  LogicAndsWithOr,
+  LogicOr,
   OperatorForComparisions,
   OperatorForFanctors,
   OperatorForTerms,
@@ -41,6 +45,7 @@ import {
   isInstanceOfTerm,
   isInstanceOfUnary,
 } from "./util.ts";
+import { DuplicateEnvVarError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 export function execute(ast: AST) {
   const environment: Environment = new Environment();
@@ -113,7 +118,31 @@ export function evaluateAssignment(
     environment.put(assignment.identifier, val);
     return val;
   }
-  return evaluateEquality(assignment as Equality, environment);
+  return evaluateLogicOr(assignment as Equality, environment);
+}
+
+export function evaluateLogicOr(
+  logicOr: LogicOr,
+  environment: Environment,
+) {
+  if (logicOr instanceof LogicAndsWithOr) {
+    const left = evaluateLogicAnd(logicOr.left, environment);
+    const right = evaluateLogicAnd(logicOr.right, environment);
+    return new Value(ValueType.Boolean, left.value || right.value);
+  }
+  return evaluateLogicAnd(logicOr, environment);
+}
+
+export function evaluateLogicAnd(
+  logicAnd: LogicAnd,
+  environment: Environment,
+) {
+  if (logicAnd instanceof EqualitiesWithAnd) {
+    const left = evaluateEquality(logicAnd.left, environment);
+    const right = evaluateEquality(logicAnd.right, environment);
+    return new Value(ValueType.Boolean, left.value && right.value);
+  }
+  return evaluateEquality(logicAnd, environment);
 }
 
 export function evaluateEquality(
@@ -135,9 +164,9 @@ export function evaluateEquality(
   );
   switch (op) {
     case OperatorForComparisions.BangEqual:
-      return new Value(ValueType.Boolean, left.value !== right.value);
+      return new Value(ValueType.Boolean, left.value != right.value);
     case OperatorForComparisions.EqualEqual:
-      return new Value(ValueType.Boolean, left.value === right.value);
+      return new Value(ValueType.Boolean, left.value == right.value);
   }
 }
 

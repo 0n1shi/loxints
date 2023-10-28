@@ -7,6 +7,7 @@ import {
   Comparision,
   ComparisionsAndOperator,
   Declaration,
+  EqualitiesWithAnd,
   Equality,
   Expression,
   ExpressionStatement,
@@ -14,6 +15,9 @@ import {
   FanctorsAndOperator,
   Group,
   IfStatement,
+  LogicAnd,
+  LogicAndsWithOr,
+  LogicOr,
   OperatorForComparisions,
   OperatorForFanctors,
   OperatorForTerms,
@@ -142,7 +146,53 @@ export function makeAssignment(tokens: Token[]): [Assignment, Token[]] {
     ];
   }
 
-  return makeEquality(tokens);
+  return makeLogicOr(tokens);
+}
+
+export function makeLogicOr(tokens: Token[]): [LogicOr, Token[]] {
+  let logicOr: LogicOr;
+  let leftTokens: Token[];
+  [logicOr, leftTokens] = makeLogicAnd(tokens);
+
+  if (leftTokens.length == 0) return [logicOr, leftTokens];
+
+  let nextToken = leftTokens[0];
+  while (nextToken.type == TokenType.Or) {
+    leftTokens = leftTokens.slice(1); // consume "or"
+
+    let right: LogicAnd;
+    [right, leftTokens] = makeLogicAnd(leftTokens);
+
+    logicOr = new LogicAndsWithOr(logicOr as LogicAnd, right);
+
+    if (leftTokens.length == 0) break;
+    else nextToken = leftTokens[0];
+  }
+
+  return [logicOr, leftTokens];
+}
+
+export function makeLogicAnd(tokens: Token[]): [LogicAnd, Token[]] {
+  let logicAnd: LogicAnd;
+  let leftTokens: Token[];
+  [logicAnd, leftTokens] = makeEquality(tokens);
+
+  if (leftTokens.length == 0) return [logicAnd, leftTokens];
+
+  let nextToken = leftTokens[0];
+  while (nextToken.type == TokenType.And) {
+    leftTokens = leftTokens.slice(1); // consume "and"
+
+    let right: Equality;
+    [right, leftTokens] = makeEquality(leftTokens);
+
+    logicAnd = new EqualitiesWithAnd(logicAnd as Equality, right);
+
+    if (leftTokens.length == 0) break;
+    else nextToken = leftTokens[0];
+  }
+
+  return [logicAnd, leftTokens];
 }
 
 export function makeEquality(tokens: Token[]): [Equality, Token[]] {

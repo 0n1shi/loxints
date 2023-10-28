@@ -1,0 +1,9 @@
+if (true and true) {
+  print("true or true");
+}
+if (true and false) {
+  print("true or true");
+}
+if (false and false) {
+  print("false or false");
+}

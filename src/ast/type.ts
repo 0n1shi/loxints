@@ -80,7 +80,28 @@ export class Block {
  */
 export type Expression = Assignment;
 
-export type Assignment = AssignmentWithIdentifier | Equality;
+export type Assignment = AssignmentWithIdentifier | LogicOr;
+
+export type LogicOr = LogicAnd | LogicAndsWithOr;
+export class LogicAndsWithOr {
+  left: LogicAnd;
+  right: LogicAnd;
+
+  constructor(left: LogicAnd, right: LogicAnd) {
+    this.left = left;
+    this.right = right;
+  }
+}
+export type LogicAnd = Equality | EqualitiesWithAnd;
+export class EqualitiesWithAnd {
+  left: Equality;
+  right: Equality;
+
+  constructor(left: Equality, right: Equality) {
+    this.left = left;
+    this.right = right;
+  }
+}
 
 export class AssignmentWithIdentifier {
   identifier: string;

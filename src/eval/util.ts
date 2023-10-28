@@ -22,4 +22,3 @@ export function isInstanceOfTerm(v: any): boolean {
 export function isInstanceOfComparision(v: any): boolean {
   return v instanceof TermsAndOperator || isInstanceOfTerm(v);
 }
-
