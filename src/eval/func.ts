@@ -31,6 +31,7 @@ import {
   UnariesAndOperator,
   Unary,
   VariableDeclaration,
+  WhileStatement,
 } from "../ast/type.ts";
 import { Environment, Value, ValueType } from "./type.ts";
 import {
@@ -45,7 +46,7 @@ import {
   isInstanceOfTerm,
   isInstanceOfUnary,
 } from "./util.ts";
-import { DuplicateEnvVarError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
+import { EnumType } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 
 export function execute(ast: AST) {
   const environment: Environment = new Environment();
@@ -80,6 +81,12 @@ export function evaluateStatement(
       evaluateStatement(statement.trueStatement, environment);
     } else if (statement.falseStatement) {
       evaluateStatement(statement.falseStatement, environment);
+    }
+    return new Value(ValueType.Nil, null);
+  }
+  if (statement instanceof WhileStatement) {
+    while (evaluateExpression(statement.expression, environment).value) {
+      evaluateStatement(statement.statement, environment);
     }
     return new Value(ValueType.Nil, null);
   }

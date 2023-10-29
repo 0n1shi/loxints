@@ -12,10 +12,12 @@ variableDeclaration -> "var" IDENTIFIER ( "=" expression)? ";" ;
 statement           -> expressionStatement
                     | ifStatement
                     | printStatement
+                    | whileStatement
                     | block ;
 expressionStatement -> expression ";" ;
 ifStatement         -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStatement      -> "print" expression ";" ;
+whileStatement      -> "while" "(" expression ")" statement ;
 block               -> "{" declaration* "}" ;
 
 # expression

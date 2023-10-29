@@ -16,13 +16,11 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
-  Statement,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
   Unary,
   UnaryWithOperator,
-  VariableDeclaration,
 } from "../../ast/type.ts";
 import { Environment, Value, ValueType } from "../type.ts";
 import {
@@ -31,7 +29,6 @@ import {
   evaluateEquality,
   evaluateFanctor,
   evaluatePrimary,
-  evaluateStatement,
   evaluateTerm,
   evaluateUnary,
 } from "../func.ts";
@@ -89,8 +86,8 @@ Deno.test("Testing evaluateAssignment()", async (t) => {
   ];
   for (const test of tests) {
     await t.step(test.name, () => {
-      const env: Environment = new Environment();
-      env.put(test.expected.identifier, new Value(ValueType.Number, -1));
+      const env = new Environment();
+      env.add(test.expected.identifier, new Value(ValueType.Number, -1));
 
       evaluateAssignment(test.input, env);
 

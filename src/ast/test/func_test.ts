@@ -7,23 +7,19 @@ import {
   makeFanctor,
   makePrimary,
   makeProgram,
-  makeStatement,
   makeTerm,
   makeUnary,
 } from "../../ast/func.ts";
 import {
   Assignment,
   AssignmentWithIdentifier,
-  Block,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
   Equality,
-  ExpressionStatement,
   Fanctor,
   FanctorsAndOperator,
   Group,
-  IfStatement,
   OperatorForComparisions,
   OperatorForFanctors,
   OperatorForTerms,
@@ -33,7 +29,6 @@ import {
   PrimaryType,
   PrintStatement,
   Program,
-  Statement,
   Term,
   TermsAndOperator,
   UnariesAndOperator,
@@ -170,219 +165,6 @@ Deno.test("Testing makeDeclaration()", async (t) => {
     await t.step(test.name, () => {
       const [statment, leftTokens] = makeDeclaration(test.input.tokens);
       assertEquals(statment, test.expected.declaration);
-      assertEquals(leftTokens, test.expected.leftTokens);
-    });
-  }
-});
-
-Deno.test("Testing makeStatement()", async (t) => {
-  type Test = {
-    name: string;
-    input: {
-      tokens: Token[];
-    };
-    expected: {
-      statment: Statement;
-      leftTokens: Token[];
-    };
-  };
-  const tests: Test[] = [
-    {
-      name: "print 10 + 5;",
-      input: {
-        tokens: [
-          { type: TokenType.Print },
-          { type: TokenType.Number, value: 10 },
-          { type: TokenType.Plus },
-          { type: TokenType.Number, value: 5 },
-          { type: TokenType.SemiColon },
-        ],
-      },
-      expected: {
-        statment: new PrintStatement(
-          new FanctorsAndOperator(
-            new Primary(PrimaryType.Number, 10),
-            OperatorForFanctors.Plus,
-            new Primary(PrimaryType.Number, 5),
-          ),
-        ),
-        leftTokens: [],
-      },
-    },
-    {
-      name: "10 + 5;",
-      input: {
-        tokens: [
-          { type: TokenType.Number, value: 10 },
-          { type: TokenType.Plus },
-          { type: TokenType.Number, value: 5 },
-          { type: TokenType.SemiColon },
-        ],
-      },
-      expected: {
-        statment: new ExpressionStatement(
-          new FanctorsAndOperator(
-            new Primary(PrimaryType.Number, 10),
-            OperatorForFanctors.Plus,
-            new Primary(PrimaryType.Number, 5),
-          ),
-        ),
-        leftTokens: [],
-      },
-    },
-    {
-      name: `{
-        var msg = "hello world"; 
-      }`,
-      input: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Var },
-          { type: TokenType.Identifier, value: "msg" },
-          { type: TokenType.Equal },
-          { type: TokenType.String, value: "hello world" },
-          { type: TokenType.SemiColon },
-          { type: TokenType.BraceRight },
-        ],
-      },
-      expected: {
-        statment: new Block([
-          new VariableDeclaration(
-            "msg",
-            new Primary(PrimaryType.String, "hello world"),
-          ),
-        ]),
-        leftTokens: [],
-      },
-    },
-    {
-      name: `if (true) {
-        msg = "hello world"; 
-      }`,
-      input: {
-        tokens: [
-          { type: TokenType.If },
-          { type: TokenType.ParenLeft },
-          { type: TokenType.True },
-          { type: TokenType.ParenRight },
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Identifier, value: "msg" },
-          { type: TokenType.Equal },
-          { type: TokenType.String, value: "hello world" },
-          { type: TokenType.SemiColon },
-          { type: TokenType.BraceRight },
-        ],
-      },
-      expected: {
-        statment: new IfStatement(
-          new Primary(PrimaryType.True),
-          new Block([
-            new ExpressionStatement(
-              new AssignmentWithIdentifier(
-                "msg",
-                new Primary(PrimaryType.String, "hello world"),
-              ),
-            ),
-          ]),
-        ),
-        leftTokens: [],
-      },
-    },
-  ];
-  for (const test of tests) {
-    await t.step(test.name, () => {
-      const [statment, leftTokens] = makeStatement(test.input.tokens);
-      assertEquals(statment, test.expected.statment);
-      assertEquals(leftTokens, test.expected.leftTokens);
-    });
-  }
-});
-
-Deno.test("Testing makeAssignment()", async (t) => {
-  type Test = {
-    name: string;
-    input: {
-      tokens: Token[];
-    };
-    expected: {
-      assignment: Assignment;
-      leftTokens: Token[];
-    };
-  };
-  const tests: Test[] = [
-    {
-      name: "a = 10",
-      input: {
-        tokens: [
-          { type: TokenType.Identifier, value: "a" },
-          { type: TokenType.Equal },
-          { type: TokenType.Number, value: 10 },
-        ],
-      },
-      expected: {
-        assignment: new AssignmentWithIdentifier(
-          "a",
-          new Primary(PrimaryType.Number, 10),
-        ),
-        leftTokens: [],
-      },
-    },
-    {
-      name: "a = -10",
-      input: {
-        tokens: [
-          { type: TokenType.Identifier, value: "a" },
-          { type: TokenType.Equal },
-          { type: TokenType.Minus },
-          { type: TokenType.Number, value: 10 },
-        ],
-      },
-      expected: {
-        assignment: new AssignmentWithIdentifier(
-          "a",
-          new UnaryWithOperator(
-            OperatorForUnary.Minus,
-            new Primary(PrimaryType.Number, 10),
-          ),
-        ),
-        leftTokens: [],
-      },
-    },
-    {
-      name: "a = (1 == 1)",
-      input: {
-        tokens: [
-          { type: TokenType.Identifier, value: "a" },
-          { type: TokenType.Equal },
-          { type: TokenType.ParenLeft },
-          { type: TokenType.Number, value: 1 },
-          { type: TokenType.EqualEqual },
-          { type: TokenType.Number, value: 1 },
-          { type: TokenType.ParenRight },
-        ],
-      },
-      expected: {
-        assignment: new AssignmentWithIdentifier(
-          "a",
-          new Primary(
-            PrimaryType.Group,
-            new Group(
-              new ComparisionsAndOperator(
-                new Primary(PrimaryType.Number, 1),
-                OperatorForComparisions.EqualEqual,
-                new Primary(PrimaryType.Number, 1),
-              ),
-            ),
-          ),
-        ),
-        leftTokens: [],
-      },
-    },
-  ];
-  for (const test of tests) {
-    await t.step(test.name, () => {
-      const [equality, leftTokens] = makeAssignment(test.input.tokens);
-      assertEquals(equality, test.expected.assignment);
       assertEquals(leftTokens, test.expected.leftTokens);
     });
   }

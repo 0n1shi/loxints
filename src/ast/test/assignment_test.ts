@@ -5,10 +5,13 @@ import {
   AssignmentWithIdentifier,
   ComparisionsAndOperator,
   EqualitiesWithAnd,
+  Group,
   LogicAndsWithOr,
   OperatorForComparisions,
+  OperatorForUnary,
   Primary,
   PrimaryType,
+  UnaryWithOperator,
 } from "../../ast/type.ts";
 import { Token, TokenType } from "../../token/type.ts";
 
@@ -24,6 +27,74 @@ Deno.test("Testing makeAssignment()", async (t) => {
     };
   };
   const tests: Test[] = [
+    {
+      name: "a = 10",
+      input: {
+        tokens: [
+          { type: TokenType.Identifier, value: "a" },
+          { type: TokenType.Equal },
+          { type: TokenType.Number, value: 10 },
+        ],
+      },
+      expected: {
+        assignment: new AssignmentWithIdentifier(
+          "a",
+          new Primary(PrimaryType.Number, 10),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "a = -10",
+      input: {
+        tokens: [
+          { type: TokenType.Identifier, value: "a" },
+          { type: TokenType.Equal },
+          { type: TokenType.Minus },
+          { type: TokenType.Number, value: 10 },
+        ],
+      },
+      expected: {
+        assignment: new AssignmentWithIdentifier(
+          "a",
+          new UnaryWithOperator(
+            OperatorForUnary.Minus,
+            new Primary(PrimaryType.Number, 10),
+          ),
+        ),
+        leftTokens: [],
+      },
+    },
+    {
+      name: "a = (1 == 1)",
+      input: {
+        tokens: [
+          { type: TokenType.Identifier, value: "a" },
+          { type: TokenType.Equal },
+          { type: TokenType.ParenLeft },
+          { type: TokenType.Number, value: 1 },
+          { type: TokenType.EqualEqual },
+          { type: TokenType.Number, value: 1 },
+          { type: TokenType.ParenRight },
+        ],
+      },
+      expected: {
+        assignment: new AssignmentWithIdentifier(
+          "a",
+          new Primary(
+            PrimaryType.Group,
+            new Group(
+              new ComparisionsAndOperator(
+                new Primary(PrimaryType.Number, 1),
+                OperatorForComparisions.EqualEqual,
+                new Primary(PrimaryType.Number, 1),
+              ),
+            ),
+          ),
+        ),
+        leftTokens: [],
+      },
+    },
     {
       name: "val = 1 == 1 and 2 == 2",
       input: {

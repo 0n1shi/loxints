@@ -34,9 +34,11 @@ import {
   Unary,
   UnaryWithOperator,
   VariableDeclaration,
+  WhileStatement,
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
+import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -103,6 +105,22 @@ export function makeStatement(tokens: Token[]): [Statement, Token[]] {
 
     return [
       new IfStatement(expression, trueStatement, falseStatement),
+      leftTokens,
+    ];
+  }
+
+  // while statement
+  if (first.type == TokenType.While) {
+    let leftTokens = tokens.slice(2); // consume "while" and "("
+    let expression: Expression;
+    [expression, leftTokens] = makeExpression(leftTokens);
+    leftTokens = leftTokens.slice(1); // consume ")"
+
+    let statement: Statement;
+    [statement, leftTokens] = makeStatement(leftTokens);
+
+    return [
+      new WhileStatement(expression, statement),
       leftTokens,
     ];
   }

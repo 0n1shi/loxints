@@ -67,6 +67,16 @@ export class PrintStatement {
   }
 }
 
+export class WhileStatement {
+  expression: Expression;
+  statement: Statement;
+
+  constructor(expression: Expression, statement: Statement) {
+    this.expression = expression;
+    this.statement = statement;
+  }
+}
+
 export class Block {
   declarations: Declaration[];
 
