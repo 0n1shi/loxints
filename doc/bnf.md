@@ -10,11 +10,13 @@ variableDeclaration -> "var" IDENTIFIER ( "=" expression)? ";" ;
 
 # statement
 statement           -> expressionStatement
+                    | forStatement
                     | ifStatement
                     | printStatement
                     | whileStatement
                     | block ;
 expressionStatement -> expression ";" ;
+forStatement        -> "for" "(" ( variableDeclaration | expressionStatement | ";" ) expression?  ";" expression? ")" statement ;
 ifStatement         -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStatement      -> "print" expression ";" ;
 whileStatement      -> "while" "(" expression ")" statement ;

@@ -31,6 +31,7 @@ export class VariableDeclaration {
  */
 export type Statement =
   | ExpressionStatement
+  // | ForStatement
   | IfStatement
   | PrintStatement
   | Block;
@@ -40,6 +41,22 @@ export class ExpressionStatement {
 
   constructor(expression: Expression) {
     this.expression = expression;
+  }
+}
+
+export class ForStatement {
+  initializer?: VariableDeclaration | ExpressionStatement;
+  condition?: Expression;
+  iteration?: Expression;
+
+  constructor(
+    initializer?: VariableDeclaration | ExpressionStatement,
+    condition?: Expression,
+    iteration?: Expression,
+  ) {
+    this.initializer = initializer;
+    this.condition = condition;
+    this.iteration = iteration;
   }
 }
 

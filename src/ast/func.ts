@@ -37,8 +37,7 @@ import {
   WhileStatement,
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
-import { InvalidPrimaryError } from "./error.ts";
-import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
+import { InvalidPrimaryError, InvalidVariableDeclaration } from "./error.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -59,21 +58,32 @@ export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
 
   // variable declaration
   if (first.type == TokenType.Var) {
-    const identifider = tokens[1].value as string; // must be variable name
-    let leftTokens = tokens.slice(2); // consume "VAR" and [IDENTIFIER]
-    const nextToken = leftTokens[0];
-
-    // with initial value
-    let expression: Expression | undefined = undefined;
-    if (nextToken !== undefined && nextToken.type == TokenType.Equal) {
-      leftTokens = leftTokens.slice(1); // consume "="
-      [expression, leftTokens] = makeExpression(leftTokens);
-      leftTokens = leftTokens.slice(1); // consume ";"
-    }
-    return [new VariableDeclaration(identifider, expression), leftTokens];
+    return variableDeclaration(tokens);
   }
 
   return makeStatement(tokens);
+}
+
+export function variableDeclaration(
+  tokens: Token[],
+): [VariableDeclaration, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "var"
+
+  const identifider = leftTokens[0].value as string; // must be variable name
+  leftTokens = leftTokens.slice(1); // consume "[identifider]"
+
+  const nextToken = leftTokens[0];
+  if (nextToken.type == TokenType.Equal) {
+    leftTokens = leftTokens.slice(1); //  consume "="
+
+    let expression: Expression;
+    [expression, leftTokens] = makeExpression(leftTokens);
+    leftTokens = leftTokens.slice(1); // consume ";"
+
+    return [new VariableDeclaration(identifider, expression), leftTokens];
+  }
+
+  return [new VariableDeclaration(identifider), leftTokens];
 }
 
 export function makeStatement(tokens: Token[]): [Statement, Token[]] {
@@ -86,6 +96,21 @@ export function makeStatement(tokens: Token[]): [Statement, Token[]] {
     leftTokens = leftTokens.slice(1); // consume ";"
     return [new PrintStatement(expression), leftTokens];
   }
+
+  // for statement
+  // if (first.type == TokenType.For) {
+  //   let leftTokens = tokens.slice(2); // consume "for" and "("
+  //   let initializer: VariableDeclaration | ExpressionStatement | undefined =
+  //     undefined;
+
+  //   const nextToken = leftTokens[0];
+  //   switch (nextToken.type) {
+  //     case TokenType.SemiColon:
+  //       break; // no initializer
+  //     case TokenType.Var:
+  //       [initializer, leftTokens] = makeDeclaration(leftTokens);
+  //   }
+  // }
 
   // if statement
   if (first.type == TokenType.If) {

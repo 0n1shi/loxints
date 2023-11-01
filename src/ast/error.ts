@@ -5,3 +5,9 @@ export class InvalidPrimaryError extends Error {
     super(`Invalid Primary ${token.type}:${token.value}`);
   }
 }
+
+export class InvalidVariableDeclaration extends Error {
+  public constructor(token: Token) {
+    super(`Invalid Variable Declaration ${token.type}:${token.value}`);
+  }
+}
