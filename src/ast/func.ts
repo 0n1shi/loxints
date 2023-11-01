@@ -73,7 +73,7 @@ export function variableDeclaration(
   leftTokens = leftTokens.slice(1); // consume "[identifider]"
 
   const nextToken = leftTokens[0];
-  if (nextToken.type == TokenType.Equal) {
+  if (nextToken && nextToken.type == TokenType.Equal) {
     leftTokens = leftTokens.slice(1); //  consume "="
 
     let expression: Expression;
