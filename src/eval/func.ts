@@ -46,7 +46,6 @@ import {
   isInstanceOfTerm,
   isInstanceOfUnary,
 } from "./util.ts";
-import { EnumType } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 
 export function execute(ast: AST) {
   const environment: Environment = new Environment();

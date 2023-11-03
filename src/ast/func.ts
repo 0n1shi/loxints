@@ -13,6 +13,7 @@ import {
   ExpressionStatement,
   Fanctor,
   FanctorsAndOperator,
+  ForStatement,
   Group,
   IfStatement,
   LogicAnd,
@@ -38,6 +39,7 @@ import {
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError, InvalidVariableDeclaration } from "./error.ts";
+import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -58,13 +60,13 @@ export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
 
   // variable declaration
   if (first.type == TokenType.Var) {
-    return variableDeclaration(tokens);
+    return makeVariableDeclaration(tokens);
   }
 
   return makeStatement(tokens);
 }
 
-export function variableDeclaration(
+export function makeVariableDeclaration(
   tokens: Token[],
 ): [VariableDeclaration, Token[]] {
   let leftTokens = tokens.slice(1); // consume "var"
@@ -86,89 +88,138 @@ export function variableDeclaration(
   return [new VariableDeclaration(identifider), leftTokens];
 }
 
+export function makePrintStatement(tokens: Token[]): [PrintStatement, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "print"
+  let expression: Expression;
+  [expression, leftTokens] = makeExpression(leftTokens);
+  leftTokens = leftTokens.slice(1); // consume ";"
+  return [new PrintStatement(expression), leftTokens];
+}
+
+export function makeForStatement(tokens: Token[]): [ForStatement, Token[]] {
+  let leftTokens = tokens.slice(2); // consume "for" and "("
+
+  let initializer: VariableDeclaration | ExpressionStatement | undefined =
+    undefined;
+  let nextToken = leftTokens[0];
+  if (nextToken && nextToken.type != TokenType.SemiColon) { // has initializer
+    if (nextToken && nextToken.type == TokenType.Var) {
+      [initializer, leftTokens] = makeVariableDeclaration(leftTokens);
+    } else {
+      [initializer, leftTokens] = makeExpressionStatement(leftTokens);
+    }
+  } else {
+    leftTokens = leftTokens.slice(1); // consume ";"
+  }
+
+  let condition: Expression | undefined = undefined;
+  nextToken = leftTokens[0];
+  if (nextToken && nextToken.type != TokenType.SemiColon) {
+    [condition, leftTokens] = makeExpression(leftTokens);
+  } else {
+    leftTokens = leftTokens.slice(1); // consume ";"
+  }
+
+  let iteration: Expression | undefined = undefined;
+  nextToken = leftTokens[0];
+  if (nextToken && nextToken.type != TokenType.ParenRight) {
+    [iteration, leftTokens] = makeExpression(leftTokens);
+  }
+
+  leftTokens = leftTokens.slice(1); // consume ")"
+
+  return [new ForStatement(initializer, condition, iteration), leftTokens];
+}
+
+export function makeIfStatement(tokens: Token[]): [IfStatement, Token[]] {
+  let leftTokens = tokens.slice(2); // consume "if" and "("
+  let expression: Expression;
+  [expression, leftTokens] = makeExpression(leftTokens);
+  leftTokens = leftTokens.slice(1); // consume ")";
+
+  let trueStatement: Statement;
+  [trueStatement, leftTokens] = makeStatement(leftTokens); // true statement
+
+  const nextToken = leftTokens[0];
+  let falseStatement: Statement | undefined = undefined;
+  if (nextToken && nextToken.type == TokenType.Else) {
+    leftTokens = leftTokens.slice(1); // consume "else"
+    [falseStatement, leftTokens] = makeStatement(leftTokens);
+  }
+
+  return [
+    new IfStatement(expression, trueStatement, falseStatement),
+    leftTokens,
+  ];
+}
+
+export function makeWhileStatement(tokens: Token[]): [WhileStatement, Token[]] {
+  let lefttokens = tokens.slice(2); // consume "while" and "("
+  let expression: Expression;
+  [expression, lefttokens] = makeExpression(lefttokens);
+  lefttokens = lefttokens.slice(1); // consume ")"
+
+  let statement: Statement;
+  [statement, lefttokens] = makeStatement(lefttokens);
+
+  return [
+    new WhileStatement(expression, statement),
+    lefttokens,
+  ];
+}
+
+export function makeBlock(tokens: Token[]): [Block, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "{"
+  let nextToken = leftTokens[0];
+  const declarations: Declaration[] = [];
+  while (nextToken && nextToken.type != TokenType.BraceRight) {
+    let declaration: Declaration;
+    [declaration, leftTokens] = makeDeclaration(leftTokens);
+    declarations.push(declaration);
+    nextToken = leftTokens[0];
+  }
+  leftTokens = leftTokens.slice(1); // consume "}"
+  return [new Block(declarations), leftTokens];
+}
+
+export function makeExpressionStatement(
+  tokens: Token[],
+): [ExpressionStatement, Token[]] {
+  let [expression, leftTokens] = makeExpression(tokens);
+  leftTokens = leftTokens.slice(1); // consume ";"
+  return [new ExpressionStatement(expression), leftTokens];
+}
+
 export function makeStatement(tokens: Token[]): [Statement, Token[]] {
   const first = tokens[0];
 
   // print statement
   if (first.type == TokenType.Print) {
-    const otherTokens = tokens.slice(1); // consume "print"
-    let [expression, leftTokens] = makeExpression(otherTokens);
-    leftTokens = leftTokens.slice(1); // consume ";"
-    return [new PrintStatement(expression), leftTokens];
+    return makePrintStatement(tokens);
   }
 
   // for statement
-  // if (first.type == TokenType.For) {
-  //   let leftTokens = tokens.slice(2); // consume "for" and "("
-  //   let initializer: VariableDeclaration | ExpressionStatement | undefined =
-  //     undefined;
-
-  //   const nextToken = leftTokens[0];
-  //   switch (nextToken.type) {
-  //     case TokenType.SemiColon:
-  //       break; // no initializer
-  //     case TokenType.Var:
-  //       [initializer, leftTokens] = makeDeclaration(leftTokens);
-  //   }
-  // }
+  if (first.type == TokenType.For) {
+    return makeForStatement(tokens);
+  }
 
   // if statement
   if (first.type == TokenType.If) {
-    const otherTokens = tokens.slice(2); // consume "if" and "("
-    let [expression, leftTokens] = makeExpression(otherTokens);
-    leftTokens = leftTokens.slice(1); // consume ")";
-
-    let trueStatement: Statement;
-    [trueStatement, leftTokens] = makeStatement(leftTokens); // true statement
-
-    const nextToken = leftTokens[0];
-    let falseStatement: Statement | undefined = undefined;
-    if (nextToken && nextToken.type == TokenType.Else) {
-      leftTokens = leftTokens.slice(1); // consume "else"
-      [falseStatement, leftTokens] = makeStatement(leftTokens);
-    }
-
-    return [
-      new IfStatement(expression, trueStatement, falseStatement),
-      leftTokens,
-    ];
+    return makeIfStatement(tokens);
   }
 
   // while statement
   if (first.type == TokenType.While) {
-    let leftTokens = tokens.slice(2); // consume "while" and "("
-    let expression: Expression;
-    [expression, leftTokens] = makeExpression(leftTokens);
-    leftTokens = leftTokens.slice(1); // consume ")"
-
-    let statement: Statement;
-    [statement, leftTokens] = makeStatement(leftTokens);
-
-    return [
-      new WhileStatement(expression, statement),
-      leftTokens,
-    ];
+    return makeWhileStatement(tokens);
   }
 
   // block
   if (first.type == TokenType.BraceLeft) {
-    let leftTokens = tokens.slice(1); // consume "{"
-    let nextToken = leftTokens[0];
-    const declarations: Declaration[] = [];
-    while (nextToken && nextToken.type != TokenType.BraceRight) {
-      let declaration: Declaration;
-      [declaration, leftTokens] = makeDeclaration(leftTokens);
-      declarations.push(declaration);
-      nextToken = leftTokens[0];
-    }
-    leftTokens = leftTokens.slice(1); // consume "}"
-    return [new Block(declarations), leftTokens];
+    return makeBlock(tokens);
   }
 
   // expression statement
-  let [expression, leftTokens] = makeExpression(tokens);
-  leftTokens = leftTokens.slice(1);
-  return [new ExpressionStatement(expression), leftTokens];
+  return makeExpressionStatement(tokens);
 }
 
 export function makeExpression(tokens: Token[]): [Expression, Token[]] {

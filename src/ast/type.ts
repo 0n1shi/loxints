@@ -31,7 +31,7 @@ export class VariableDeclaration {
  */
 export type Statement =
   | ExpressionStatement
-  // | ForStatement
+  | ForStatement
   | IfStatement
   | PrintStatement
   | Block;
