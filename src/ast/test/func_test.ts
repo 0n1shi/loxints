@@ -1,6 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
-  makeAssignment,
   makeComparision,
   makeDeclaration,
   makeEquality,
@@ -11,8 +10,6 @@ import {
   makeUnary,
 } from "../../ast/func.ts";
 import {
-  Assignment,
-  AssignmentWithIdentifier,
   Comparision,
   ComparisionsAndOperator,
   Declaration,

@@ -23,3 +23,9 @@ export class UndefinedVariableError extends Error {
     super(`Undefined variable ${variableName}`);
   }
 }
+
+export class InvalidStatementError extends Error {
+  public constructor() {
+    super("Invalid Statement Error");
+  }
+}

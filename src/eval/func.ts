@@ -9,6 +9,7 @@ import {
   EqualitiesWithAnd,
   Equality,
   Expression,
+  ExpressionStatement,
   Fanctor,
   FanctorsAndOperator,
   ForStatement,
@@ -38,6 +39,7 @@ import { Environment, Value, ValueType } from "./type.ts";
 import {
   InvalidComparisionError,
   InvalidFanctorError,
+  InvalidStatementError,
   InvalidTermError,
   UndefinedVariableError,
 } from "./error.ts";
@@ -91,8 +93,13 @@ export function evaluateIfStatement(
   return new Value(ValueType.Nil, null);
 }
 
-export function evaluatePrintStatement(statement: PrintStatement, environment: Environment): Value {
-
+export function evaluatePrintStatement(
+  statement: PrintStatement,
+  environment: Environment,
+): Value {
+  const value = evaluateExpression(statement.expression, environment);
+  console.log(value.value); // print
+  return new Value(ValueType.Nil, null);
 }
 
 export function evaluateWhileStatement(
@@ -105,18 +112,55 @@ export function evaluateWhileStatement(
   return new Value(ValueType.Nil, null);
 }
 
+export function evaluateBlock(
+  statement: Block,
+  environment: Environment,
+): Value {
+  const env = new Environment(environment);
+  for (const declaration of statement.declarations) {
+    evaluateDeclaration(declaration, env);
+  }
+  return new Value(ValueType.Nil, null);
+}
+
+export function evaluateExpressionStatement(
+  statement: ExpressionStatement,
+  environment: Environment,
+): Value {
+  return evaluateExpression(statement.expression, environment);
+}
+
+export function evaluateForStatement(
+  statement: ForStatement,
+  environment: Environment,
+): Value {
+  const forEnv = new Environment(environment);
+
+  if (statement.initializer) {
+    if (statement.initializer instanceof VariableDeclaration) {
+      evaluateVariableDeclaration(statement.initializer, forEnv);
+    } else {
+      evaluateExpressionStatement(statement.initializer, forEnv);
+    }
+  }
+
+  while (
+    statement.condition == undefined ||
+    evaluateExpression(statement.condition, forEnv).value
+  ) {
+    evaluateStatement(statement.statement, forEnv);
+    if (statement.iteration) evaluateExpression(statement.iteration, forEnv);
+  }
+
+  return new Value(ValueType.Nil, null);
+}
+
 export function evaluateStatement(
   statement: Statement,
   environment: Environment,
 ): Value {
   if (statement instanceof ForStatement) {
-    const forEnv = new Environment(environment);
-    if (statement.initializer != undefined) {
-      if (statement.initializer instanceof VariableDeclaration) {
-        evaluateVariableDeclaration(statement.initializer, forEnv);
-      } else {
-      }
-    }
+    return evaluateForStatement(statement, environment);
   }
   if (statement instanceof IfStatement) {
     return evaluateIfStatement(statement, environment);
@@ -125,19 +169,18 @@ export function evaluateStatement(
     return evaluateWhileStatement(statement, environment);
   }
   if (statement instanceof Block) {
-    const env = new Environment(environment);
-    for (const declaration of statement.declarations) {
-      evaluateDeclaration(declaration, env);
-    }
-    return new Value(ValueType.Nil, null);
+    return evaluateBlock(statement, environment);
   }
 
-  const expr = evaluateExpression(statement.expression, environment);
   if (statement instanceof PrintStatement) {
-    console.log(expr.value); // print
-    return new Value(ValueType.Nil, null);
+    return evaluatePrintStatement(statement, environment);
   }
-  return expr;
+
+  if (statement instanceof ExpressionStatement) {
+    return evaluateExpressionStatement(statement, environment);
+  }
+
+  throw new InvalidStatementError();
 }
 
 export function evaluateExpression(

@@ -48,12 +48,15 @@ export class ForStatement {
   initializer?: VariableDeclaration | ExpressionStatement;
   condition?: Expression;
   iteration?: Expression;
+  statement: Statement;
 
   constructor(
+    statement: Statement,
     initializer?: VariableDeclaration | ExpressionStatement,
     condition?: Expression,
     iteration?: Expression,
   ) {
+    this.statement = statement;
     this.initializer = initializer;
     this.condition = condition;
     this.iteration = iteration;

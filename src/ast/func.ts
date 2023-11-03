@@ -128,7 +128,13 @@ export function makeForStatement(tokens: Token[]): [ForStatement, Token[]] {
 
   leftTokens = leftTokens.slice(1); // consume ")"
 
-  return [new ForStatement(initializer, condition, iteration), leftTokens];
+  let statement: Statement;
+  [statement, leftTokens] = makeStatement(leftTokens);
+
+  return [
+    new ForStatement(statement, initializer, condition, iteration),
+    leftTokens,
+  ];
 }
 
 export function makeIfStatement(tokens: Token[]): [IfStatement, Token[]] {
