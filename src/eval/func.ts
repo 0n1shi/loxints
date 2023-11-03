@@ -11,6 +11,7 @@ import {
   Expression,
   Fanctor,
   FanctorsAndOperator,
+  ForStatement,
   Group,
   IfStatement,
   LogicAnd,
@@ -54,45 +55,79 @@ export function execute(ast: AST) {
 
 export function executeProgram(program: Program, environment: Environment) {
   for (const declaration of program.declarations) {
-    executeDeclaration(declaration, environment);
+    evaluateDeclaration(declaration, environment);
   }
 }
 
-export function executeDeclaration(
+export function evaluateVariableDeclaration(
+  variableDeclaration: VariableDeclaration,
+  environment: Environment,
+): Value {
+  const val = evaluateExpression(variableDeclaration.expression!, environment);
+  environment.add(variableDeclaration.identifier, val);
+  return new Value(ValueType.Nil, null);
+}
+
+export function evaluateDeclaration(
   declaration: Declaration,
   environment: Environment,
 ): Value {
   if (declaration instanceof VariableDeclaration) {
-    const val = evaluateExpression(declaration.expression!, environment);
-    environment.add(declaration.identifier, val);
-    return new Value(ValueType.Nil, null);
+    return evaluateVariableDeclaration(declaration, environment);
   }
   return evaluateStatement(declaration as Statement, environment);
+}
+
+export function evaluateIfStatement(
+  statement: IfStatement,
+  environment: Environment,
+) {
+  const val = evaluateExpression(statement.expression, environment);
+  if (val.value) {
+    evaluateStatement(statement.trueStatement, environment);
+  } else if (statement.falseStatement) {
+    evaluateStatement(statement.falseStatement, environment);
+  }
+  return new Value(ValueType.Nil, null);
+}
+
+export function evaluatePrintStatement(statement: PrintStatement, environment: Environment): Value {
+
+}
+
+export function evaluateWhileStatement(
+  statement: WhileStatement,
+  environment: Environment,
+): Value {
+  while (evaluateExpression(statement.expression, environment).value) {
+    evaluateStatement(statement.statement, environment);
+  }
+  return new Value(ValueType.Nil, null);
 }
 
 export function evaluateStatement(
   statement: Statement,
   environment: Environment,
 ): Value {
-  if (statement instanceof IfStatement) {
-    const val = evaluateExpression(statement.expression, environment);
-    if (val.value) {
-      evaluateStatement(statement.trueStatement, environment);
-    } else if (statement.falseStatement) {
-      evaluateStatement(statement.falseStatement, environment);
+  if (statement instanceof ForStatement) {
+    const forEnv = new Environment(environment);
+    if (statement.initializer != undefined) {
+      if (statement.initializer instanceof VariableDeclaration) {
+        evaluateVariableDeclaration(statement.initializer, forEnv);
+      } else {
+      }
     }
-    return new Value(ValueType.Nil, null);
+  }
+  if (statement instanceof IfStatement) {
+    return evaluateIfStatement(statement, environment);
   }
   if (statement instanceof WhileStatement) {
-    while (evaluateExpression(statement.expression, environment).value) {
-      evaluateStatement(statement.statement, environment);
-    }
-    return new Value(ValueType.Nil, null);
+    return evaluateWhileStatement(statement, environment);
   }
   if (statement instanceof Block) {
     const env = new Environment(environment);
     for (const declaration of statement.declarations) {
-      executeDeclaration(declaration, env);
+      evaluateDeclaration(declaration, env);
     }
     return new Value(ValueType.Nil, null);
   }
