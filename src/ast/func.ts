@@ -38,8 +38,7 @@ import {
   WhileStatement,
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
-import { InvalidPrimaryError, InvalidVariableDeclaration } from "./error.ts";
-import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
+import { InvalidPrimaryError } from "./error.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -116,9 +115,8 @@ export function makeForStatement(tokens: Token[]): [ForStatement, Token[]] {
   nextToken = leftTokens[0];
   if (nextToken && nextToken.type != TokenType.SemiColon) {
     [condition, leftTokens] = makeExpression(leftTokens);
-  } else {
-    leftTokens = leftTokens.slice(1); // consume ";"
   }
+  leftTokens = leftTokens.slice(1); // consume ";"
 
   let iteration: Expression | undefined = undefined;
   nextToken = leftTokens[0];
