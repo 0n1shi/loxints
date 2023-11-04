@@ -1,230 +1,68 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
-import { LineNumber, Token, TokenType } from "../../token/type.ts";
 import { tokenize } from "../../token/func.ts";
+import { primaryTests } from "../../test/data/primary.ts";
+import { unaryTests } from "../../test/data/unary.ts";
+import { fanctorTests } from "../../test/data/fanctor.ts";
+import { termTests } from "../../test/data/term.ts";
+import { comparisionTests } from "../../test/data/comparision.ts";
+import { equalityTests } from "../../test/data/equality.ts";
 
-Deno.test("Testing tokenize()", async (t) => {
-  type Test = {
-    name: string;
-    input: string;
-    expected: {
-      tokens: Token[];
-      lineNumber: LineNumber;
-    };
-  };
-  const tests: Test[] = [
-    {
-      name: "Single-character symbols",
-      input: "{ . -  }",
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Dot },
-          { type: TokenType.Minus },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 1,
-      },
-    },
-    {
-      name: "Double-character symbols",
-      input: "{ != == <= >= }",
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.BangEqual },
-          { type: TokenType.EqualEqual },
-          { type: TokenType.LessEqual },
-          { type: TokenType.GreaterEqual },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 1,
-      },
-    },
-    {
-      name: "New line",
-      input: `{
-  . -
-}`,
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Dot },
-          { type: TokenType.Minus },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 3,
-      },
-    },
-    {
-      name: "Comment",
-      input: `{
-  // comment
-}`,
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 3,
-      },
-    },
-    {
-      name: "Number",
-      input: `{
-  123,
-  123.5,
-}`,
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Number, value: 123 },
-          { type: TokenType.Comma },
-          { type: TokenType.Number, value: 123.5 },
-          { type: TokenType.Comma },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 4,
-      },
-    },
-    {
-      name: "Identifier",
-      input: `{
-  msg = 123;
-}`,
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Identifier, value: "msg" },
-          { type: TokenType.Equal },
-          { type: TokenType.Number, value: 123 },
-          { type: TokenType.SemiColon },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 3,
-      },
-    },
-    {
-      name: "String",
-      input: `{
-  msg = "Hello world";
-}`,
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Identifier, value: "msg" },
-          { type: TokenType.Equal },
-          { type: TokenType.String, value: "Hello world" },
-          { type: TokenType.SemiColon },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 3,
-      },
-    },
-    {
-      name: "Keywords",
-      input: `{
-  var msg = "Hello world";
-}`,
-      expected: {
-        tokens: [
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Var },
-          { type: TokenType.Identifier, value: "msg" },
-          { type: TokenType.Equal },
-          { type: TokenType.String, value: "Hello world" },
-          { type: TokenType.SemiColon },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 3,
-      },
-    },
-    {
-      name: "Print statement",
-      input: `print 10 + 5;`,
-      expected: {
-        tokens: [
-          { type: TokenType.Print },
-          { type: TokenType.Number, value: 10 },
-          { type: TokenType.Plus },
-          { type: TokenType.Number, value: 5 },
-          { type: TokenType.SemiColon },
-        ],
-        lineNumber: 1,
-      },
-    },
-    {
-      name: "statements",
-      input: `10 + 5; 1 + 2;`,
-      expected: {
-        tokens: [
-          { type: TokenType.Number, value: 10 },
-          { type: TokenType.Plus },
-          { type: TokenType.Number, value: 5 },
-          { type: TokenType.SemiColon },
-          { type: TokenType.Number, value: 1 },
-          { type: TokenType.Plus },
-          { type: TokenType.Number, value: 2 },
-          { type: TokenType.SemiColon },
-        ],
-        lineNumber: 1,
-      },
-    },
-    {
-      name: "variable declaration",
-      input: `var msg = "hello world."`,
-      expected: {
-        tokens: [
-          { type: TokenType.Var },
-          { type: TokenType.Identifier, value: "msg" },
-          { type: TokenType.Equal },
-          { type: TokenType.String, value: "hello world." },
-        ],
-        lineNumber: 1,
-      },
-    },
-    {
-      name: "variable assignment",
-      input: `msg = "hello world."`,
-      expected: {
-        tokens: [
-          { type: TokenType.Identifier, value: "msg" },
-          { type: TokenType.Equal },
-          { type: TokenType.String, value: "hello world." },
-        ],
-        lineNumber: 1,
-      },
-    },
-    {
-      name: "if statement",
-      input: `if (2 > 1) {
-        val = val + 1;
-      }`,
-      expected: {
-        tokens: [
-          { type: TokenType.If },
-          { type: TokenType.ParenLeft },
-          { type: TokenType.Number, value: 2 },
-          { type: TokenType.Greater },
-          { type: TokenType.Number, value: 1 },
-          { type: TokenType.ParenRight },
-          { type: TokenType.BraceLeft },
-          { type: TokenType.Identifier, value: "val" },
-          { type: TokenType.Equal },
-          { type: TokenType.Identifier, value: "val" },
-          { type: TokenType.Plus },
-          { type: TokenType.Number, value: 1 },
-          { type: TokenType.SemiColon },
-          { type: TokenType.BraceRight },
-        ],
-        lineNumber: 3,
-      },
-    },
-  ];
-  for (const test of tests) {
-    await t.step(test.name, () => {
-      const [tokens, lineNumber] = tokenize(test.input);
-      assertEquals(tokens, test.expected.tokens);
-      assertEquals(lineNumber, test.expected.lineNumber);
+Deno.test("Testing tokenize primaries", async (context) => {
+  for (const test of primaryTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+
+Deno.test("Testing tokenize unaries", async (context) => {
+  for (const test of unaryTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+
+Deno.test("Testing tokenize fanctors", async (context) => {
+  for (const test of fanctorTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+
+Deno.test("Testing tokenize terms", async (context) => {
+  for (const test of termTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+
+Deno.test("Testing tokenize comparisions", async (context) => {
+  for (const test of comparisionTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+
+Deno.test("Testing tokenize equalities", async (context) => {
+  for (const test of equalityTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
     });
   }
 });
