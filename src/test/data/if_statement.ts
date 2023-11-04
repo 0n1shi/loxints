@@ -60,7 +60,7 @@ export const ifStatementTests: TestData[] = [
       { type: TokenType.BraceRight },
     ],
     ast: new IfStatement(
-      new Primary(PrimaryType.True),
+      new Primary(PrimaryType.False),
       new Block([
         new PrintStatement(new Primary(PrimaryType.String, "hello world")),
       ]),

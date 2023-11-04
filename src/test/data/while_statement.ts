@@ -2,6 +2,7 @@ import { Token, TokenType } from "../../token/type.ts";
 import {
   AssignmentWithIdentifier,
   Block,
+  ExpressionStatement,
   FanctorsAndOperator,
   OperatorForFanctors,
   OperatorForTerms,
@@ -58,12 +59,14 @@ export const whileStatementTests: TestData[] = [
         new PrintStatement(
           new Primary(PrimaryType.String, "hello world"),
         ),
-        new AssignmentWithIdentifier(
-          "count",
-          new FanctorsAndOperator(
-            new Primary(PrimaryType.Identifier, "count"),
-            OperatorForFanctors.Plus,
-            new Primary(PrimaryType.Number, 1),
+        new ExpressionStatement(
+          new AssignmentWithIdentifier(
+            "count",
+            new FanctorsAndOperator(
+              new Primary(PrimaryType.Identifier, "count"),
+              OperatorForFanctors.Plus,
+              new Primary(PrimaryType.Number, 1),
+            ),
           ),
         ),
       ]),
