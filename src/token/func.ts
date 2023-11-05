@@ -8,12 +8,13 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
   let cursor = 0;
   let lineNumber: LineNumber = 1;
 
+  let currentChar = "";
   while (true) {
     if (cursor >= sourceCodeLength) {
       break;
     }
 
-    const currentChar = sourceCode[cursor];
+    currentChar = sourceCode[cursor];
     cursor++;
 
     switch (currentChar) {
@@ -192,6 +193,9 @@ export function tokenize(sourceCode: string): [Token[], LineNumber] {
       delete token.value;
     }
   }
+
+  // fix line number
+  if (currentChar == "\n") lineNumber--;
 
   return [tokens, lineNumber];
 }
