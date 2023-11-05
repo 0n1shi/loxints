@@ -16,6 +16,8 @@ import { ifStatementTests } from "../../test/data/if_statement.ts";
 import { forStatementTests } from "../../test/data/for_statement.ts";
 import { expressionStatementTests } from "../../test/data/expression_statement.ts";
 import { variableDeclarationTests } from "../../test/data/variable_declaration.ts";
+import { argumentsTests } from "../../test/data/arguments.ts";
+import { callTests } from "../../test/data/call.ts";
 
 Deno.test("Testing tokenize variable declarations", async (context) => {
   for (const test of variableDeclarationTests) {
@@ -145,6 +147,24 @@ Deno.test("Testing tokenize fanctors", async (context) => {
 });
 Deno.test("Testing tokenize unaries", async (context) => {
   for (const test of unaryTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+Deno.test("Testing tokenize calls", async (context) => {
+  for (const test of callTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+Deno.test("Testing tokenize arguments", async (context) => {
+  for (const test of argumentsTests) {
     await context.step(test.name, () => {
       const [tokens, lines] = tokenize(test.program);
       assertEquals(tokens, test.tokens);

@@ -33,7 +33,9 @@ comparision         -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term                -> fanctor ( ( "-" | "+" ) fanctor )* ;
 fanctor             -> unary ( ( "/" | "*" ) unary )* ;
 unary               -> ( "!" | "-" ) unary
-                    | primary
+                    | call
+call                -> primary ( "(" arguments? ")" )* ;
+arguments           -> expression ( "," expression )* ;
 primary             -> NUMBER
                     | STRING
                     | "true"

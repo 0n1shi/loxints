@@ -240,7 +240,7 @@ export class UnariesAndOperator {
 /**
  * Unary
  */
-export type Unary = UnaryWithOperator | Primary;
+export type Unary = UnaryWithOperator | Call;
 
 export enum OperatorForUnary {
   Bang = "!",
@@ -254,6 +254,32 @@ export class UnaryWithOperator {
   constructor(operator: OperatorForUnary, right: Unary) {
     this.operator = operator;
     this.right = right;
+  }
+}
+
+/**
+ * Call
+ */
+export type Call = Primary | PrimaryWithArguments;
+
+export class PrimaryWithArguments {
+  primary: Primary;
+  arguments?: Arguments[];
+
+  constructor(primary: Primary, args?: Arguments[]) {
+    this.primary = primary;
+    this.arguments = args;
+  }
+}
+
+/**
+ * Arguments
+ */
+export class Arguments {
+  expressions?: Expression[];
+
+  constructor(expressions: Expression[]) {
+    this.expressions = expressions;
   }
 }
 

@@ -1,9 +1,11 @@
 import { Token } from "../token/type.ts";
 import {
+  Arguments,
   Assignment,
   AssignmentWithIdentifier,
   AST,
   Block,
+  Call,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -26,6 +28,7 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
+  PrimaryWithArguments,
   PrintStatement,
   Program,
   Statement,
@@ -428,7 +431,54 @@ export function makeUnary(tokens: Token[]): [Unary, Token[]] {
     return [new UnaryWithOperator(operator, unary), leftTokens];
   }
 
-  return makePrimary(tokens);
+  return makeCall(tokens);
+}
+
+export function makeCall(tokens: Token[]): [Call, Token[]] {
+  let primary: Primary;
+  let leftTokens: Token[];
+  [primary, leftTokens] = makePrimary(tokens);
+
+  const argsList: Arguments[] = [];
+  let nextToken = leftTokens[0];
+  while (nextToken && nextToken.type == TokenType.ParenLeft) {
+    let args: Arguments;
+    [args, leftTokens] = makeArguments(leftTokens);
+    argsList.push(args);
+
+    nextToken = leftTokens[0];
+  }
+
+  if (argsList.length == 0) return [primary, leftTokens];
+  return [new PrimaryWithArguments(primary, argsList), leftTokens];
+}
+
+export function makeArguments(
+  tokens: Token[],
+): [Arguments, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "("
+
+  const expressions: Expression[] = [];
+  let nextToken = leftTokens[0];
+  while (nextToken && nextToken.type != TokenType.ParenRight) {
+    let expression: Expression;
+    [expression, leftTokens] = makeExpression(leftTokens);
+
+    expressions.push(expression);
+
+    nextToken = leftTokens[0];
+    if (nextToken && nextToken.type == TokenType.Comma) {
+      leftTokens = leftTokens.slice(1); // consume ","
+      nextToken = leftTokens[0];
+    }
+  }
+
+  leftTokens = leftTokens.slice(1); // consume ")"
+
+  return [
+    new Arguments(expressions),
+    leftTokens,
+  ];
 }
 
 export function makePrimary(tokens: Token[]): [Primary, Token[]] {
