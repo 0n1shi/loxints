@@ -5,9 +5,15 @@ export enum ValueType {
   Number = "[number]",
   Boolean = "[boolean]",
   Nil = "[nil]",
+  Function = "[function]",
 }
 
-export type ValueTypeInTS = string | number | boolean | null;
+export type ValueTypeInTS =
+  | string
+  | number
+  | boolean
+  | null
+  | ((...args: any[]) => any);
 
 export class Value {
   type: ValueType;

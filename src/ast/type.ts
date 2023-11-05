@@ -264,9 +264,9 @@ export type Call = Primary | PrimaryWithArguments;
 
 export class PrimaryWithArguments {
   primary: Primary;
-  arguments?: Arguments[];
+  arguments: Arguments[];
 
-  constructor(primary: Primary, args?: Arguments[]) {
+  constructor(primary: Primary, args: Arguments[]) {
     this.primary = primary;
     this.arguments = args;
   }
@@ -276,7 +276,7 @@ export class PrimaryWithArguments {
  * Arguments
  */
 export class Arguments {
-  expressions?: Expression[];
+  expressions: Expression[];
 
   constructor(expressions: Expression[]) {
     this.expressions = expressions;

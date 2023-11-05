@@ -1,14 +1,18 @@
 import {
-  ComparisionsAndOperator,
   FanctorsAndOperator,
   Primary,
+  PrimaryWithArguments,
   TermsAndOperator,
   UnariesAndOperator,
   UnaryWithOperator,
 } from "../ast/type.ts";
 
+export function isInstanceOfCall(v: any): boolean {
+  return v instanceof Primary || v instanceof PrimaryWithArguments;
+}
+
 export function isInstanceOfUnary(v: any): boolean {
-  return v instanceof UnaryWithOperator || v instanceof Primary;
+  return v instanceof UnaryWithOperator || isInstanceOfCall(v);
 }
 
 export function isInstanceOfFanctor(v: any): boolean {

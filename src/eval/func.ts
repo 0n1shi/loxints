@@ -3,6 +3,7 @@ import {
   AssignmentWithIdentifier,
   AST,
   Block,
+  Call,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -32,6 +33,7 @@ import {
   TermsAndOperator,
   UnariesAndOperator,
   Unary,
+  UnaryWithOperator,
   VariableDeclaration,
   WhileStatement,
 } from "../ast/type.ts";
@@ -41,18 +43,20 @@ import {
   InvalidFanctorError,
   InvalidStatementError,
   InvalidTermError,
+  UndefinedFunctionError,
   UndefinedVariableError,
 } from "./error.ts";
 import {
+  isInstanceOfCall,
   isInstanceOfComparision,
   isInstanceOfFanctor,
   isInstanceOfTerm,
   isInstanceOfUnary,
 } from "./util.ts";
+import { builtinEnvironment } from "./builtin.ts";
 
 export function execute(ast: AST) {
-  const environment: Environment = new Environment();
-  return executeProgram(ast as Program, environment);
+  return executeProgram(ast as Program, builtinEnvironment);
 }
 
 export function executeProgram(program: Program, environment: Environment) {
@@ -398,12 +402,12 @@ export function evaluateFanctor(
 }
 
 export function evaluateUnary(unary: Unary, environment: Environment): Value {
-  if (unary instanceof Primary) {
-    return evaluatePrimary(unary, environment);
+  if (isInstanceOfCall(unary)) {
+    return evaluateCall(unary as Call, environment);
   }
 
-  const op = unary.operator;
-  const right = evaluateUnary(unary.right, environment);
+  const op = (unary as UnaryWithOperator).operator;
+  const right = evaluateUnary((unary as UnaryWithOperator).right, environment);
 
   switch (op) {
     case OperatorForUnary.Bang:
@@ -411,6 +415,49 @@ export function evaluateUnary(unary: Unary, environment: Environment): Value {
     case OperatorForUnary.Minus:
       return new Value(right.type, -right.value!);
   }
+}
+
+export function evaluateCall(call: Call, environment: Environment): Value {
+  if (call instanceof Primary) {
+    return evaluatePrimary(call, environment);
+  }
+
+  const name = call.primary.value as string;
+  const func = environment.get(name);
+  if (func == undefined) throw new UndefinedFunctionError(name);
+
+  const args = call.arguments[0];
+  const argVals = [];
+  for (const expression of args.expressions) {
+    const val = evaluateExpression(expression, environment);
+    argVals.push(val.value);
+  }
+  let returned = (func.value as (...args: any[]) => any)(...argVals);
+
+  const leftArguments = call.arguments.slice(1);
+  for (const args of leftArguments) {
+    const argVals = [];
+    for (const expression of args.expressions) {
+      const val = evaluateExpression(expression, environment);
+      argVals.push(val.value);
+    }
+    returned = (returned as (...args: any[]) => any)(...argVals);
+  }
+
+  let valueType = ValueType.Nil;
+  switch (typeof returned) {
+    case "number":
+      valueType = ValueType.Number;
+      break;
+    case "string":
+      valueType = ValueType.String;
+      break;
+    case "function":
+      valueType = ValueType.Function;
+      break;
+  }
+
+  return new Value(valueType, returned);
 }
 
 export function evaluatePrimary(

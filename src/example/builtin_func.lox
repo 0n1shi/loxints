@@ -1,0 +1,2 @@
+var result = div(5, 2);
+print result;
