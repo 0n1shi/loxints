@@ -16,6 +16,7 @@ import {
   Fanctor,
   FanctorsAndOperator,
   ForStatement,
+  FunctionDeclaration,
   Group,
   IfStatement,
   LogicAnd,
@@ -60,12 +61,45 @@ export function makeProgram(tokens: Token[]): [Program, Token[]] {
 export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
   const first = tokens[0];
 
+  // function declaration
+  if (first.type == TokenType.Fun) {
+    return makeVariableDeclaration(tokens);
+  }
+
   // variable declaration
   if (first.type == TokenType.Var) {
     return makeVariableDeclaration(tokens);
   }
 
   return makeStatement(tokens);
+}
+
+export function makeFunctionDeclaration(
+  tokens: Token[],
+): [FunctionDeclaration, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "fun"
+
+  const identifider = leftTokens[0].value as string; // must be function name
+  leftTokens = leftTokens.slice(2); // consume "[identifider]" and "("
+
+  const parameters: string[] = [];
+  let nextToken = leftTokens[0];
+  if (nextToken && nextToken.type != TokenType.ParenRight) {
+    parameters.push(nextToken.value as string);
+    leftTokens = leftTokens.slice(1); // consume "[identifider]"
+
+    nextToken = leftTokens[0];
+    if (nextToken && nextToken.type == TokenType.Comma) {
+      leftTokens = leftTokens.slice(1); // consume ","
+    }
+  }
+
+  leftTokens = leftTokens.slice(1); // consume ")"
+
+  let block: Block;
+  [block, leftTokens] = makeBlock(leftTokens);
+
+  return [new FunctionDeclaration(identifider, parameters, block), leftTokens];
 }
 
 export function makeVariableDeclaration(

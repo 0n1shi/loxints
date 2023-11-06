@@ -3,6 +3,7 @@ syntax keyword nil nil
 syntax keyword function print
 syntax keyword function mod
 syntax keyword function clock
+syntax keyword function fun
 
 syntax keyword statement if
 syntax keyword statement else

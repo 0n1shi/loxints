@@ -14,7 +14,19 @@ export class Program {
 /**
  * Declaration
  */
-export type Declaration = VariableDeclaration | Statement;
+export type Declaration = FunctionDeclaration | VariableDeclaration | Statement;
+
+export class FunctionDeclaration {
+  identifier: string;
+  parameters: string[];
+  block: Block;
+
+  constructor(identifier: string, parameters: string[], block: Block) {
+    this.identifier = identifier;
+    this.parameters = parameters;
+    this.block = block;
+  }
+}
 
 export class VariableDeclaration {
   identifier: string;

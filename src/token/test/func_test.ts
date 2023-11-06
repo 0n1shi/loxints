@@ -18,7 +18,17 @@ import { expressionStatementTests } from "../../test/data/expression_statement.t
 import { variableDeclarationTests } from "../../test/data/variable_declaration.ts";
 import { argumentsTests } from "../../test/data/arguments.ts";
 import { callTests } from "../../test/data/call.ts";
+import { functionDeclarationTests } from "../../test/data/function_declaration.ts";
 
+Deno.test("Testing tokenize function declarations", async (context) => {
+  for (const test of functionDeclarationTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
 Deno.test("Testing tokenize variable declarations", async (context) => {
   for (const test of variableDeclarationTests) {
     await context.step(test.name, () => {
