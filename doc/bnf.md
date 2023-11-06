@@ -4,9 +4,14 @@
 program             -> declaration* EOF ;
 
 # declaration
-declaration         -> variableDeclaration
+declaration         -> functionDeclaration
+                    | variableDeclaration
                     | statement ;
+functionDeclaration -> "fun" function ;
 variableDeclaration -> "var" IDENTIFIER ( "=" expression)? ";" ;
+
+function            -> IDENTIFIER "(" parameters? ")" block ;
+parameters          -> IDENTIFIER ( "," IDENTIFIER )* ;
 
 # statement
 statement           -> expressionStatement
