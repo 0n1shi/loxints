@@ -3,14 +3,14 @@ export const builtinEnvironment = new Environment();
 
 builtinEnvironment.add(
   "mod",
-  new Value(ValueType.Function, (a: number, b: number) => {
+  new Value(ValueType.NativeFunction, (a: number, b: number) => {
     return a % b;
   }),
 );
 
 builtinEnvironment.add(
   "clock",
-  new Value(ValueType.Function, (): number => {
+  new Value(ValueType.NativeFunction, (): number => {
     return new Date().valueOf();
   }),
 );

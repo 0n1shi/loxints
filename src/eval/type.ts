@@ -1,3 +1,4 @@
+import { Block } from "../ast/type.ts";
 import { UndefinedVariableError } from "./error.ts";
 
 export enum ValueType {
@@ -5,7 +6,18 @@ export enum ValueType {
   Number = "[number]",
   Boolean = "[boolean]",
   Nil = "[nil]",
-  Function = "[function]",
+  UserFunction = "[user function]",
+  NativeFunction = "[native function]",
+}
+
+export class UserFunction {
+  parameters: string[];
+  body: Block;
+
+  constructor(parameters: string[], body: Block) {
+    this.parameters = parameters;
+    this.body = body;
+  }
 }
 
 export type ValueTypeInTS =
@@ -13,6 +25,7 @@ export type ValueTypeInTS =
   | number
   | boolean
   | null
+  | UserFunction
   | ((...args: any[]) => any);
 
 export class Value {

@@ -38,7 +38,7 @@ import {
   VariableDeclaration,
   WhileStatement,
 } from "../ast/type.ts";
-import { Environment, Value, ValueType } from "./type.ts";
+import { Environment, UserFunction, Value, ValueType } from "./type.ts";
 import {
   InvalidComparisionError,
   InvalidFanctorError,
@@ -70,8 +70,16 @@ export function evaluateFunctionDeclaration(
   functionDeclaration: FunctionDeclaration,
   environment: Environment,
 ): Value {
-  const funcEnv = new Environment(environment) // function scope
-  for (const param of functionDeclaration.parameters)
+  environment.add(
+    functionDeclaration.identifier,
+    new Value(
+      ValueType.UserFunction,
+      new UserFunction(
+        functionDeclaration.parameters,
+        functionDeclaration.block,
+      ),
+    ),
+  );
   return new Value(ValueType.Nil, null);
 }
 
@@ -466,7 +474,7 @@ export function evaluateCall(call: Call, environment: Environment): Value {
       valueType = ValueType.String;
       break;
     case "function":
-      valueType = ValueType.Function;
+      valueType = ValueType.NativeFunction;
       break;
   }
 
