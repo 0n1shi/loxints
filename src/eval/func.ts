@@ -40,10 +40,12 @@ import {
 } from "../ast/type.ts";
 import { Environment, UserFunction, Value, ValueType } from "./type.ts";
 import {
+  DefinedFunctionError,
   InvalidComparisionError,
   InvalidFanctorError,
   InvalidStatementError,
   InvalidTermError,
+  UncallableFunctionError,
   UndefinedFunctionError,
   UndefinedVariableError,
 } from "./error.ts";
@@ -70,8 +72,12 @@ export function evaluateFunctionDeclaration(
   functionDeclaration: FunctionDeclaration,
   environment: Environment,
 ): Value {
+  const identifier = functionDeclaration.identifier;
+  if (environment.has(identifier)) {
+    throw new DefinedFunctionError(identifier);
+  }
   environment.add(
-    functionDeclaration.identifier,
+    identifier,
     new Value(
       ValueType.UserFunction,
       new UserFunction(
@@ -447,38 +453,54 @@ export function evaluateCall(call: Call, environment: Environment): Value {
   const func = environment.get(name);
   if (func == undefined) throw new UndefinedFunctionError(name);
 
-  const args = call.arguments[0];
-  const argVals = [];
-  for (const expression of args.expressions) {
-    const val = evaluateExpression(expression, environment);
-    argVals.push(val.value);
-  }
-  let returned = (func.value as (...args: any[]) => any)(...argVals);
-
-  const leftArguments = call.arguments.slice(1);
-  for (const args of leftArguments) {
+  if (func.type == ValueType.NativeFunction) {
+    const args = call.arguments[0];
     const argVals = [];
     for (const expression of args.expressions) {
       const val = evaluateExpression(expression, environment);
       argVals.push(val.value);
     }
-    returned = (returned as (...args: any[]) => any)(...argVals);
+    let returned = (func.value as (...args: any[]) => any)(...argVals);
+
+    const leftArguments = call.arguments.slice(1);
+    for (const args of leftArguments) {
+      const argVals = [];
+      for (const expression of args.expressions) {
+        const val = evaluateExpression(expression, environment);
+        argVals.push(val.value);
+      }
+      returned = (returned as (...args: any[]) => any)(...argVals);
+    }
+
+    let valueType = ValueType.Nil;
+    switch (typeof returned) {
+      case "number":
+        valueType = ValueType.Number;
+        break;
+      case "string":
+        valueType = ValueType.String;
+        break;
+      case "function":
+        valueType = ValueType.NativeFunction;
+        break;
+    }
+
+    return new Value(valueType, returned);
   }
 
-  let valueType = ValueType.Nil;
-  switch (typeof returned) {
-    case "number":
-      valueType = ValueType.Number;
-      break;
-    case "string":
-      valueType = ValueType.String;
-      break;
-    case "function":
-      valueType = ValueType.NativeFunction;
-      break;
+  if (func.type == ValueType.UserFunction) {
+    const funcEnv = new Environment(environment);
+    const userFunc = func.value as unknown as FunctionDeclaration;
+    for (const param of userFunc.parameters) {
+      const val = environment.get(param);
+      if (val == undefined) throw new UndefinedVariableError(param);
+
+      funcEnv.add(param, val);
+    }
+    return evaluateBlock(userFunc.block, funcEnv);
   }
 
-  return new Value(valueType, returned);
+  throw new UncallableFunctionError(name);
 }
 
 export function evaluatePrimary(
