@@ -14,6 +14,7 @@ import {
   Fanctor,
   FanctorsAndOperator,
   ForStatement,
+  FunctionDeclaration,
   Group,
   IfStatement,
   LogicAnd,
@@ -65,6 +66,15 @@ export function executeProgram(program: Program, environment: Environment) {
   }
 }
 
+export function evaluateFunctionDeclaration(
+  functionDeclaration: FunctionDeclaration,
+  environment: Environment,
+): Value {
+  const funcEnv = new Environment(environment) // function scope
+  for (const param of functionDeclaration.parameters)
+  return new Value(ValueType.Nil, null);
+}
+
 export function evaluateVariableDeclaration(
   variableDeclaration: VariableDeclaration,
   environment: Environment,
@@ -78,6 +88,9 @@ export function evaluateDeclaration(
   declaration: Declaration,
   environment: Environment,
 ): Value {
+  if (declaration instanceof FunctionDeclaration) {
+    return evaluateFunctionDeclaration(declaration, environment);
+  }
   if (declaration instanceof VariableDeclaration) {
     return evaluateVariableDeclaration(declaration, environment);
   }
