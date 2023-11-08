@@ -77,4 +77,40 @@ export const functionDeclarationTests: TestData[] = [
       ]),
     ),
   },
+  {
+    name: "add and print it",
+    program: `fun add(a, b) {
+  print a + b;
+}`,
+    lines: 3,
+    tokens: [
+      { type: TokenType.Fun },
+      { type: TokenType.Identifier, value: "add" },
+      { type: TokenType.ParenLeft },
+      { type: TokenType.Identifier, value: "a" },
+      { type: TokenType.Comma },
+      { type: TokenType.Identifier, value: "b" },
+      { type: TokenType.ParenRight },
+      { type: TokenType.BraceLeft },
+      { type: TokenType.Print },
+      { type: TokenType.Identifier, value: "a" },
+      { type: TokenType.Plus },
+      { type: TokenType.Identifier, value: "b" },
+      { type: TokenType.SemiColon },
+      { type: TokenType.BraceRight },
+    ],
+    ast: new FunctionDeclaration(
+      "add",
+      ["a", "b"],
+      new Block([
+        new PrintStatement(
+          new FanctorsAndOperator(
+            new Primary(PrimaryType.Identifier, "a"),
+            OperatorForFanctors.Plus,
+            new Primary(PrimaryType.Identifier, "b"),
+          ),
+        ),
+      ]),
+    ),
+  },
 ];

@@ -63,7 +63,7 @@ export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
 
   // function declaration
   if (first.type == TokenType.Fun) {
-    return makeVariableDeclaration(tokens);
+    return makeFunctionDeclaration(tokens);
   }
 
   // variable declaration
@@ -84,13 +84,14 @@ export function makeFunctionDeclaration(
 
   const parameters: string[] = [];
   let nextToken = leftTokens[0];
-  if (nextToken && nextToken.type != TokenType.ParenRight) {
+  while (nextToken && nextToken.type != TokenType.ParenRight) {
     parameters.push(nextToken.value as string);
     leftTokens = leftTokens.slice(1); // consume "[identifider]"
 
     nextToken = leftTokens[0];
     if (nextToken && nextToken.type == TokenType.Comma) {
       leftTokens = leftTokens.slice(1); // consume ","
+      nextToken = leftTokens[0];
     }
   }
 
