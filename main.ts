@@ -2,7 +2,7 @@ import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 import { tokenize } from "./src/token/func.ts";
 import { makeAST } from "./src/ast/func.ts";
 import { execute, executeProgram } from "./src/eval/func.ts";
-import { Environment, Value } from "./src/eval/type.ts";
+import { Environment } from "./src/eval/type.ts";
 
 if (import.meta.main) {
   const run = new Command()
