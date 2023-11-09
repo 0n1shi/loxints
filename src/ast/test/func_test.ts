@@ -8,6 +8,7 @@ import { equalityTests } from "../../test/data/equality.ts";
 import { logicAndTests } from "../../test/data/logic_and.ts";
 import { logicOrTests } from "../../test/data/logic_or.ts";
 import { assignmentTests } from "../../test/data/assignment.ts";
+import { returnStatementTests } from "../../test/data/return_statement.ts";
 import { blockTests } from "../../test/data/block.ts";
 import { whileStatementTests } from "../../test/data/while_statement.ts";
 import { printStatementTests } from "../../test/data/print_statement.ts";
@@ -35,6 +36,7 @@ import {
   makeLogicOr,
   makePrimary,
   makePrintStatement,
+  makeReturnStatement,
   makeTerm,
   makeUnary,
   makeVariableDeclaration,
@@ -85,6 +87,14 @@ Deno.test("Testing ast for print staments", async (context) => {
   for (const test of printStatementTests) {
     await context.step(test.name, () => {
       const [ast] = makePrintStatement(test.tokens);
+      assertEquals(ast, test.ast);
+    });
+  }
+});
+Deno.test("Testing ast for return staments", async (context) => {
+  for (const test of returnStatementTests) {
+    await context.step(test.name, () => {
+      const [ast] = makeReturnStatement(test.tokens);
       assertEquals(ast, test.ast);
     });
   }

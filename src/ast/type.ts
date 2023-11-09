@@ -46,6 +46,8 @@ export type Statement =
   | ForStatement
   | IfStatement
   | PrintStatement
+  | ReturnStatement
+  | WhileStatement
   | Block;
 
 export class ExpressionStatement {
@@ -95,6 +97,14 @@ export class PrintStatement {
   expression: Expression;
 
   constructor(expression: Expression) {
+    this.expression = expression;
+  }
+}
+
+export class ReturnStatement {
+  expression?: Expression;
+
+  constructor(expression?: Expression) {
     this.expression = expression;
   }
 }

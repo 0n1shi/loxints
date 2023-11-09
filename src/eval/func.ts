@@ -29,6 +29,7 @@ import {
   PrimaryType,
   PrintStatement,
   Program,
+  ReturnStatement,
   Statement,
   Term,
   TermsAndOperator,
@@ -38,7 +39,13 @@ import {
   VariableDeclaration,
   WhileStatement,
 } from "../ast/type.ts";
-import { Environment, UserFunction, Value, ValueType } from "./type.ts";
+import {
+  Environment,
+  ReturnValueError,
+  UserFunction,
+  Value,
+  ValueType,
+} from "./type.ts";
 import {
   DefinedFunctionError,
   InvalidComparisionError,
@@ -154,6 +161,17 @@ export function evaluateBlock(
   return new Value(ValueType.Nil, null);
 }
 
+export function evaluateReturnStatement(
+  statement: ReturnStatement,
+  environment: Environment,
+): Value {
+  if (statement.expression) {
+    const val = evaluateExpression(statement.expression, environment);
+    throw new ReturnValueError(val);
+  }
+  throw new ReturnValueError(new Value(ValueType.Nil, null));
+}
+
 export function evaluateExpressionStatement(
   statement: ExpressionStatement,
   environment: Environment,
@@ -202,11 +220,12 @@ export function evaluateStatement(
   if (statement instanceof Block) {
     return evaluateBlock(statement, environment);
   }
-
   if (statement instanceof PrintStatement) {
     return evaluatePrintStatement(statement, environment);
   }
-
+  if (statement instanceof ReturnStatement) {
+    return evaluateReturnStatement(statement, environment);
+  }
   if (statement instanceof ExpressionStatement) {
     return evaluateExpressionStatement(statement, environment);
   }
@@ -506,7 +525,17 @@ export function evaluateCall(call: Call, environment: Environment): Value {
     functionDeclaration.parameters.forEach((v, i) => {
       envForCall.add(v, values[i]);
     });
-    return evaluateBlock(functionDeclaration.block, envForCall);
+
+    try {
+      evaluateBlock(functionDeclaration.block, envForCall);
+    } catch (e) {
+      if (e instanceof ReturnValueError) {
+        return e.value;
+      }
+      throw e;
+    }
+
+    return new Value(ValueType.Nil, null);
   }
 
   throw new UncallableFunctionError(name);

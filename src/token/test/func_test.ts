@@ -17,6 +17,7 @@ import { forStatementTests } from "../../test/data/for_statement.ts";
 import { expressionStatementTests } from "../../test/data/expression_statement.ts";
 import { variableDeclarationTests } from "../../test/data/variable_declaration.ts";
 import { argumentsTests } from "../../test/data/arguments.ts";
+import { returnStatementTests } from "../../test/data/return_statement.ts";
 import { callTests } from "../../test/data/call.ts";
 import { functionDeclarationTests } from "../../test/data/function_declaration.ts";
 
@@ -67,6 +68,15 @@ Deno.test("Testing tokenize if staments", async (context) => {
 });
 Deno.test("Testing tokenize print staments", async (context) => {
   for (const test of printStatementTests) {
+    await context.step(test.name, () => {
+      const [tokens, lines] = tokenize(test.program);
+      assertEquals(tokens, test.tokens);
+      assertEquals(lines, test.lines);
+    });
+  }
+});
+Deno.test("Testing tokenize return staments", async (context) => {
+  for (const test of returnStatementTests) {
     await context.step(test.name, () => {
       const [tokens, lines] = tokenize(test.program);
       assertEquals(tokens, test.tokens);

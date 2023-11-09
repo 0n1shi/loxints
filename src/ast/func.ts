@@ -32,6 +32,7 @@ import {
   PrimaryWithArguments,
   PrintStatement,
   Program,
+  ReturnStatement,
   Statement,
   Term,
   TermsAndOperator,
@@ -232,12 +233,31 @@ export function makeExpressionStatement(
   return [new ExpressionStatement(expression), leftTokens];
 }
 
+export function makeReturnStatement(
+  tokens: Token[],
+): [ReturnStatement, Token[]] {
+  let expression: Expression | undefined = undefined;
+  let leftTokens = tokens.slice(1); // consume "return"
+  const nextToken = leftTokens[0];
+  if (nextToken.type == TokenType.SemiColon) {
+    leftTokens = leftTokens.slice(1); // consume ";"
+    return [new ReturnStatement(), leftTokens];
+  }
+  [expression, leftTokens] = makeExpression(leftTokens);
+  leftTokens = leftTokens.slice(1); // consume ";"
+  return [new ReturnStatement(expression), leftTokens];
+}
+
 export function makeStatement(tokens: Token[]): [Statement, Token[]] {
   const first = tokens[0];
 
   // print statement
   if (first.type == TokenType.Print) {
     return makePrintStatement(tokens);
+  }
+
+  if (first.type == TokenType.Return) {
+    return makeReturnStatement(tokens);
   }
 
   // for statement

@@ -18,12 +18,14 @@ statement           -> expressionStatement
                     | forStatement
                     | ifStatement
                     | printStatement
+                    | returnStatement
                     | whileStatement
                     | block ;
 expressionStatement -> expression ";" ;
 forStatement        -> "for" "(" ( variableDeclaration | expressionStatement | ";" ) expression?  ";" expression? ")" statement ;
 ifStatement         -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStatement      -> "print" expression ";" ;
+returnStatement     -> "return" expression? ";" ;
 whileStatement      -> "while" "(" expression ")" statement ;
 block               -> "{" declaration* "}" ;
 

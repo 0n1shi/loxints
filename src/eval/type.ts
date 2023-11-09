@@ -1,6 +1,15 @@
 import { Block } from "../ast/type.ts";
 import { UndefinedVariableError } from "./error.ts";
 
+export class ReturnValueError extends Error {
+  value: Value;
+
+  constructor(value: Value) {
+    super();
+    this.value = value;
+  }
+}
+
 export enum ValueType {
   String = "[string]",
   Number = "[number]",

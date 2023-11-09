@@ -9,6 +9,7 @@ syntax keyword statement if
 syntax keyword statement else
 syntax keyword statement for
 syntax keyword statement while
+syntax keyword statement return
 
 syntax keyword var var
 
