@@ -12,11 +12,11 @@ export enum ValueType {
 
 export class UserFunction {
   parameters: string[];
-  body: Block;
+  block: Block;
 
-  constructor(parameters: string[], body: Block) {
+  constructor(parameters: string[], block: Block) {
     this.parameters = parameters;
-    this.body = body;
+    this.block = block;
   }
 }
 
