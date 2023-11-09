@@ -17,7 +17,7 @@ export class InvalidFanctorError extends Error {
 }
 export class UndefinedVariableError extends Error {
   public constructor(variableName: string) {
-    super(`Undefined variable ${variableName}`);
+    super(`Undefined variable "${variableName}"`);
   }
 }
 export class InvalidStatementError extends Error {

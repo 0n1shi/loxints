@@ -1,11 +1,9 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import { Primary, PrimaryType } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Primary;
 };
 
@@ -16,6 +14,9 @@ export const primaryTests: TestData[] = [
     lines: 1,
     tokens: [{ type: TokenType.Number, value: 10 }],
     ast: new Primary(PrimaryType.Number, 10),
+    value: new Value(ValueType.Number, 10),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "string",
@@ -23,6 +24,9 @@ export const primaryTests: TestData[] = [
     lines: 1,
     tokens: [{ type: TokenType.String, value: "hello world" }],
     ast: new Primary(PrimaryType.String, "hello world"),
+    value: new Value(ValueType.String, "hello world"),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "true",
@@ -30,6 +34,9 @@ export const primaryTests: TestData[] = [
     lines: 1,
     tokens: [{ type: TokenType.True }],
     ast: new Primary(PrimaryType.True),
+    value: new Value(ValueType.Boolean, true),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "false",
@@ -37,6 +44,9 @@ export const primaryTests: TestData[] = [
     lines: 1,
     tokens: [{ type: TokenType.False }],
     ast: new Primary(PrimaryType.False),
+    value: new Value(ValueType.Boolean, false),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "nil",
@@ -44,6 +54,9 @@ export const primaryTests: TestData[] = [
     lines: 1,
     tokens: [{ type: TokenType.Nil }],
     ast: new Primary(PrimaryType.Nil),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "identifier",
@@ -51,5 +64,14 @@ export const primaryTests: TestData[] = [
     lines: 1,
     tokens: [{ type: TokenType.Identifier, value: "name" }],
     ast: new Primary(PrimaryType.Identifier, "name"),
+    value: new Value(ValueType.String, "mike"),
+    environmentBefore: new Environment().add(
+      "name",
+      new Value(ValueType.String, "mike"),
+    ),
+    environmentAfter: new Environment().add(
+      "name",
+      new Value(ValueType.String, "mike"),
+    ),
   },
 ];
