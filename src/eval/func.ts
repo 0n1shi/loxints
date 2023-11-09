@@ -489,15 +489,24 @@ export function evaluateCall(call: Call, environment: Environment): Value {
   }
 
   if (func.type == ValueType.UserFunction) {
-    const funcEnv = new Environment(environment);
-    const userFunc = func.value as unknown as FunctionDeclaration;
-    for (const param of userFunc.parameters) {
-      const val = environment.get(param);
-      if (val == undefined) throw new UndefinedVariableError(param);
+    const functionDeclaration = func.value as unknown as FunctionDeclaration;
 
-      funcEnv.add(param, val);
+    // first call
+    const args = call.arguments[0];
+    const values: Value[] = [];
+
+    // evaluate args
+    for (const expression of args.expressions) {
+      const val = evaluateExpression(expression, environment);
+      values.push(val);
     }
-    return evaluateBlock(userFunc.block, funcEnv);
+
+    // bind args into env for the function
+    const envForCall = new Environment(environment);
+    functionDeclaration.parameters.forEach((v, i) => {
+      envForCall.add(v, values[i]);
+    });
+    return evaluateBlock(functionDeclaration.block, envForCall);
   }
 
   throw new UncallableFunctionError(name);
