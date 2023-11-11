@@ -1,0 +1,11 @@
+fun execute_3_times(f) {
+  for (var i = 0; i < 3; i = i + 1) {
+    f();
+  }
+}
+
+fun hello() {
+  print "hello";
+}
+
+execute_3_times(hello);
