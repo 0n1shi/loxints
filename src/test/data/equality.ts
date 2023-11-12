@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   ComparisionsAndOperator,
   Equality,
@@ -6,12 +6,10 @@ import {
   Primary,
   PrimaryType,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Equality;
 };
 
@@ -30,6 +28,9 @@ export const equalityTests: TestData[] = [
       OperatorForComparisions.EqualEqual,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Boolean, false),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "1 != 2",
@@ -45,5 +46,8 @@ export const equalityTests: TestData[] = [
       OperatorForComparisions.BangEqual,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Boolean, true),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

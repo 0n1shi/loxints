@@ -6,12 +6,10 @@ import {
   PrimaryType,
   TermsAndOperator,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Comparision;
 };
 
@@ -30,6 +28,9 @@ export const comparisionTests: TestData[] = [
       OperatorForTerms.Less,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Boolean, true),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "1 <= 2",
@@ -45,6 +46,9 @@ export const comparisionTests: TestData[] = [
       OperatorForTerms.LessEqual,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Boolean, true),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "1 > 2",
@@ -60,6 +64,9 @@ export const comparisionTests: TestData[] = [
       OperatorForTerms.Greater,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Boolean, false),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "1 >= 2",
@@ -75,5 +82,8 @@ export const comparisionTests: TestData[] = [
       OperatorForTerms.GreaterEqual,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Boolean, false),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   ComparisionsAndOperator,
   LogicAndsWithOr,
@@ -7,12 +7,10 @@ import {
   Primary,
   PrimaryType,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: LogicOr;
 };
 
@@ -30,6 +28,9 @@ export const logicOrTests: TestData[] = [
       new Primary(PrimaryType.True),
       new Primary(PrimaryType.False),
     ),
+    value: new Value(ValueType.Boolean, true),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "1 == 1 or 1 == 2",
@@ -56,5 +57,8 @@ export const logicOrTests: TestData[] = [
         new Primary(PrimaryType.Number, 2),
       ),
     ),
+    value: new Value(ValueType.Boolean, true),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

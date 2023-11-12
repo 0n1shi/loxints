@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   FanctorsAndOperator,
   OperatorForFanctors,
@@ -6,12 +6,10 @@ import {
   PrimaryType,
   Term,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Term;
 };
 
@@ -30,6 +28,9 @@ export const termTests: TestData[] = [
       OperatorForFanctors.Plus,
       new Primary(PrimaryType.Number, 10),
     ),
+    value: new Value(ValueType.Number, 20),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "10 - 10",
@@ -45,5 +46,8 @@ export const termTests: TestData[] = [
       OperatorForFanctors.Minus,
       new Primary(PrimaryType.Number, 10),
     ),
+    value: new Value(ValueType.Number, 0),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

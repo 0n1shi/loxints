@@ -1,5 +1,13 @@
 import { TokenType } from "../../token/type.ts";
-import { Primary, PrimaryType } from "../../ast/type.ts";
+import {
+  FanctorsAndOperator,
+  Group,
+  OperatorForFanctors,
+  OperatorForTerms,
+  Primary,
+  PrimaryType,
+  TermsAndOperator,
+} from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
 import { Environment, Value, ValueType } from "../../eval/type.ts";
 
@@ -73,5 +81,30 @@ export const primaryTests: TestData[] = [
       "name",
       new Value(ValueType.String, "mike"),
     ),
+  },
+  {
+    name: "group",
+    program: "(1 + 2)",
+    lines: 1,
+    tokens: [
+      { type: TokenType.ParenLeft },
+      { type: TokenType.Number, value: 1 },
+      { type: TokenType.Plus },
+      { type: TokenType.Number, value: 2 },
+      { type: TokenType.ParenRight },
+    ],
+    ast: new Primary(
+      PrimaryType.Group,
+      new Group(
+        new FanctorsAndOperator(
+          new Primary(PrimaryType.Number, 1),
+          OperatorForFanctors.Plus,
+          new Primary(PrimaryType.Number, 2),
+        ),
+      ),
+    ),
+    value: new Value(ValueType.Number, 3),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

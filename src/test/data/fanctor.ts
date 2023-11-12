@@ -8,12 +8,10 @@ import {
   UnariesAndOperator,
   UnaryWithOperator,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Fanctor;
 };
 
@@ -30,6 +28,9 @@ export const fanctorTests: TestData[] = [
       OperatorForUnary.Minus,
       new Primary(PrimaryType.Number, 10),
     ),
+    value: new Value(ValueType.Number, -10),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "10 / 2",
@@ -45,6 +46,9 @@ export const fanctorTests: TestData[] = [
       OperatorForUnaries.Slash,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Number, 5),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "-10 * 2",
@@ -64,5 +68,8 @@ export const fanctorTests: TestData[] = [
       OperatorForUnaries.Star,
       new Primary(PrimaryType.Number, 2),
     ),
+    value: new Value(ValueType.Number, -20),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

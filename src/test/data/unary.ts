@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   OperatorForUnary,
   Primary,
@@ -6,12 +6,10 @@ import {
   Unary,
   UnaryWithOperator,
 } from "../../ast/type.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
+import { TestDataBase } from "./data.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Unary;
 };
 
@@ -28,6 +26,9 @@ export const unaryTests: TestData[] = [
       OperatorForUnary.Minus,
       new Primary(PrimaryType.Number, 10),
     ),
+    value: new Value(ValueType.Number, -10),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "--10",
@@ -45,6 +46,9 @@ export const unaryTests: TestData[] = [
         new Primary(PrimaryType.Number, 10),
       ),
     ),
+    value: new Value(ValueType.Number, 10),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "!true",
@@ -58,6 +62,9 @@ export const unaryTests: TestData[] = [
       OperatorForUnary.Bang,
       new Primary(PrimaryType.True),
     ),
+    value: new Value(ValueType.Boolean, false),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
   {
     name: "!!false",
@@ -75,5 +82,8 @@ export const unaryTests: TestData[] = [
         new Primary(PrimaryType.False),
       ),
     ),
+    value: new Value(ValueType.Boolean, false),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];
