@@ -1,24 +1,24 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
-import { primaryTests } from "../../test/data/primary.ts";
-import { unaryTests } from "../../test/data/unary.ts";
-import { fanctorTests } from "../../test/data/fanctor.ts";
-import { termTests } from "../../test/data/term.ts";
-import { comparisionTests } from "../../test/data/comparision.ts";
-import { equalityTests } from "../../test/data/equality.ts";
-import { logicAndTests } from "../../test/data/logic_and.ts";
-import { logicOrTests } from "../../test/data/logic_or.ts";
-import { assignmentTests } from "../../test/data/assignment.ts";
-import { returnStatementTests } from "../../test/data/return_statement.ts";
-import { blockTests } from "../../test/data/block.ts";
-import { whileStatementTests } from "../../test/data/while_statement.ts";
-import { printStatementTests } from "../../test/data/print_statement.ts";
-import { ifStatementTests } from "../../test/data/if_statement.ts";
-import { forStatementTests } from "../../test/data/for_statement.ts";
-import { expressionStatementTests } from "../../test/data/expression_statement.ts";
-import { variableDeclarationTests } from "../../test/data/variable_declaration.ts";
-import { argumentsTests } from "../../test/data/arguments.ts";
-import { callTests } from "../../test/data/call.ts";
-import { functionDeclarationTests } from "../../test/data/function_declaration.ts";
+import { primaryTests } from "../data/primary.ts";
+import { unaryTests } from "../data/unary.ts";
+import { fanctorTests } from "../data/fanctor.ts";
+import { termTests } from "../data/term.ts";
+import { comparisionTests } from "../data/comparision.ts";
+import { equalityTests } from "../data/equality.ts";
+import { logicAndTests } from "../data/logic_and.ts";
+import { logicOrTests } from "../data/logic_or.ts";
+import { assignmentTests } from "../data/assignment.ts";
+import { returnStatementTests } from "../data/return_statement.ts";
+import { blockTests } from "../data/block.ts";
+import { whileStatementTests } from "../data/while_statement.ts";
+import { printStatementTests } from "../data/print_statement.ts";
+import { ifStatementTests } from "../data/if_statement.ts";
+import { forStatementTests } from "../data/for_statement.ts";
+import { expressionStatementTests } from "../data/expression_statement.ts";
+import { variableDeclarationTests } from "../data/variable_declaration.ts";
+import { argumentsTests } from "../data/arguments.ts";
+import { callTests } from "../data/call.ts";
+import { functionDeclarationTests } from "../data/function_declaration.ts";
 
 import {
   makeArguments,
@@ -41,7 +41,7 @@ import {
   makeUnary,
   makeVariableDeclaration,
   makeWhileStatement,
-} from "../func.ts";
+} from "../../ast/func.ts";
 
 Deno.test("Testing ast for function declarations", async (context) => {
   for (const test of functionDeclarationTests) {

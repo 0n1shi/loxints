@@ -1,25 +1,36 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
+  evaluateAssignment,
   evaluateCall,
   evaluateComparision,
   evaluateEquality,
+  evaluateFanctor,
   evaluateLogicAnd,
   evaluateLogicOr,
   evaluatePrimary,
   evaluateTerm,
-} from "../func.ts";
+  evaluateUnary,
+} from "../../eval/func.ts";
 import { primaryTests } from "../../test/data/primary.ts";
-import { evaluateUnary } from "../func.ts";
 import { callTests } from "../../test/data/call.ts";
 import { unaryTests } from "../../test/data/unary.ts";
 import { fanctorTests } from "../../test/data/fanctor.ts";
-import { evaluateFanctor } from "../func.ts";
 import { termTests } from "../../test/data/term.ts";
 import { comparisionTests } from "../../test/data/comparision.ts";
 import { equalityTests } from "../../test/data/equality.ts";
 import { logicAndTests } from "../../test/data/logic_and.ts";
 import { logicOrTests } from "../../test/data/logic_or.ts";
+import { assignmentTests } from "../../test/data/assignment.ts";
 
+Deno.test("Testing evaluation of assignment", async (context) => {
+  for (const test of assignmentTests) {
+    await context.step(test.name, () => {
+      const value = evaluateAssignment(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
 Deno.test("Testing evaluation of logic or", async (context) => {
   for (const test of logicOrTests) {
     await context.step(test.name, () => {

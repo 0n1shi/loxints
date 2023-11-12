@@ -1,16 +1,14 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   Assignment,
   AssignmentWithIdentifier,
   Primary,
   PrimaryType,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Assignment;
 };
 
@@ -27,6 +25,15 @@ export const assignmentTests: TestData[] = [
     ast: new AssignmentWithIdentifier(
       "name",
       new Primary(PrimaryType.String, "mike"),
+    ),
+    value: new Value(ValueType.String, "mike"),
+    environmentBefore: new Environment().add(
+      "name",
+      new Value(ValueType.String, "john"),
+    ),
+    environmentAfter: new Environment().add(
+      "name",
+      new Value(ValueType.String, "mike"),
     ),
   },
 ];

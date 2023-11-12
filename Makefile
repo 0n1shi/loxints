@@ -6,10 +6,10 @@ test:
 	deno test --quiet src/
 
 test_token:
-	deno test --quiet src/token
+	deno test --quiet src/test/token
 
 test_ast:
-	deno test --quiet src/ast
+	deno test --quiet src/test/ast
 
 test_eval:
-	deno test --quiet src/eval
+	deno test --quiet src/test/eval
