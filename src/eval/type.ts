@@ -22,10 +22,12 @@ export enum ValueType {
 export class UserFunction {
   parameters: string[];
   block: Block;
+  environment: Environment;
 
-  constructor(parameters: string[], block: Block) {
+  constructor(parameters: string[], block: Block, environment: Environment) {
     this.parameters = parameters;
     this.block = block;
+    this.environment = environment;
   }
 }
 

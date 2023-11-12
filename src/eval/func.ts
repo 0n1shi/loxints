@@ -90,6 +90,7 @@ export function evaluateFunctionDeclaration(
       new UserFunction(
         functionDeclaration.parameters,
         functionDeclaration.block,
+        environment,
       ),
     ),
   );
@@ -473,23 +474,16 @@ export function evaluateCall(call: Call, environment: Environment): Value {
   if (func == undefined) throw new UndefinedFunctionError(name);
 
   if (func.type == ValueType.NativeFunction) {
-    const args = call.arguments[0];
-    const argVals = [];
-    for (const expression of args.expressions) {
-      const val = evaluateExpression(expression, environment);
-      argVals.push(val.value);
-    }
-    let returned = (func.value as (...args: any[]) => any)(...argVals);
-
-    const leftArguments = call.arguments.slice(1);
-    for (const args of leftArguments) {
+    let returned: any;
+    call.arguments.forEach((args, i) => {
       const argVals = [];
       for (const expression of args.expressions) {
         const val = evaluateExpression(expression, environment);
         argVals.push(val.value);
       }
-      returned = (returned as (...args: any[]) => any)(...argVals);
-    }
+      const f = (i === 0 ? func.value : returned) as (...args: any[]) => any;
+      returned = f(...argVals);
+    });
 
     let valueType = ValueType.Nil;
     switch (typeof returned) {
@@ -508,34 +502,35 @@ export function evaluateCall(call: Call, environment: Environment): Value {
   }
 
   if (func.type == ValueType.UserFunction) {
-    const functionDeclaration = func.value as unknown as FunctionDeclaration;
+    let returnedValue: Value = new Value(ValueType.Nil, null);
+    call.arguments.forEach((args, i) => {
+      const userFunction =
+        (i == 0 ? func.value : returnedValue.value) as unknown as UserFunction;
+      const values: Value[] = [];
 
-    // first call
-    const args = call.arguments[0];
-    const values: Value[] = [];
-
-    // evaluate args
-    for (const expression of args.expressions) {
-      const val = evaluateExpression(expression, environment);
-      values.push(val);
-    }
-
-    // bind args into env for the function
-    const envForCall = new Environment(environment);
-    functionDeclaration.parameters.forEach((v, i) => {
-      envForCall.add(v, values[i]);
-    });
-
-    try {
-      evaluateBlock(functionDeclaration.block, envForCall);
-    } catch (e) {
-      if (e instanceof ReturnValueError) {
-        return e.value;
+      // evaluate args
+      for (const expression of args.expressions) {
+        const val = evaluateExpression(expression, environment);
+        values.push(val);
       }
-      throw e;
-    }
 
-    return new Value(ValueType.Nil, null);
+      // bind args into env for the function
+      const envForCall = new Environment(userFunction.environment);
+      userFunction.parameters.forEach((v, i) => {
+        envForCall.add(v, values[i]);
+      });
+
+      try {
+        evaluateBlock(userFunction.block, envForCall);
+      } catch (e) {
+        if (e instanceof ReturnValueError) {
+          returnedValue = e.value;
+        } else {
+          throw e;
+        }
+      }
+    });
+    return returnedValue;
   }
 
   throw new UncallableFunctionError(name);

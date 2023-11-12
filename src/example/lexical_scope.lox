@@ -12,3 +12,5 @@ fun makeCount() {
 var count = makeCount();
 
 count();
+count();
+count();

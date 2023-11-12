@@ -14,6 +14,7 @@ syntax keyword statement return
 syntax keyword var var
 
 syntax region string start=+"+ end=+"+
+syntax region comment start=+//+ end=+\n+
 
 syntax keyword boolean true
 syntax keyword boolean false
@@ -39,6 +40,7 @@ highlight link string String
 highlight link statement Statement
 highlight link logic Operator
 highlight link operator Operator
+highlight link comment Comment
 
 
 " Error          xxx ctermfg=204 guifg=#e06c75

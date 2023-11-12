@@ -1,5 +1,6 @@
+var max = 3;
 fun execute_3_times(f) {
-  for (var i = 0; i < 3; i = i + 1) {
+  for (var i = 0; i < max; i = i + 1) {
     f();
   }
 }
