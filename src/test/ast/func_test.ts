@@ -19,6 +19,7 @@ import { variableDeclarationTests } from "../data/variable_declaration.ts";
 import { argumentsTests } from "../data/arguments.ts";
 import { callTests } from "../data/call.ts";
 import { functionDeclarationTests } from "../data/function_declaration.ts";
+import { expressionTests } from "../data/expression.ts";
 
 import {
   makeArguments,
@@ -27,6 +28,7 @@ import {
   makeCall,
   makeComparision,
   makeEquality,
+  makeExpression,
   makeExpressionStatement,
   makeFanctor,
   makeForStatement,
@@ -111,6 +113,14 @@ Deno.test("Testing ast for blocks", async (context) => {
   for (const test of blockTests) {
     await context.step(test.name, () => {
       const [ast] = makeBlock(test.tokens);
+      assertEquals(ast, test.ast);
+    });
+  }
+});
+Deno.test("Testing ast for expressions", async (context) => {
+  for (const test of expressionTests) {
+    await context.step(test.name, () => {
+      const [ast] = makeExpression(test.tokens);
       assertEquals(ast, test.ast);
     });
   }
