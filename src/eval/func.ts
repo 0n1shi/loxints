@@ -4,6 +4,7 @@ import {
   AST,
   Block,
   Call,
+  ClassDeclaration,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -40,6 +41,8 @@ import {
   WhileStatement,
 } from "../ast/type.ts";
 import {
+  Class,
+  ClassInstance,
   Environment,
   ReturnValueError,
   UserFunction,
@@ -47,6 +50,7 @@ import {
   ValueType,
 } from "./type.ts";
 import {
+  DefinedClassError,
   DefinedFunctionError,
   InvalidComparisionError,
   InvalidFanctorError,
@@ -73,6 +77,18 @@ export function executeProgram(program: Program, environment: Environment) {
   for (const declaration of program.declarations) {
     evaluateDeclaration(declaration, environment);
   }
+}
+
+export function evaluateClassDeclaration(
+  classDeclaration: ClassDeclaration,
+  environment: Environment,
+): Value {
+  const identifier = classDeclaration.identifier;
+  if (environment.has(identifier)) {
+    throw new DefinedClassError(identifier);
+  }
+  environment.add(identifier, new Value(ValueType.Class, new Class()));
+  return new Value(ValueType.Nil, null);
 }
 
 export function evaluateFunctionDeclaration(
@@ -110,6 +126,9 @@ export function evaluateDeclaration(
   declaration: Declaration,
   environment: Environment,
 ): Value {
+  if (declaration instanceof ClassDeclaration) {
+    return evaluateClassDeclaration(declaration, environment);
+  }
   if (declaration instanceof FunctionDeclaration) {
     return evaluateFunctionDeclaration(declaration, environment);
   }
@@ -531,6 +550,10 @@ export function evaluateCall(call: Call, environment: Environment): Value {
       }
     });
     return returnedValue;
+  }
+
+  if (func.type == ValueType.Class) {
+    return new Value(ValueType.ClassInstance, new ClassInstance(name));
   }
 
   throw new UncallableFunctionError(name);

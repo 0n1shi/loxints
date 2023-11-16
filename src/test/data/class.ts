@@ -11,7 +11,7 @@ import {
   ReturnStatement,
 } from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
-import { Environment } from "../../eval/type.ts";
+import { Class, Environment } from "../../eval/type.ts";
 import { Value, ValueType } from "../../eval/type.ts";
 
 type TestData = TestDataBase & {
@@ -52,7 +52,10 @@ export const classTests: TestData[] = [
     ]),
     value: new Value(ValueType.Nil, null),
     environmentBefore: new Environment(),
-    environmentAfter: new Environment(),
+    environmentAfter: new Environment().add(
+      "User",
+      new Value(ValueType.Class, new Class("User")),
+    ),
   },
   {
     name: "class declaration 2",
@@ -96,6 +99,9 @@ export const classTests: TestData[] = [
     ]),
     value: new Value(ValueType.Nil, null),
     environmentBefore: new Environment(),
-    environmentAfter: new Environment(),
+    environmentAfter: new Environment().add(
+      "User",
+      new Value(ValueType.Class, new Class("User")),
+    ),
   },
 ];

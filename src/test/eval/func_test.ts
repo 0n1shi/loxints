@@ -2,6 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
   evaluateAssignment,
   evaluateCall,
+  evaluateClassDeclaration,
   evaluateComparision,
   evaluateEquality,
   evaluateExpression,
@@ -23,7 +24,17 @@ import { logicAndTests } from "../../test/data/logic_and.ts";
 import { logicOrTests } from "../../test/data/logic_or.ts";
 import { assignmentTests } from "../../test/data/assignment.ts";
 import { expressionTests } from "../data/expression.ts";
+import { classTests } from "../data/class.ts";
 
+Deno.test("Testing evaluation of class", async (context) => {
+  for (const test of classTests) {
+    await context.step(test.name, () => {
+      const value = evaluateClassDeclaration(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
 Deno.test("Testing evaluation of expression", async (context) => {
   for (const test of expressionTests) {
     await context.step(test.name, () => {

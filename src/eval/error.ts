@@ -35,6 +35,11 @@ export class DefinedFunctionError extends Error {
     super(`Function ${name} is already defined.`);
   }
 }
+export class DefinedClassError extends Error {
+  public constructor(name: string) {
+    super(`Class ${name} is already defined.`);
+  }
+}
 export class UncallableFunctionError extends Error {
   public constructor(name: string) {
     super(`Function ${name} is not callable.`);

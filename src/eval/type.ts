@@ -15,8 +15,24 @@ export enum ValueType {
   Number = "[number]",
   Boolean = "[boolean]",
   Nil = "[nil]",
+  Class = "[class]",
+  ClassInstance = "[class instance]",
   UserFunction = "[user function]",
   NativeFunction = "[native function]",
+}
+
+export class Class {
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+
+export class ClassInstance {
+  className: string;
+  constructor(className: string) {
+    this.className = className;
+  }
 }
 
 export class UserFunction {
@@ -31,13 +47,17 @@ export class UserFunction {
   }
 }
 
+export type NativeFunction = (...args: any[]) => any;
+
 export type ValueTypeInTS =
   | string
   | number
   | boolean
   | null
+  | Class
+  | ClassInstance
   | UserFunction
-  | ((...args: any[]) => any);
+  | NativeFunction;
 
 export class Value {
   type: ValueType;
