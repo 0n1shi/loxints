@@ -6,17 +6,24 @@ import { Environment } from "./src/eval/type.ts";
 
 if (import.meta.main) {
   const run = new Command()
-    .arguments("<file_path:string>")
     .description("run source code of file path")
-    .action((_, file_path: string) => {
+    .option("-d --debug", "debug mode", {
+      default: false,
+    })
+    .arguments("<file_path:string>")
+    .action(({ debug }, file_path: string) => {
       const sourceCode = Deno.readTextFileSync(file_path);
       const [tokens, lineNumber] = tokenize(sourceCode);
       const [ast, leftTokens] = makeAST(tokens);
-      console.log("-------------- output --------------");
+      if (debug) {
+        console.log("-------------- output --------------");
+      }
       execute(ast);
-      console.log("--------------- meta ---------------");
-      console.log(`line number: ${lineNumber}`);
-      console.log(`left tokens: ${leftTokens}`);
+      if (debug) {
+        console.log("--------------- meta ---------------");
+        console.log(`line number: ${lineNumber}`);
+        console.log(`left tokens: ${leftTokens}`);
+      }
     });
   const interpret = new Command()
     .description("start interpreter")
