@@ -20,12 +20,14 @@ import { argumentsTests } from "../data/arguments.ts";
 import { callTests } from "../data/call.ts";
 import { functionDeclarationTests } from "../data/function_declaration.ts";
 import { expressionTests } from "../data/expression.ts";
+import { classTests } from "../data/class.ts";
 
 import {
   makeArguments,
   makeAssignment,
   makeBlock,
   makeCall,
+  makeClassDeclaration,
   makeComparision,
   makeEquality,
   makeExpression,
@@ -45,6 +47,14 @@ import {
   makeWhileStatement,
 } from "../../ast/func.ts";
 
+Deno.test("Testing ast for class declarations", async (context) => {
+  for (const test of classTests) {
+    await context.step(test.name, () => {
+      const [ast] = makeClassDeclaration(test.tokens);
+      assertEquals(ast, test.ast);
+    });
+  }
+});
 Deno.test("Testing ast for function declarations", async (context) => {
   for (const test of functionDeclarationTests) {
     await context.step(test.name, () => {

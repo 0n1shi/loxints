@@ -6,6 +6,7 @@ import {
   AST,
   Block,
   Call,
+  ClassDeclaration,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -62,6 +63,11 @@ export function makeProgram(tokens: Token[]): [Program, Token[]] {
 export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
   const first = tokens[0];
 
+  // class declaration
+  if (first.type == TokenType.Class) {
+    return makeClassDeclaration(tokens);
+  }
+
   // function declaration
   if (first.type == TokenType.Fun) {
     return makeFunctionDeclaration(tokens);
@@ -73,6 +79,54 @@ export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
   }
 
   return makeStatement(tokens);
+}
+
+export function makeClassDeclaration(
+  tokens: Token[],
+): [ClassDeclaration, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "class"
+
+  const identifider = leftTokens[0].value as string; // must be class name
+  leftTokens = leftTokens.slice(2); // consume "[identifider]" and "{"
+
+  const methods: FunctionDeclaration[] = [];
+  let nextToken = leftTokens[0];
+  while (nextToken && nextToken.type != TokenType.BraceRight) {
+    let classMethod: FunctionDeclaration;
+    [classMethod, leftTokens] = makeClassMethodDeclaration(leftTokens);
+    methods.push(classMethod);
+    nextToken = leftTokens[0];
+  }
+  leftTokens = leftTokens.slice(1); // consume "}"
+
+  return [new ClassDeclaration(identifider, methods), leftTokens];
+}
+
+function makeClassMethodDeclaration(
+  tokens: Token[],
+): [FunctionDeclaration, Token[]] {
+  const identifider = tokens[0].value as string; // must be function name
+  let leftTokens = tokens.slice(2); // consume "[identifider]" and "("
+
+  const parameters: string[] = [];
+  let nextToken = leftTokens[0];
+  while (nextToken && nextToken.type != TokenType.ParenRight) {
+    parameters.push(nextToken.value as string);
+    leftTokens = leftTokens.slice(1); // consume "[identifider]"
+
+    nextToken = leftTokens[0];
+    if (nextToken && nextToken.type == TokenType.Comma) {
+      leftTokens = leftTokens.slice(1); // consume ","
+      nextToken = leftTokens[0];
+    }
+  }
+
+  leftTokens = leftTokens.slice(1); // consume ")"
+
+  let block: Block;
+  [block, leftTokens] = makeBlock(leftTokens);
+
+  return [new FunctionDeclaration(identifider, parameters, block), leftTokens];
 }
 
 export function makeFunctionDeclaration(

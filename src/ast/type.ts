@@ -14,7 +14,21 @@ export class Program {
 /**
  * Declaration
  */
-export type Declaration = FunctionDeclaration | VariableDeclaration | Statement;
+export type Declaration =
+  | ClassDeclaration
+  | FunctionDeclaration
+  | VariableDeclaration
+  | Statement;
+
+export class ClassDeclaration {
+  identifier: string;
+  methods: FunctionDeclaration[];
+
+  constructor(identifier: string, methods: FunctionDeclaration[]) {
+    this.identifier = identifier;
+    this.methods = methods;
+  }
+}
 
 export class FunctionDeclaration {
   identifier: string;
