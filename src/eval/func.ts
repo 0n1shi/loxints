@@ -87,7 +87,7 @@ export function evaluateClassDeclaration(
   if (environment.has(identifier)) {
     throw new DefinedClassError(identifier);
   }
-  environment.add(identifier, new Value(ValueType.Class, new Class()));
+  environment.add(identifier, new Value(ValueType.Class, new Class(identifier)));
   return new Value(ValueType.Nil, null);
 }
 
