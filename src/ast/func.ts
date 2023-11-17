@@ -1,13 +1,12 @@
 import { Token } from "../token/type.ts";
 import {
   Arguments,
+  ArgumentsOrGetter,
   Assignment,
   AssignmentWithIdentifier,
   AST,
   Block,
   Call,
-  CallOrGetter,
-  CallWithArguments,
   ClassDeclaration,
   Comparision,
   ComparisionsAndOperator,
@@ -33,6 +32,7 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
+  PrimaryWithArgumentsOrGetters,
   PrintStatement,
   Program,
   ReturnStatement,
@@ -550,18 +550,34 @@ export function makeCall(tokens: Token[]): [Call, Token[]] {
   let leftTokens: Token[];
   [primary, leftTokens] = makePrimary(tokens);
 
-  const argsList: Arguments[] = [];
+  const argumentsOrGetters: ArgumentsOrGetter[] = [];
   let nextToken = leftTokens[0];
-  while (nextToken && nextToken.type == TokenType.ParenLeft) {
-    let args: Arguments;
-    [args, leftTokens] = makeArguments(leftTokens);
-    argsList.push(args);
+  while (nextToken) {
+    if (nextToken.type == TokenType.ParenLeft) {
+      let args: Arguments;
+      [args, leftTokens] = makeArguments(leftTokens);
+      argumentsOrGetters.push(args);
 
-    nextToken = leftTokens[0];
+      nextToken = leftTokens[0];
+    } else if (nextToken.type == TokenType.Dot) {
+      let getter: Getter;
+      [getter, leftTokens] = makeGetter(leftTokens);
+      argumentsOrGetters.push(getter);
+    }
   }
 
-  if (argsList.length == 0) return [primary, leftTokens];
-  return [new PrimaryWithArguments(primary, argsList), leftTokens];
+  if (argumentsOrGetters.length == 0) return [primary, leftTokens];
+  return [
+    new PrimaryWithArgumentsOrGetters(primary, argumentsOrGetters),
+    leftTokens,
+  ];
+}
+
+export function makeGetter(tokens: Token[]): [Getter, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "."
+  const token = tokens[0];
+  leftTokens = leftTokens.slice(1); // consume IDENTIFIER
+  return [new Getter(token.value as string), leftTokens];
 }
 
 export function makeArguments(

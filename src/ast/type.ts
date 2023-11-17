@@ -296,24 +296,27 @@ export class UnaryWithOperator {
 /**
  * Call
  */
-export type Call = Primary | PrimaryWithCallOrGetters;
+export type Call = Primary | PrimaryWithArgumentsOrGetters;
 
-export class PrimaryWithCallOrGetters {
+export class PrimaryWithArgumentsOrGetters {
   primary: Primary;
-  callOrGetters: CallOrGetter[];
+  argumentsOrGetters: ArgumentsOrGetter[];
 
-  constructor(primary: Primary, callOrGetters: CallOrGetter[]) {
+  constructor(
+    primary: Primary,
+    argumentsOrGetters: ArgumentsOrGetter[],
+  ) {
     this.primary = primary;
-    this.callOrGetters = callOrGetters;
+    this.argumentsOrGetters = argumentsOrGetters;
   }
 }
 
-export type CallOrGetter = CallWithArguments | Getter;
+export type ArgumentsOrGetter = Arguments | Getter;
 
 /**
  * Arguments
  */
-export class CallWithArguments {
+export class Arguments {
   expressions: Expression[];
 
   constructor(expressions: Expression[]) {

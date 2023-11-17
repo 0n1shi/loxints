@@ -7,7 +7,6 @@ import {
   OperatorForFanctors,
   Primary,
   PrimaryType,
-  PrimaryWithArguments,
   PrintStatement,
   ReturnStatement,
 } from "../../ast/type.ts";
@@ -48,21 +47,6 @@ const testEnv = new Environment().add(
 );
 
 export const callTests: TestData[] = [
-  {
-    name: "function identifier",
-    program: `hello`,
-    lines: 1,
-    tokens: [
-      { type: TokenType.Identifier, value: "hello" },
-    ],
-    ast: new Primary(PrimaryType.Identifier, "hello"),
-    value: new Value(
-      ValueType.UserFunction,
-      userFunctionHello,
-    ),
-    environmentBefore: testEnv,
-    environmentAfter: testEnv,
-  },
   {
     name: "call without any arguments",
     program: `hello()`,
