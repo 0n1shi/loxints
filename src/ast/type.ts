@@ -296,26 +296,39 @@ export class UnaryWithOperator {
 /**
  * Call
  */
-export type Call = Primary | PrimaryWithArguments;
+export type Call = Primary | PrimaryWithCallOrGetters;
 
-export class PrimaryWithArguments {
+export class PrimaryWithCallOrGetters {
   primary: Primary;
-  arguments: Arguments[];
+  callOrGetters: CallOrGetter[];
 
-  constructor(primary: Primary, args: Arguments[]) {
+  constructor(primary: Primary, callOrGetters: CallOrGetter[]) {
     this.primary = primary;
-    this.arguments = args;
+    this.callOrGetters = callOrGetters;
   }
 }
+
+export type CallOrGetter = CallWithArguments | Getter;
 
 /**
  * Arguments
  */
-export class Arguments {
+export class CallWithArguments {
   expressions: Expression[];
 
   constructor(expressions: Expression[]) {
     this.expressions = expressions;
+  }
+}
+
+/**
+ * Property Access
+ */
+export class Getter {
+  identifier: string;
+
+  constructor(identifier: string) {
+    this.identifier = identifier;
   }
 }
 
