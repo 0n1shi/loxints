@@ -30,19 +30,22 @@ export class Class {
 
 export class ClassInstance {
   className: string;
-  fields: Map<string, any>;
+  fields: Map<string, Value>;
 
   constructor(className: string) {
     this.className = className;
     this.fields = new Map();
   }
 
-  get(key: string): any {
-    if (this.fields.has(key)) {
-      return this.fields.get(key);
+  get(key: string): Value {
+    if (!this.fields.has(key)) {
+      throw new UndefinedClassMember(this.className, key);
     }
+    return this.fields.get(key)!;
+  }
 
-    throw new UndefinedClassMember(this.className, key);
+  set(key: string, val: Value): void {
+    this.fields.set(key, val);
   }
 }
 

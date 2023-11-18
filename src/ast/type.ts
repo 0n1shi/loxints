@@ -172,10 +172,12 @@ export class EqualitiesWithAnd {
 export class AssignmentWithIdentifier {
   identifier: string;
   assignment: Assignment;
+  call?: Call;
 
-  constructor(identifier: string, assignment: Assignment) {
+  constructor(identifier: string, assignment: Assignment, call?: Call) {
     this.identifier = identifier;
     this.assignment = assignment;
+    this.call = call;
   }
 }
 

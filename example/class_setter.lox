@@ -1,0 +1,4 @@
+class User {}
+
+var mike = User();
+mike.name = "Mike";

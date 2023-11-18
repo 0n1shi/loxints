@@ -112,7 +112,7 @@ export const callTests: TestData[] = [
   },
   {
     name: "call class method",
-    program: `user.id(1)`,
+    program: `user.id()`,
     lines: 1,
     tokens: [
       { type: TokenType.Identifier, value: "user" },

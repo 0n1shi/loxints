@@ -47,6 +47,7 @@ import {
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
+import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -356,6 +357,23 @@ export function makeAssignment(tokens: Token[]): [Assignment, Token[]] {
       new AssignmentWithIdentifier(firstToken.value as string, assignment),
       leftTokens,
     ];
+  } else if (
+    firstToken?.type == TokenType.Identifier &&
+    secondToken?.type == TokenType.Dot
+  ) {
+    let call: Call;
+    let leftTokens: Token[] = [];
+    [call, leftTokens] = makeCall(tokens);
+    leftTokens = leftTokens.slice(1); // consume "="
+    let assignment: Assignment;
+    [assignment, leftTokens] = makeAssignment(leftTokens);
+
+    const tail: Getter = (call as PrimaryWithArgumentsOrGetters)
+      .argumentsOrGetters.pop() as Getter;
+    return [
+      new AssignmentWithIdentifier(tail.identifier, assignment, call),
+      leftTokens,
+    ];
   }
 
   return makeLogicOr(tokens);
@@ -556,7 +574,6 @@ export function makeCall(tokens: Token[]): [Call, Token[]] {
     if (nextToken.type == TokenType.ParenLeft) {
       let args: Arguments;
       [args, leftTokens] = makeArguments(leftTokens);
-      console.warn(args);
       argumentsOrGetters.push(args);
       nextToken = leftTokens[0];
     } else if (nextToken.type == TokenType.Dot) {

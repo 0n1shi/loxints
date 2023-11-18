@@ -56,6 +56,7 @@ import {
   InvalidFanctorError,
   InvalidStatementError,
   InvalidTermError,
+  RuntimeError,
   UncallableFunctionError,
   UndefinedFunctionError,
   UndefinedVariableError,
@@ -87,7 +88,10 @@ export function evaluateClassDeclaration(
   if (environment.has(identifier)) {
     throw new DefinedClassError(identifier);
   }
-  environment.add(identifier, new Value(ValueType.Class, new Class(identifier)));
+  environment.add(
+    identifier,
+    new Value(ValueType.Class, new Class(identifier)),
+  );
   return new Value(ValueType.Nil, null);
 }
 
@@ -265,6 +269,21 @@ export function evaluateAssignment(
   environment: Environment,
 ): Value {
   if (assignment instanceof AssignmentWithIdentifier) {
+    // class instance setter
+    if (assignment.call) {
+      const instance = evaluateCall(assignment.call, environment);
+      if (instance.type != ValueType.ClassInstance) {
+        throw new RuntimeError(
+          "Invalid assignment: value must be class instance.",
+        );
+      }
+
+      const val = evaluateAssignment(assignment.assignment, environment);
+      (instance.value as ClassInstance).set(assignment.identifier, val);
+      return val;
+    }
+
+    // variable assignment
     if (!environment.has(assignment.identifier)) {
       throw new UndefinedVariableError(assignment.identifier);
     }
