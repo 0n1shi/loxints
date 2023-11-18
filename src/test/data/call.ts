@@ -4,9 +4,11 @@ import {
   Block,
   Call,
   FanctorsAndOperator,
+  Getter,
   OperatorForFanctors,
   Primary,
   PrimaryType,
+  PrimaryWithArgumentsOrGetters,
   PrintStatement,
   ReturnStatement,
 } from "../../ast/type.ts";
@@ -56,7 +58,7 @@ export const callTests: TestData[] = [
       { type: TokenType.ParenLeft },
       { type: TokenType.ParenRight },
     ],
-    ast: new PrimaryWithArguments(
+    ast: new PrimaryWithArgumentsOrGetters(
       new Primary(PrimaryType.Identifier, "hello"),
       [new Arguments([])],
     ),
@@ -76,13 +78,84 @@ export const callTests: TestData[] = [
       { type: TokenType.Number, value: 2 },
       { type: TokenType.ParenRight },
     ],
-    ast: new PrimaryWithArguments(
+    ast: new PrimaryWithArgumentsOrGetters(
       new Primary(PrimaryType.Identifier, "add"),
       [
         new Arguments([
           new Primary(PrimaryType.Number, 1),
           new Primary(PrimaryType.Number, 2),
         ]),
+      ],
+    ),
+    value: new Value(ValueType.Number, 3),
+    environmentBefore: testEnv,
+    environmentAfter: testEnv,
+  },
+  {
+    name: "property access",
+    program: `user.id`,
+    lines: 1,
+    tokens: [
+      { type: TokenType.Identifier, value: "user" },
+      { type: TokenType.Dot },
+      { type: TokenType.Identifier, value: "id" },
+    ],
+    ast: new PrimaryWithArgumentsOrGetters(
+      new Primary(PrimaryType.Identifier, "user"),
+      [
+        new Getter("id"),
+      ],
+    ),
+    value: new Value(ValueType.Number, 3),
+    environmentBefore: testEnv,
+    environmentAfter: testEnv,
+  },
+  {
+    name: "call class method",
+    program: `user.id(1)`,
+    lines: 1,
+    tokens: [
+      { type: TokenType.Identifier, value: "user" },
+      { type: TokenType.Dot },
+      { type: TokenType.Identifier, value: "id" },
+      { type: TokenType.ParenLeft },
+      { type: TokenType.ParenRight },
+    ],
+    ast: new PrimaryWithArgumentsOrGetters(
+      new Primary(PrimaryType.Identifier, "user"),
+      [
+        new Getter("id"),
+        new Arguments([]),
+      ],
+    ),
+    value: new Value(ValueType.Number, 3),
+    environmentBefore: testEnv,
+    environmentAfter: testEnv,
+  },
+  {
+    name: "method chain",
+    program: `egg.scramble(3).with(cheddar)`,
+    lines: 1,
+    tokens: [
+      { type: TokenType.Identifier, value: "egg" },
+      { type: TokenType.Dot },
+      { type: TokenType.Identifier, value: "scramble" },
+      { type: TokenType.ParenLeft },
+      { type: TokenType.Number, value: 3 },
+      { type: TokenType.ParenRight },
+      { type: TokenType.Dot },
+      { type: TokenType.Identifier, value: "with" },
+      { type: TokenType.ParenLeft },
+      { type: TokenType.Identifier, value: "cheddar" },
+      { type: TokenType.ParenRight },
+    ],
+    ast: new PrimaryWithArgumentsOrGetters(
+      new Primary(PrimaryType.Identifier, "egg"),
+      [
+        new Getter("scramble"),
+        new Arguments([new Primary(PrimaryType.Number, 3)]),
+        new Getter("with"),
+        new Arguments([new Primary(PrimaryType.Identifier, "cheddar")]),
       ],
     ),
     value: new Value(ValueType.Number, 3),

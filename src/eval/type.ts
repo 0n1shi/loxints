@@ -1,5 +1,5 @@
 import { Block } from "../ast/type.ts";
-import { UndefinedVariableError } from "./error.ts";
+import { UndefinedClassMember, UndefinedVariableError } from "./error.ts";
 
 export class ReturnValueError extends Error {
   value: Value;
@@ -30,8 +30,19 @@ export class Class {
 
 export class ClassInstance {
   className: string;
+  fields: Map<string, any>;
+
   constructor(className: string) {
     this.className = className;
+    this.fields = new Map();
+  }
+
+  get(key: string): any {
+    if (this.fields.has(key)) {
+      return this.fields.get(key);
+    }
+
+    throw new UndefinedClassMember(this.className, key);
   }
 }
 

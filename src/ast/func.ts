@@ -556,14 +556,15 @@ export function makeCall(tokens: Token[]): [Call, Token[]] {
     if (nextToken.type == TokenType.ParenLeft) {
       let args: Arguments;
       [args, leftTokens] = makeArguments(leftTokens);
+      console.warn(args);
       argumentsOrGetters.push(args);
-
       nextToken = leftTokens[0];
     } else if (nextToken.type == TokenType.Dot) {
       let getter: Getter;
       [getter, leftTokens] = makeGetter(leftTokens);
       argumentsOrGetters.push(getter);
-    }
+      nextToken = leftTokens[0];
+    } else break;
   }
 
   if (argumentsOrGetters.length == 0) return [primary, leftTokens];
@@ -575,7 +576,7 @@ export function makeCall(tokens: Token[]): [Call, Token[]] {
 
 export function makeGetter(tokens: Token[]): [Getter, Token[]] {
   let leftTokens = tokens.slice(1); // consume "."
-  const token = tokens[0];
+  const token = leftTokens[0];
   leftTokens = leftTokens.slice(1); // consume IDENTIFIER
   return [new Getter(token.value as string), leftTokens];
 }
