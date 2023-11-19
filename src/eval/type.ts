@@ -23,8 +23,22 @@ export enum ValueType {
 
 export class Class {
   name: string;
+  fields: Map<string, Value>;
+
   constructor(name: string) {
     this.name = name;
+    this.fields = new Map();
+  }
+
+  get(key: string): Value {
+    if (!this.fields.has(key)) {
+      throw new UndefinedClassMember(this.name, key);
+    }
+    return this.fields.get(key)!;
+  }
+
+  set(key: string, val: Value): void {
+    this.fields.set(key, val);
   }
 }
 

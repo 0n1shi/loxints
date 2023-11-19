@@ -25,6 +25,11 @@ export class InvalidStatementError extends Error {
     super("Invalid Statement Error");
   }
 }
+export class UndefinedError extends Error {
+  public constructor(name: string) {
+    super(`"${name}" is undefined.`);
+  }
+}
 export class UndefinedFunctionError extends Error {
   public constructor(name: string) {
     super(`Undefined function ${name}`);

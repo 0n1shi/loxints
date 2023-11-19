@@ -2,3 +2,4 @@ class User {}
 
 var mike = User();
 mike.name = "Mike";
+print mike.name;

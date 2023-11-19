@@ -16,6 +16,7 @@ import {
   FanctorsAndOperator,
   ForStatement,
   FunctionDeclaration,
+  Getter,
   Group,
   IfStatement,
   LogicAnd,
@@ -58,6 +59,7 @@ import {
   InvalidTermError,
   RuntimeError,
   UncallableFunctionError,
+  UndefinedError,
   UndefinedFunctionError,
   UndefinedVariableError,
 } from "./error.ts";
@@ -508,46 +510,59 @@ export function evaluateCall(call: Call, environment: Environment): Value {
   }
 
   const name = call.primary.value as string;
-  const func = environment.get(name);
-  if (func == undefined) throw new UndefinedFunctionError(name);
+  const funcOrVar = environment.get(name);
+  if (funcOrVar == undefined) throw new UndefinedError(name);
 
-  if (func.type == ValueType.NativeFunction) {
-    let returned: any;
-    call.arguments.forEach((args, i) => {
-      const argVals = [];
-      for (const expression of args.expressions) {
-        const val = evaluateExpression(expression, environment);
-        argVals.push(val.value);
-      }
-      const f = (i === 0 ? func.value : returned) as (...args: any[]) => any;
-      returned = f(...argVals);
-    });
+  const argsOrGetters = call.argumentsOrGetters;
 
-    let valueType = ValueType.Nil;
-    switch (typeof returned) {
-      case "number":
-        valueType = ValueType.Number;
-        break;
-      case "string":
-        valueType = ValueType.String;
-        break;
-      case "function":
-        valueType = ValueType.NativeFunction;
-        break;
+  let returned: Value | undefined = undefined;
+  argsOrGetters.forEach((argOrGetter) => {
+    // class initializer
+    if (funcOrVar.type == ValueType.Class) {
+      returned = new Value(ValueType.ClassInstance, new ClassInstance(name));
+      return;
     }
 
-    return new Value(valueType, returned);
-  }
+    // property access
+    if (argOrGetter instanceof Getter) {
+      returned = (funcOrVar.value as ClassInstance | Class).get(
+        argOrGetter.identifier,
+      );
+      return;
+    }
 
-  if (func.type == ValueType.UserFunction) {
-    let returnedValue: Value = new Value(ValueType.Nil, null);
-    call.arguments.forEach((args, i) => {
-      const userFunction =
-        (i == 0 ? func.value : returnedValue.value) as unknown as UserFunction;
-      const values: Value[] = [];
+    // native function call
+    if (funcOrVar.type == ValueType.NativeFunction) {
+      const nativeFunction = funcOrVar.value as (...args: any[]) => any;
+      const args = [];
+      for (const expression of argOrGetter.expressions) {
+        const val = evaluateExpression(expression, environment);
+        args.push(val.value);
+      }
+      const returnedRawValue = nativeFunction(...args);
+      let valueType = ValueType.Nil;
+      switch (typeof returnedRawValue) {
+        case "number":
+          valueType = ValueType.Number;
+          break;
+        case "string":
+          valueType = ValueType.String;
+          break;
+        case "function":
+          valueType = ValueType.NativeFunction;
+          break;
+      }
+      returned = new Value(valueType, returnedRawValue);
+      return;
+    }
+
+    // user function or method call
+    if (funcOrVar.type == ValueType.UserFunction) {
+      const userFunction = funcOrVar.value as unknown as UserFunction;
 
       // evaluate args
-      for (const expression of args.expressions) {
+      const values: Value[] = [];
+      for (const expression of argOrGetter.expressions) {
         const val = evaluateExpression(expression, environment);
         values.push(val);
       }
@@ -560,22 +575,20 @@ export function evaluateCall(call: Call, environment: Environment): Value {
 
       try {
         evaluateBlock(userFunction.block, envForCall);
+        returned = new Value(ValueType.Nil, null);
       } catch (e) {
         if (e instanceof ReturnValueError) {
-          returnedValue = e.value;
+          returned = e.value;
         } else {
           throw e;
         }
       }
-    });
-    return returnedValue;
-  }
+      return;
+    }
+  });
 
-  if (func.type == ValueType.Class) {
-    return new Value(ValueType.ClassInstance, new ClassInstance(name));
-  }
-
-  throw new UncallableFunctionError(name);
+  if (returned == undefined) throw new UncallableFunctionError(name);
+  return returned;
 }
 
 export function evaluatePrimary(

@@ -47,7 +47,6 @@ import {
 } from "./type.ts";
 import { TokenType } from "../token/type.ts";
 import { InvalidPrimaryError } from "./error.ts";
-import { TooManyArgumentsError } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/_errors.ts";
 
 export function makeAST(tokens: Token[]): [AST, Token[]] {
   return makeProgram(tokens);
@@ -346,32 +345,33 @@ export function makeExpression(tokens: Token[]): [Expression, Token[]] {
 }
 
 export function makeAssignment(tokens: Token[]): [Assignment, Token[]] {
-  const firstToken = tokens[0];
-  const secondToken = tokens[1];
-  if (
-    firstToken?.type == TokenType.Identifier &&
-    secondToken?.type == TokenType.Equal
-  ) {
-    const [assignment, leftTokens] = makeAssignment(tokens.slice(2)); // consume [IDENTIFIER] and "="
-    return [
-      new AssignmentWithIdentifier(firstToken.value as string, assignment),
-      leftTokens,
-    ];
-  } else if (
-    firstToken?.type == TokenType.Identifier &&
-    secondToken?.type == TokenType.Dot
-  ) {
-    let call: Call;
-    let leftTokens: Token[] = [];
-    [call, leftTokens] = makeCall(tokens);
+  // check if it's an assignment first.
+  let call: Call;
+  let leftTokens: Token[] = [];
+  [call, leftTokens] = makeCall(tokens);
+  if (leftTokens.length > 0 && leftTokens[0].type == TokenType.Equal) {
     leftTokens = leftTokens.slice(1); // consume "="
     let assignment: Assignment;
     [assignment, leftTokens] = makeAssignment(leftTokens);
 
-    const tail: Getter = (call as PrimaryWithArgumentsOrGetters)
-      .argumentsOrGetters.pop() as Getter;
+    if (call instanceof PrimaryWithArgumentsOrGetters) {
+      const tail: Getter = (call as PrimaryWithArgumentsOrGetters)
+        .argumentsOrGetters.pop() as Getter;
+      if (
+        (call as PrimaryWithArgumentsOrGetters).argumentsOrGetters.length == 0
+      ) {
+        call = new Primary(
+          PrimaryType.Identifier,
+          (call as PrimaryWithArgumentsOrGetters).primary.value as string,
+        );
+      }
+      return [
+        new AssignmentWithIdentifier(tail.identifier, assignment, call),
+        leftTokens,
+      ];
+    }
     return [
-      new AssignmentWithIdentifier(tail.identifier, assignment, call),
+      new AssignmentWithIdentifier(call.value as string, assignment),
       leftTokens,
     ];
   }
@@ -552,7 +552,7 @@ export function makeFanctor(tokens: Token[]): [Fanctor, Token[]] {
 export function makeUnary(tokens: Token[]): [Unary, Token[]] {
   const token = tokens[0];
 
-  if (token.type == TokenType.Bang || token.type == TokenType.Minus) {
+  if (token?.type == TokenType.Bang || token?.type == TokenType.Minus) {
     const operator = token.type == TokenType.Bang
       ? OperatorForUnary.Bang
       : OperatorForUnary.Minus;
@@ -630,7 +630,7 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
   const token = tokens[0];
   const leftTokens = tokens.slice(1);
 
-  switch (token.type) {
+  switch (token?.type) {
     case TokenType.False:
       return [new Primary(PrimaryType.False), leftTokens];
     case TokenType.True:
@@ -646,7 +646,7 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
   }
 
   // A grouped expression
-  if (token.type == TokenType.ParenLeft) {
+  if (token?.type == TokenType.ParenLeft) {
     let leftTokens = tokens.slice(1); // consume "("
     let expression: Expression;
     [expression, leftTokens] = makeExpression(leftTokens);
