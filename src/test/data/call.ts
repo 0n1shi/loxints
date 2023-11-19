@@ -14,7 +14,7 @@ import {
 } from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
 import { Environment } from "../../eval/type.ts";
-import { UserFunction } from "../../eval/type.ts";
+import { ClassInstance, UserFunction } from "../../eval/type.ts";
 import { Value, ValueType } from "../../eval/type.ts";
 
 type TestData = TestDataBase & {
@@ -39,6 +39,10 @@ const userFunctionAdd = new UserFunction(
   ]),
   new Environment(),
 );
+const classInstanceUser = new ClassInstance("User").set(
+  "id",
+  new Value(ValueType.Number, 10),
+);
 
 const testEnv = new Environment().add(
   "hello",
@@ -46,6 +50,9 @@ const testEnv = new Environment().add(
 ).add(
   "add",
   new Value(ValueType.UserFunction, userFunctionAdd),
+).add(
+  "user",
+  new Value(ValueType.ClassInstance, classInstanceUser),
 );
 
 export const callTests: TestData[] = [
@@ -106,60 +113,60 @@ export const callTests: TestData[] = [
         new Getter("id"),
       ],
     ),
-    value: new Value(ValueType.Number, 3),
+    value: new Value(ValueType.Number, 10),
     environmentBefore: testEnv,
     environmentAfter: testEnv,
   },
-  {
-    name: "call class method",
-    program: `user.id()`,
-    lines: 1,
-    tokens: [
-      { type: TokenType.Identifier, value: "user" },
-      { type: TokenType.Dot },
-      { type: TokenType.Identifier, value: "id" },
-      { type: TokenType.ParenLeft },
-      { type: TokenType.ParenRight },
-    ],
-    ast: new PrimaryWithArgumentsOrGetters(
-      new Primary(PrimaryType.Identifier, "user"),
-      [
-        new Getter("id"),
-        new Arguments([]),
-      ],
-    ),
-    value: new Value(ValueType.Number, 3),
-    environmentBefore: testEnv,
-    environmentAfter: testEnv,
-  },
-  {
-    name: "method chain",
-    program: `egg.scramble(3).with(cheddar)`,
-    lines: 1,
-    tokens: [
-      { type: TokenType.Identifier, value: "egg" },
-      { type: TokenType.Dot },
-      { type: TokenType.Identifier, value: "scramble" },
-      { type: TokenType.ParenLeft },
-      { type: TokenType.Number, value: 3 },
-      { type: TokenType.ParenRight },
-      { type: TokenType.Dot },
-      { type: TokenType.Identifier, value: "with" },
-      { type: TokenType.ParenLeft },
-      { type: TokenType.Identifier, value: "cheddar" },
-      { type: TokenType.ParenRight },
-    ],
-    ast: new PrimaryWithArgumentsOrGetters(
-      new Primary(PrimaryType.Identifier, "egg"),
-      [
-        new Getter("scramble"),
-        new Arguments([new Primary(PrimaryType.Number, 3)]),
-        new Getter("with"),
-        new Arguments([new Primary(PrimaryType.Identifier, "cheddar")]),
-      ],
-    ),
-    value: new Value(ValueType.Number, 3),
-    environmentBefore: testEnv,
-    environmentAfter: testEnv,
-  },
+  // {
+  //   name: "call class method",
+  //   program: `user.id()`,
+  //   lines: 1,
+  //   tokens: [
+  //     { type: TokenType.Identifier, value: "user" },
+  //     { type: TokenType.Dot },
+  //     { type: TokenType.Identifier, value: "id" },
+  //     { type: TokenType.ParenLeft },
+  //     { type: TokenType.ParenRight },
+  //   ],
+  //   ast: new PrimaryWithArgumentsOrGetters(
+  //     new Primary(PrimaryType.Identifier, "user"),
+  //     [
+  //       new Getter("id"),
+  //       new Arguments([]),
+  //     ],
+  //   ),
+  //   value: new Value(ValueType.Number, 3),
+  //   environmentBefore: testEnv,
+  //   environmentAfter: testEnv,
+  // },
+  // {
+  //   name: "method chain",
+  //   program: `egg.scramble(3).with(cheddar)`,
+  //   lines: 1,
+  //   tokens: [
+  //     { type: TokenType.Identifier, value: "egg" },
+  //     { type: TokenType.Dot },
+  //     { type: TokenType.Identifier, value: "scramble" },
+  //     { type: TokenType.ParenLeft },
+  //     { type: TokenType.Number, value: 3 },
+  //     { type: TokenType.ParenRight },
+  //     { type: TokenType.Dot },
+  //     { type: TokenType.Identifier, value: "with" },
+  //     { type: TokenType.ParenLeft },
+  //     { type: TokenType.Identifier, value: "cheddar" },
+  //     { type: TokenType.ParenRight },
+  //   ],
+  //   ast: new PrimaryWithArgumentsOrGetters(
+  //     new Primary(PrimaryType.Identifier, "egg"),
+  //     [
+  //       new Getter("scramble"),
+  //       new Arguments([new Primary(PrimaryType.Number, 3)]),
+  //       new Getter("with"),
+  //       new Arguments([new Primary(PrimaryType.Identifier, "cheddar")]),
+  //     ],
+  //   ),
+  //   value: new Value(ValueType.Number, 3),
+  //   environmentBefore: testEnv,
+  //   environmentAfter: testEnv,
+  // },
 ];

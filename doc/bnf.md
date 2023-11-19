@@ -24,7 +24,12 @@ statement           -> expressionStatement
                     | whileStatement
                     | block ;
 expressionStatement -> expression ";" ;
-forStatement        -> "for" "(" ( variableDeclaration | expressionStatement | ";" ) expression?  ";" expression? ")" statement ;
+forStatement        -> "for" "(" 
+                    ( variableDeclaration | expressionStatement | ";" )
+                    expression?  ";"
+                    expression? 
+                    ")"
+                    statement ;
 ifStatement         -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStatement      -> "print" expression ";" ;
 returnStatement     -> "return" expression? ";" ;

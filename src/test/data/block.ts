@@ -6,12 +6,10 @@ import {
   PrintStatement,
   VariableDeclaration,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: Block;
 };
 
@@ -42,5 +40,8 @@ print msg;
       ),
       new PrintStatement(new Primary(PrimaryType.Identifier, "msg")),
     ]),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

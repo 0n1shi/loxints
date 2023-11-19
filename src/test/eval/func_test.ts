@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import {
   evaluateAssignment,
+  evaluateBlock,
   evaluateCall,
   evaluateClassDeclaration,
   evaluateComparision,
@@ -10,9 +11,13 @@ import {
   evaluateLogicAnd,
   evaluateLogicOr,
   evaluatePrimary,
+  evaluateReturnStatement,
   evaluateTerm,
   evaluateUnary,
+  evaluateWhileStatement,
+  evaluatePrintStatement,
 } from "../../eval/func.ts";
+import { Value, ValueType } from "../../eval/type.ts";
 import { primaryTests } from "../../test/data/primary.ts";
 import { callTests } from "../../test/data/call.ts";
 import { unaryTests } from "../../test/data/unary.ts";
@@ -25,11 +30,56 @@ import { logicOrTests } from "../../test/data/logic_or.ts";
 import { assignmentTests } from "../../test/data/assignment.ts";
 import { expressionTests } from "../data/expression.ts";
 import { classTests } from "../data/class.ts";
+import { blockTests } from "../data/block.ts";
+import { whileStatementTests } from "../data/while_statement.ts";
+import { returnStatementTests } from "../data/return_statement.ts";
+import { printStatementTests } from "../data/print_statement.ts";
 
 Deno.test("Testing evaluation of class", async (context) => {
+  for (const test of printStatementTests) {
+    await context.step(test.name, () => {
+      const value = evaluatePrintStatement(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of print statement", async (context) => {
   for (const test of classTests) {
     await context.step(test.name, () => {
       const value = evaluateClassDeclaration(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of return statment", async (context) => {
+  for (const test of returnStatementTests) {
+    await context.step(test.name, () => {
+      let value = new Value(ValueType.Nil, null);
+      try {
+        value = evaluateReturnStatement(test.ast, test.environmentBefore);
+      } catch (e) {
+        assertEquals(e, test.error);
+      }
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of while statment", async (context) => {
+  for (const test of whileStatementTests) {
+    await context.step(test.name, () => {
+      const value = evaluateWhileStatement(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of block", async (context) => {
+  for (const test of blockTests) {
+    await context.step(test.name, () => {
+      const value = evaluateBlock(test.ast, test.environmentBefore);
       assertEquals(value, test.value);
       assertEquals(test.environmentBefore, test.environmentAfter);
     });

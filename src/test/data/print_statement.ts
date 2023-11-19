@@ -1,11 +1,9 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
+import { TestDataBase } from "./data.ts";
 import { Primary, PrimaryType, PrintStatement } from "../../ast/type.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: PrintStatement;
 };
 
@@ -22,5 +20,8 @@ export const printStatementTests: TestData[] = [
     ast: new PrintStatement(
       new Primary(PrimaryType.String, "hello world"),
     ),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

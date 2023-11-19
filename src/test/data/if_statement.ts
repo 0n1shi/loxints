@@ -6,6 +6,7 @@ import {
   PrimaryType,
   PrintStatement,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
 
 type TestData = {
   name: string;

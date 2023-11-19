@@ -37,8 +37,9 @@ export class Class {
     return this.fields.get(key)!;
   }
 
-  set(key: string, val: Value): void {
+  set(key: string, val: Value): Class {
     this.fields.set(key, val);
+    return this;
   }
 }
 
@@ -58,8 +59,9 @@ export class ClassInstance {
     return this.fields.get(key)!;
   }
 
-  set(key: string, val: Value): void {
+  set(key: string, val: Value): ClassInstance {
     this.fields.set(key, val);
+    return this;
   }
 }
 
