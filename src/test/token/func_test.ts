@@ -21,10 +21,10 @@ import { returnStatementTests } from "../data/return_statement.ts";
 import { callTests } from "../data/call.ts";
 import { functionDeclarationTests } from "../data/function_declaration.ts";
 import { expressionTests } from "../data/expression.ts";
-import { classTests } from "../data/class.ts";
+import { classDeclarationTests } from "../data/class_declaration.ts";
 
 Deno.test("Testing tokenize class declarations", async (context) => {
-  for (const test of classTests) {
+  for (const test of classDeclarationTests) {
     await context.step(test.name, () => {
       const [tokens, lines] = tokenize(test.program);
       assertEquals(tokens, test.tokens);
@@ -39,7 +39,6 @@ Deno.test("Testing tokenize function declarations", async (context) => {
       assertEquals(tokens, test.tokens);
       assertEquals(lines, test.lines);
     });
-    test.after();
   }
 });
 Deno.test("Testing tokenize variable declarations", async (context) => {

@@ -34,7 +34,7 @@ import { logicAndTests } from "../../test/data/logic_and.ts";
 import { logicOrTests } from "../../test/data/logic_or.ts";
 import { assignmentTests } from "../../test/data/assignment.ts";
 import { expressionTests } from "../data/expression.ts";
-import { classTests } from "../data/class.ts";
+import { classDeclarationTests } from "../data/class_declaration.ts";
 import { blockTests } from "../data/block.ts";
 import { whileStatementTests } from "../data/while_statement.ts";
 import { returnStatementTests } from "../data/return_statement.ts";
@@ -45,8 +45,8 @@ import { expressionStatementTests } from "../data/expression_statement.ts";
 import { variableDeclarationTests } from "../data/variable_declaration.ts";
 import { functionDeclarationTests } from "../data/function_declaration.ts";
 
-Deno.test("Testing evaluation of class statement", async (context) => {
-  for (const test of classTests) {
+Deno.test("Testing evaluation of class declaration", async (context) => {
+  for (const test of classDeclarationTests) {
     await context.step(test.name, () => {
       const value = evaluateClassDeclaration(test.ast, test.environmentBefore);
       assertEquals(value, test.value);

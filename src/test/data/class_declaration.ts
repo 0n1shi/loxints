@@ -12,13 +12,17 @@ import {
 } from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
 import { Class, Environment } from "../../eval/type.ts";
-import { Value, ValueType } from "../../eval/type.ts";
+import { ClassMethod, Value, ValueType } from "../../eval/type.ts";
 
 type TestData = TestDataBase & {
   ast: ClassDeclaration;
 };
 
-export const classTests: TestData[] = [
+// TODO: better way to do this ...
+const userClassTestEnvrionment = new Environment();
+const adminClassTestEnvrionment = new Environment();
+
+export const classDeclarationTests: TestData[] = [
   {
     name: "class declaration",
     program: `class User {
@@ -51,15 +55,30 @@ export const classTests: TestData[] = [
       ),
     ]),
     value: new Value(ValueType.Nil, null),
-    environmentBefore: new Environment(),
+    environmentBefore: userClassTestEnvrionment,
     environmentAfter: new Environment().add(
       "User",
-      new Value(ValueType.Class, new Class("User")),
+      new Value(
+        ValueType.Class,
+        new Class("User").set(
+          "id",
+          new Value(
+            ValueType.ClassMethod,
+            new ClassMethod(
+              [],
+              new Block([
+                new ReturnStatement(new Primary(PrimaryType.Number, 0)),
+              ]),
+              userClassTestEnvrionment,
+            ),
+          ),
+        ),
+      ),
     ),
   },
   {
     name: "class declaration 2",
-    program: `class User {
+    program: `class Admin {
   hi(name) {
     print "hi, " + name;
   } 
@@ -98,10 +117,31 @@ export const classTests: TestData[] = [
       ),
     ]),
     value: new Value(ValueType.Nil, null),
-    environmentBefore: new Environment(),
+    environmentBefore: adminClassTestEnvrionment,
     environmentAfter: new Environment().add(
       "User",
-      new Value(ValueType.Class, new Class("User")),
+      new Value(
+        ValueType.Class,
+        new Class("User").set(
+          "hi",
+          new Value(
+            ValueType.ClassMethod,
+            new ClassMethod(
+              ["name"],
+              new Block([
+                new PrintStatement(
+                  new FanctorsAndOperator(
+                    new Primary(PrimaryType.String, "hi, "),
+                    OperatorForFanctors.Plus,
+                    new Primary(PrimaryType.Identifier, "name"),
+                  ),
+                ),
+              ]),
+              adminClassTestEnvrionment,
+            ),
+          ),
+        ),
+      ),
     ),
   },
 ];

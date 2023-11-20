@@ -20,7 +20,7 @@ import { argumentsTests } from "../data/arguments.ts";
 import { callTests } from "../data/call.ts";
 import { functionDeclarationTests } from "../data/function_declaration.ts";
 import { expressionTests } from "../data/expression.ts";
-import { classTests } from "../data/class.ts";
+import { classDeclarationTests } from "../data/class_declaration.ts";
 
 import {
   makeArguments,
@@ -48,7 +48,7 @@ import {
 } from "../../ast/func.ts";
 
 Deno.test("Testing ast for class declarations", async (context) => {
-  for (const test of classTests) {
+  for (const test of classDeclarationTests) {
     await context.step(test.name, () => {
       const [ast] = makeClassDeclaration(test.tokens);
       assertEquals(ast, test.ast);

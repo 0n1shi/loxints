@@ -17,6 +17,7 @@ export enum ValueType {
   Nil = "[nil]",
   Class = "[class]",
   ClassInstance = "[class instance]",
+  ClassMethod = "[class method]",
   UserFunction = "[user function]",
   NativeFunction = "[native function]",
 }
@@ -77,6 +78,18 @@ export class UserFunction {
   }
 }
 
+export class ClassMethod {
+  parameters: string[];
+  block: Block;
+  environment: Environment;
+
+  constructor(parameters: string[], block: Block, environment: Environment) {
+    this.parameters = parameters;
+    this.block = block;
+    this.environment = environment;
+  }
+}
+
 export type NativeFunction = (...args: any[]) => any;
 
 export type ValueTypeInTS =
@@ -86,6 +99,7 @@ export type ValueTypeInTS =
   | null
   | Class
   | ClassInstance
+  | ClassMethod
   | UserFunction
   | NativeFunction;
 

@@ -44,6 +44,7 @@ import {
 import {
   Class,
   ClassInstance,
+  ClassMethod,
   Environment,
   ReturnValueError,
   UserFunction,
@@ -60,7 +61,6 @@ import {
   RuntimeError,
   UncallableFunctionError,
   UndefinedError,
-  UndefinedFunctionError,
   UndefinedVariableError,
 } from "./error.ts";
 import {
@@ -90,9 +90,19 @@ export function evaluateClassDeclaration(
   if (environment.has(identifier)) {
     throw new DefinedClassError(identifier);
   }
+  const declaredClass = new Class(identifier);
+  for (const method of classDeclaration.methods) {
+    declaredClass.set(
+      method.identifier,
+      new Value(
+        ValueType.ClassMethod,
+        new ClassMethod(method.parameters, method.block, environment),
+      ),
+    );
+  }
   environment.add(
     identifier,
-    new Value(ValueType.Class, new Class(identifier)),
+    new Value(ValueType.Class, declaredClass),
   );
   return new Value(ValueType.Nil, null);
 }
