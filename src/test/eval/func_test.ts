@@ -8,15 +8,16 @@ import {
   evaluateEquality,
   evaluateExpression,
   evaluateFanctor,
+  evaluateForStatement,
+  evaluateIfStatement,
   evaluateLogicAnd,
   evaluateLogicOr,
   evaluatePrimary,
+  evaluatePrintStatement,
   evaluateReturnStatement,
   evaluateTerm,
-  evaluateIfStatement,
   evaluateUnary,
   evaluateWhileStatement,
-  evaluatePrintStatement,
 } from "../../eval/func.ts";
 import { Value, ValueType } from "../../eval/type.ts";
 import { primaryTests } from "../../test/data/primary.ts";
@@ -36,6 +37,7 @@ import { whileStatementTests } from "../data/while_statement.ts";
 import { returnStatementTests } from "../data/return_statement.ts";
 import { printStatementTests } from "../data/print_statement.ts";
 import { ifStatementTests } from "../data/if_statement.ts";
+import { forStatementTests } from "../data/for_statement.ts";
 
 Deno.test("Testing evaluation of class statement", async (context) => {
   for (const test of classTests) {
@@ -46,10 +48,10 @@ Deno.test("Testing evaluation of class statement", async (context) => {
     });
   }
 });
-Deno.test("Testing evaluation of print statement", async (context) => {
-  for (const test of printStatementTests) {
+Deno.test("Testing evaluation of for statement", async (context) => {
+  for (const test of forStatementTests) {
     await context.step(test.name, () => {
-      const value = evaluatePrintStatement(test.ast, test.environmentBefore);
+      const value = evaluateForStatement(test.ast, test.environmentBefore);
       assertEquals(value, test.value);
       assertEquals(test.environmentBefore, test.environmentAfter);
     });
@@ -59,6 +61,15 @@ Deno.test("Testing evaluation of if statement", async (context) => {
   for (const test of ifStatementTests) {
     await context.step(test.name, () => {
       const value = evaluateIfStatement(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of print statement", async (context) => {
+  for (const test of printStatementTests) {
+    await context.step(test.name, () => {
+      const value = evaluatePrintStatement(test.ast, test.environmentBefore);
       assertEquals(value, test.value);
       assertEquals(test.environmentBefore, test.environmentAfter);
     });

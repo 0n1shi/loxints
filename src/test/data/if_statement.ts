@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   AssignmentWithIdentifier,
   Block,
@@ -6,7 +6,6 @@ import {
   IfStatement,
   Primary,
   PrimaryType,
-  PrintStatement,
 } from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
 import { Environment, Value, ValueType } from "../../eval/type.ts";
