@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import { Primary, PrimaryType, VariableDeclaration } from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
 import { Environment, Value, ValueType } from "../../eval/type.ts";

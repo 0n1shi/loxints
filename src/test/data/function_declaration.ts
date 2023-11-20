@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   Block,
   FanctorsAndOperator,
@@ -8,14 +8,22 @@ import {
   PrimaryType,
   PrintStatement,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import {
+  Environment,
+  UserFunction,
+  Value,
+  ValueType,
+} from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: FunctionDeclaration;
 };
+
+// TODO: find out better way to do this ...
+const helloFuncEnv = new Environment();
+const greetFuncEnv = new Environment();
+const addFuncEnv = new Environment();
 
 export const functionDeclarationTests: TestData[] = [
   {
@@ -42,6 +50,24 @@ export const functionDeclarationTests: TestData[] = [
         new PrintStatement(new Primary(PrimaryType.String, "hello world")),
       ]),
     ),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: helloFuncEnv,
+    environmentAfter: new Environment()
+      .add(
+        "hello",
+        new Value(
+          ValueType.UserFunction,
+          new UserFunction(
+            [],
+            new Block([
+              new PrintStatement(
+                new Primary(PrimaryType.String, "hello world"),
+              ),
+            ]),
+            helloFuncEnv,
+          ),
+        ),
+      ),
   },
   {
     name: "greet to a name",
@@ -76,12 +102,34 @@ export const functionDeclarationTests: TestData[] = [
         ),
       ]),
     ),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: greetFuncEnv,
+    environmentAfter: new Environment()
+      .add(
+        "greet",
+        new Value(
+          ValueType.UserFunction,
+          new UserFunction(
+            ["name"],
+            new Block([
+              new PrintStatement(
+                new FanctorsAndOperator(
+                  new Primary(PrimaryType.String, "hello, "),
+                  OperatorForFanctors.Plus,
+                  new Primary(PrimaryType.Identifier, "name"),
+                ),
+              ),
+            ]),
+            greetFuncEnv,
+          ),
+        ),
+      ),
   },
   {
     name: "add and print it",
     program: `fun add(a, b) {
   print a + b;
-}`,
+  }`,
     lines: 3,
     tokens: [
       { type: TokenType.Fun },
@@ -112,5 +160,27 @@ export const functionDeclarationTests: TestData[] = [
         ),
       ]),
     ),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: addFuncEnv,
+    environmentAfter: new Environment()
+      .add(
+        "add",
+        new Value(
+          ValueType.UserFunction,
+          new UserFunction(
+            ["a", "b"],
+            new Block([
+              new PrintStatement(
+                new FanctorsAndOperator(
+                  new Primary(PrimaryType.Identifier, "a"),
+                  OperatorForFanctors.Plus,
+                  new Primary(PrimaryType.Identifier, "b"),
+                ),
+              ),
+            ]),
+            addFuncEnv,
+          ),
+        ),
+      ),
   },
 ];

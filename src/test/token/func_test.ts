@@ -39,6 +39,7 @@ Deno.test("Testing tokenize function declarations", async (context) => {
       assertEquals(tokens, test.tokens);
       assertEquals(lines, test.lines);
     });
+    test.after();
   }
 });
 Deno.test("Testing tokenize variable declarations", async (context) => {

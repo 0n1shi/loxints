@@ -10,6 +10,7 @@ import {
   evaluateExpressionStatement,
   evaluateFanctor,
   evaluateForStatement,
+  evaluateFunctionDeclaration,
   evaluateIfStatement,
   evaluateLogicAnd,
   evaluateLogicOr,
@@ -42,11 +43,24 @@ import { ifStatementTests } from "../data/if_statement.ts";
 import { forStatementTests } from "../data/for_statement.ts";
 import { expressionStatementTests } from "../data/expression_statement.ts";
 import { variableDeclarationTests } from "../data/variable_declaration.ts";
+import { functionDeclarationTests } from "../data/function_declaration.ts";
 
 Deno.test("Testing evaluation of class statement", async (context) => {
   for (const test of classTests) {
     await context.step(test.name, () => {
       const value = evaluateClassDeclaration(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of function declaration", async (context) => {
+  for (const test of functionDeclarationTests) {
+    await context.step(test.name, () => {
+      const value = evaluateFunctionDeclaration(
+        test.ast,
+        test.environmentBefore,
+      );
       assertEquals(value, test.value);
       assertEquals(test.environmentBefore, test.environmentAfter);
     });
