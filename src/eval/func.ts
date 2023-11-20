@@ -123,7 +123,9 @@ export function evaluateVariableDeclaration(
   variableDeclaration: VariableDeclaration,
   environment: Environment,
 ): Value {
-  const val = evaluateExpression(variableDeclaration.expression!, environment);
+  const val = variableDeclaration.expression
+    ? evaluateExpression(variableDeclaration.expression!, environment)
+    : new Value(ValueType.Nil, null);
   environment.add(variableDeclaration.identifier, val);
   return new Value(ValueType.Nil, null);
 }

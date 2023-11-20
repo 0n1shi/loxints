@@ -7,6 +7,7 @@ import {
   evaluateComparision,
   evaluateEquality,
   evaluateExpression,
+  evaluateExpressionStatement,
   evaluateFanctor,
   evaluateForStatement,
   evaluateIfStatement,
@@ -17,6 +18,7 @@ import {
   evaluateReturnStatement,
   evaluateTerm,
   evaluateUnary,
+  evaluateVariableDeclaration,
   evaluateWhileStatement,
 } from "../../eval/func.ts";
 import { Value, ValueType } from "../../eval/type.ts";
@@ -38,11 +40,37 @@ import { returnStatementTests } from "../data/return_statement.ts";
 import { printStatementTests } from "../data/print_statement.ts";
 import { ifStatementTests } from "../data/if_statement.ts";
 import { forStatementTests } from "../data/for_statement.ts";
+import { expressionStatementTests } from "../data/expression_statement.ts";
+import { variableDeclarationTests } from "../data/variable_declaration.ts";
 
 Deno.test("Testing evaluation of class statement", async (context) => {
   for (const test of classTests) {
     await context.step(test.name, () => {
       const value = evaluateClassDeclaration(test.ast, test.environmentBefore);
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of variable declaration", async (context) => {
+  for (const test of variableDeclarationTests) {
+    await context.step(test.name, () => {
+      const value = evaluateVariableDeclaration(
+        test.ast,
+        test.environmentBefore,
+      );
+      assertEquals(value, test.value);
+      assertEquals(test.environmentBefore, test.environmentAfter);
+    });
+  }
+});
+Deno.test("Testing evaluation of expression statement", async (context) => {
+  for (const test of expressionStatementTests) {
+    await context.step(test.name, () => {
+      const value = evaluateExpressionStatement(
+        test.ast,
+        test.environmentBefore,
+      );
       assertEquals(value, test.value);
       assertEquals(test.environmentBefore, test.environmentAfter);
     });
