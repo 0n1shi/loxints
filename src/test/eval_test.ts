@@ -21,29 +21,29 @@ import {
   evaluateUnary,
   evaluateVariableDeclaration,
   evaluateWhileStatement,
-} from "../../eval/func.ts";
-import { Value, ValueType } from "../../eval/type.ts";
-import { primaryTests } from "../../test/data/primary.ts";
-import { callTests } from "../../test/data/call.ts";
-import { unaryTests } from "../../test/data/unary.ts";
-import { fanctorTests } from "../../test/data/fanctor.ts";
-import { termTests } from "../../test/data/term.ts";
-import { comparisionTests } from "../../test/data/comparision.ts";
-import { equalityTests } from "../../test/data/equality.ts";
-import { logicAndTests } from "../../test/data/logic_and.ts";
-import { logicOrTests } from "../../test/data/logic_or.ts";
-import { assignmentTests } from "../../test/data/assignment.ts";
-import { expressionTests } from "../data/expression.ts";
-import { classDeclarationTests } from "../data/class_declaration.ts";
-import { blockTests } from "../data/block.ts";
-import { whileStatementTests } from "../data/while_statement.ts";
-import { returnStatementTests } from "../data/return_statement.ts";
-import { printStatementTests } from "../data/print_statement.ts";
-import { ifStatementTests } from "../data/if_statement.ts";
-import { forStatementTests } from "../data/for_statement.ts";
-import { expressionStatementTests } from "../data/expression_statement.ts";
-import { variableDeclarationTests } from "../data/variable_declaration.ts";
-import { functionDeclarationTests } from "../data/function_declaration.ts";
+} from "../eval/func.ts";
+import { Value, ValueType } from "../eval/type.ts";
+import { primaryTests } from "../test/data/primary.ts";
+import { callTests } from "../test/data/call.ts";
+import { unaryTests } from "../test/data/unary.ts";
+import { fanctorTests } from "../test/data/fanctor.ts";
+import { termTests } from "../test/data/term.ts";
+import { comparisionTests } from "../test/data/comparision.ts";
+import { equalityTests } from "../test/data/equality.ts";
+import { logicAndTests } from "../test/data/logic_and.ts";
+import { logicOrTests } from "../test/data/logic_or.ts";
+import { assignmentTests } from "../test/data/assignment.ts";
+import { expressionTests } from "./data/expression.ts";
+import { classDeclarationTests } from "./data/class_declaration.ts";
+import { blockTests } from "./data/block.ts";
+import { whileStatementTests } from "./data/while_statement.ts";
+import { returnStatementTests } from "./data/return_statement.ts";
+import { printStatementTests } from "./data/print_statement.ts";
+import { ifStatementTests } from "./data/if_statement.ts";
+import { forStatementTests } from "./data/for_statement.ts";
+import { expressionStatementTests } from "./data/expression_statement.ts";
+import { variableDeclarationTests } from "./data/variable_declaration.ts";
+import { functionDeclarationTests } from "./data/function_declaration.ts";
 
 Deno.test("Testing evaluation of class declaration", async (context) => {
   for (const test of classDeclarationTests) {

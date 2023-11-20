@@ -86,7 +86,7 @@ export const classDeclarationTests: TestData[] = [
     lines: 5,
     tokens: [
       { type: TokenType.Class },
-      { type: TokenType.Identifier, value: "User" },
+      { type: TokenType.Identifier, value: "Admin" },
       { type: TokenType.BraceLeft },
       { type: TokenType.Identifier, value: "hi" },
       { type: TokenType.ParenLeft },
@@ -101,7 +101,7 @@ export const classDeclarationTests: TestData[] = [
       { type: TokenType.BraceRight },
       { type: TokenType.BraceRight },
     ],
-    ast: new ClassDeclaration("User", [
+    ast: new ClassDeclaration("Admin", [
       new FunctionDeclaration(
         "hi",
         ["name"],
@@ -119,10 +119,10 @@ export const classDeclarationTests: TestData[] = [
     value: new Value(ValueType.Nil, null),
     environmentBefore: adminClassTestEnvrionment,
     environmentAfter: new Environment().add(
-      "User",
+      "Admin",
       new Value(
         ValueType.Class,
-        new Class("User").set(
+        new Class("Admin").set(
           "hi",
           new Value(
             ValueType.ClassMethod,
