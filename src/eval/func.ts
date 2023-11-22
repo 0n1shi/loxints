@@ -522,30 +522,33 @@ export function evaluateCall(call: Call, environment: Environment): Value {
   }
 
   const name = call.primary.value as string;
-  const funcOrVar = environment.get(name);
-  if (funcOrVar == undefined) throw new UndefinedError(name);
+  let returned = environment.get(name);
+  if (returned == undefined) throw new UndefinedError(name);
 
   const argsOrGetters = call.argumentsOrGetters;
-
-  let returned: Value | undefined = undefined;
   argsOrGetters.forEach((argOrGetter) => {
-    // class initializer
-    if (funcOrVar.type == ValueType.Class) {
-      returned = new Value(ValueType.ClassInstance, new ClassInstance(name));
-      return;
-    }
-
     // property access
     if (argOrGetter instanceof Getter) {
-      returned = (funcOrVar.value as ClassInstance | Class).get(
+      returned = (returned!.value as ClassInstance | Class).get(
         argOrGetter.identifier,
       );
       return;
     }
 
+    // calls
+
+    // class initializer
+    if (returned!.type == ValueType.Class) {
+      returned = new Value(
+        ValueType.ClassInstance,
+        new ClassInstance(returned!.value as Class),
+      );
+      return;
+    }
+
     // native function call
-    if (funcOrVar.type == ValueType.NativeFunction) {
-      const nativeFunction = funcOrVar.value as (...args: any[]) => any;
+    if (returned!.type == ValueType.NativeFunction) {
+      const nativeFunction = returned!.value as (...args: any[]) => any;
       const args = [];
       for (const expression of argOrGetter.expressions) {
         const val = evaluateExpression(expression, environment);
@@ -568,9 +571,9 @@ export function evaluateCall(call: Call, environment: Environment): Value {
       return;
     }
 
-    // user function or method call
-    if (funcOrVar.type == ValueType.UserFunction) {
-      const userFunction = funcOrVar.value as unknown as UserFunction;
+    // function call
+    if (returned!.type == ValueType.UserFunction) {
+      const userFunction = returned!.value as unknown as UserFunction;
 
       // evaluate args
       const values: Value[] = [];
@@ -587,6 +590,36 @@ export function evaluateCall(call: Call, environment: Environment): Value {
 
       try {
         evaluateBlock(userFunction.block, envForCall);
+        returned = new Value(ValueType.Nil, null);
+      } catch (e) {
+        if (e instanceof ReturnValueError) {
+          returned = e.value;
+        } else {
+          throw e;
+        }
+      }
+      return;
+    }
+
+    // class method call
+    if (returned!.type == ValueType.ClassMethod) {
+      const classMethod = returned!.value as unknown as ClassMethod;
+
+      // evaluate args
+      const values: Value[] = [];
+      for (const expression of argOrGetter.expressions) {
+        const val = evaluateExpression(expression, environment);
+        values.push(val);
+      }
+
+      // bind args into env for the function
+      const envForCall = new Environment(classMethod.environment);
+      classMethod.parameters.forEach((v, i) => {
+        envForCall.add(v, values[i]);
+      });
+
+      try {
+        evaluateBlock(classMethod.block, envForCall);
         returned = new Value(ValueType.Nil, null);
       } catch (e) {
         if (e instanceof ReturnValueError) {

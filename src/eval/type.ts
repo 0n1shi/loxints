@@ -24,11 +24,15 @@ export enum ValueType {
 
 export class Class {
   name: string;
-  fields: Map<string, Value>;
+  private fields: Map<string, Value>;
 
   constructor(name: string) {
     this.name = name;
     this.fields = new Map();
+  }
+
+  has(key: string): boolean {
+    return this.fields.has(key);
   }
 
   get(key: string): Value {
@@ -45,19 +49,23 @@ export class Class {
 }
 
 export class ClassInstance {
-  className: string;
+  cls: Class;
   fields: Map<string, Value>;
 
-  constructor(className: string) {
-    this.className = className;
+  constructor(cls: Class) {
+    this.cls = cls;
     this.fields = new Map();
   }
 
   get(key: string): Value {
-    if (!this.fields.has(key)) {
-      throw new UndefinedClassMember(this.className, key);
+    if (this.fields.has(key)) {
+      return this.fields.get(key)!;
     }
-    return this.fields.get(key)!;
+    if (this.cls.has(key)) {
+      return this.cls.get(key);
+    }
+
+    throw new UndefinedClassMember(this.cls.name, key);
   }
 
   set(key: string, val: Value): ClassInstance {

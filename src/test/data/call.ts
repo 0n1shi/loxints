@@ -14,7 +14,7 @@ import {
 } from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
 import { Environment } from "../../eval/type.ts";
-import { ClassInstance, UserFunction } from "../../eval/type.ts";
+import { Class, ClassInstance, UserFunction } from "../../eval/type.ts";
 import { Value, ValueType } from "../../eval/type.ts";
 
 type TestData = TestDataBase & {
@@ -39,7 +39,8 @@ const userFunctionAdd = new UserFunction(
   ]),
   new Environment(),
 );
-const classInstanceUser = new ClassInstance("User").set(
+const userClass = new Class("User");
+const classInstanceUser = new ClassInstance(userClass).set(
   "id",
   new Value(ValueType.Number, 10),
 );
