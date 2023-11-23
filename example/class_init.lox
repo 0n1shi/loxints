@@ -12,5 +12,10 @@ class User {
 }
 
 var mike = User(100, "mike");
+var john = User(101, "john");
+
 print mike.getID();
 print mike.getName();
+
+print john.getID();
+print john.getName();
