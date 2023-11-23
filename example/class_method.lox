@@ -1,0 +1,8 @@
+class User {
+  id () {
+    return 3;
+  }
+}
+
+var mike = User();
+print mike.id();

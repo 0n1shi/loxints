@@ -12,12 +12,10 @@ import {
   TermsAndOperator,
   WhileStatement,
 } from "../../ast/type.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
+import { TestDataBase } from "./data.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: WhileStatement;
 };
 
@@ -71,5 +69,16 @@ export const whileStatementTests: TestData[] = [
         ),
       ]),
     ),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: new Environment()
+      .add(
+        "count",
+        new Value(ValueType.Number, 0),
+      ),
+    environmentAfter: new Environment()
+      .add(
+        "count",
+        new Value(ValueType.Number, 3),
+      ),
   },
 ];

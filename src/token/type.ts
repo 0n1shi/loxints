@@ -31,7 +31,7 @@ export enum TokenType {
 
   // keywords
   And = "and",
-  Class = "calss",
+  Class = "class",
   Else = "else",
   False = "false",
   Fun = "fun",
@@ -71,7 +71,7 @@ export const keywords = [
 
 export type Token = {
   type: TokenType;
-  value?: string | number;
+  value?: string | number | boolean;
 };
 
 export type LineNumber = number;

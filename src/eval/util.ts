@@ -1,14 +1,14 @@
 import {
   FanctorsAndOperator,
   Primary,
-  PrimaryWithArguments,
+  PrimaryWithArgumentsOrGetters,
   TermsAndOperator,
   UnariesAndOperator,
   UnaryWithOperator,
 } from "../ast/type.ts";
 
 export function isInstanceOfCall(v: any): boolean {
-  return v instanceof Primary || v instanceof PrimaryWithArguments;
+  return v instanceof Primary || v instanceof PrimaryWithArgumentsOrGetters;
 }
 
 export function isInstanceOfUnary(v: any): boolean {

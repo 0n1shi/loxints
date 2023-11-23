@@ -25,6 +25,11 @@ export class InvalidStatementError extends Error {
     super("Invalid Statement Error");
   }
 }
+export class UndefinedError extends Error {
+  public constructor(name: string) {
+    super(`"${name}" is undefined.`);
+  }
+}
 export class UndefinedFunctionError extends Error {
   public constructor(name: string) {
     super(`Undefined function ${name}`);
@@ -35,8 +40,23 @@ export class DefinedFunctionError extends Error {
     super(`Function ${name} is already defined.`);
   }
 }
+export class DefinedClassError extends Error {
+  public constructor(name: string) {
+    super(`Class ${name} is already defined.`);
+  }
+}
 export class UncallableFunctionError extends Error {
   public constructor(name: string) {
     super(`Function ${name} is not callable.`);
+  }
+}
+export class UndefinedClassMember extends Error {
+  public constructor(className: string, fieldName: string) {
+    super(`${className}.${fieldName} is undefined.`);
+  }
+}
+export class RuntimeError extends Error {
+  public constructor(message: string) {
+    super(message);
   }
 }

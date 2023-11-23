@@ -4,9 +4,11 @@
 program             -> declaration* EOF ;
 
 # declaration
-declaration         -> functionDeclaration
+declaration         -> classDeclaration
+                    | functionDeclaration
                     | variableDeclaration
                     | statement ;
+classDeclaration    -> "class" IDENTIFIER "{" function* "}" ;
 functionDeclaration -> "fun" function ;
 variableDeclaration -> "var" IDENTIFIER ( "=" expression )? ";" ;
 
@@ -22,7 +24,12 @@ statement           -> expressionStatement
                     | whileStatement
                     | block ;
 expressionStatement -> expression ";" ;
-forStatement        -> "for" "(" ( variableDeclaration | expressionStatement | ";" ) expression?  ";" expression? ")" statement ;
+forStatement        -> "for" "(" 
+                    ( variableDeclaration | expressionStatement | ";" )
+                    expression?  ";"
+                    expression? 
+                    ")"
+                    statement ;
 ifStatement         -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStatement      -> "print" expression ";" ;
 returnStatement     -> "return" expression? ";" ;
@@ -31,7 +38,7 @@ block               -> "{" declaration* "}" ;
 
 # expression
 expression          -> assignment ;
-assignment          -> IDENTIFIER "=" assignment
+assignment          -> ( call "." )? IDENTIFIER "=" assignment
                     | logic_or ;
 logic_or            -> logic_and ( "or" logic_and )* ;
 logic_and           -> equality ( "and" equality )* ;
@@ -41,7 +48,7 @@ term                -> fanctor ( ( "-" | "+" ) fanctor )* ;
 fanctor             -> unary ( ( "/" | "*" ) unary )* ;
 unary               -> ( "!" | "-" ) unary
                     | call
-call                -> primary ( "(" arguments? ")" )* ;
+call                -> primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments           -> expression ( "," expression )* ;
 primary             -> NUMBER
                     | STRING

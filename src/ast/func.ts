@@ -1,11 +1,13 @@
 import { Token } from "../token/type.ts";
 import {
   Arguments,
+  ArgumentsOrGetter,
   Assignment,
   AssignmentWithIdentifier,
   AST,
   Block,
   Call,
+  ClassDeclaration,
   Comparision,
   ComparisionsAndOperator,
   Declaration,
@@ -17,6 +19,7 @@ import {
   FanctorsAndOperator,
   ForStatement,
   FunctionDeclaration,
+  Getter,
   Group,
   IfStatement,
   LogicAnd,
@@ -29,7 +32,7 @@ import {
   OperatorForUnary,
   Primary,
   PrimaryType,
-  PrimaryWithArguments,
+  PrimaryWithArgumentsOrGetters,
   PrintStatement,
   Program,
   ReturnStatement,
@@ -62,6 +65,11 @@ export function makeProgram(tokens: Token[]): [Program, Token[]] {
 export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
   const first = tokens[0];
 
+  // class declaration
+  if (first.type == TokenType.Class) {
+    return makeClassDeclaration(tokens);
+  }
+
   // function declaration
   if (first.type == TokenType.Fun) {
     return makeFunctionDeclaration(tokens);
@@ -73,6 +81,54 @@ export function makeDeclaration(tokens: Token[]): [Declaration, Token[]] {
   }
 
   return makeStatement(tokens);
+}
+
+export function makeClassDeclaration(
+  tokens: Token[],
+): [ClassDeclaration, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "class"
+
+  const identifider = leftTokens[0].value as string; // must be class name
+  leftTokens = leftTokens.slice(2); // consume "[identifider]" and "{"
+
+  const methods: FunctionDeclaration[] = [];
+  let nextToken = leftTokens[0];
+  while (nextToken && nextToken.type != TokenType.BraceRight) {
+    let classMethod: FunctionDeclaration;
+    [classMethod, leftTokens] = makeClassMethodDeclaration(leftTokens);
+    methods.push(classMethod);
+    nextToken = leftTokens[0];
+  }
+  leftTokens = leftTokens.slice(1); // consume "}"
+
+  return [new ClassDeclaration(identifider, methods), leftTokens];
+}
+
+function makeClassMethodDeclaration(
+  tokens: Token[],
+): [FunctionDeclaration, Token[]] {
+  const identifider = tokens[0].value as string; // must be function name
+  let leftTokens = tokens.slice(2); // consume "[identifider]" and "("
+
+  const parameters: string[] = [];
+  let nextToken = leftTokens[0];
+  while (nextToken && nextToken.type != TokenType.ParenRight) {
+    parameters.push(nextToken.value as string);
+    leftTokens = leftTokens.slice(1); // consume "[identifider]"
+
+    nextToken = leftTokens[0];
+    if (nextToken && nextToken.type == TokenType.Comma) {
+      leftTokens = leftTokens.slice(1); // consume ","
+      nextToken = leftTokens[0];
+    }
+  }
+
+  leftTokens = leftTokens.slice(1); // consume ")"
+
+  let block: Block;
+  [block, leftTokens] = makeBlock(leftTokens);
+
+  return [new FunctionDeclaration(identifider, parameters, block), leftTokens];
 }
 
 export function makeFunctionDeclaration(
@@ -289,15 +345,33 @@ export function makeExpression(tokens: Token[]): [Expression, Token[]] {
 }
 
 export function makeAssignment(tokens: Token[]): [Assignment, Token[]] {
-  const firstToken = tokens[0];
-  const secondToken = tokens[1];
-  if (
-    firstToken?.type == TokenType.Identifier &&
-    secondToken?.type == TokenType.Equal
-  ) {
-    const [assignment, leftTokens] = makeAssignment(tokens.slice(2)); // consume [IDENTIFIER] and "="
+  // check if it's an assignment first.
+  let call: Call;
+  let leftTokens: Token[] = [];
+  [call, leftTokens] = makeCall(tokens);
+  if (leftTokens.length > 0 && leftTokens[0].type == TokenType.Equal) {
+    leftTokens = leftTokens.slice(1); // consume "="
+    let assignment: Assignment;
+    [assignment, leftTokens] = makeAssignment(leftTokens);
+
+    if (call instanceof PrimaryWithArgumentsOrGetters) {
+      const tail: Getter = (call as PrimaryWithArgumentsOrGetters)
+        .argumentsOrGetters.pop() as Getter;
+      if (
+        (call as PrimaryWithArgumentsOrGetters).argumentsOrGetters.length == 0
+      ) {
+        call = new Primary(
+          PrimaryType.Identifier,
+          (call as PrimaryWithArgumentsOrGetters).primary.value as string,
+        );
+      }
+      return [
+        new AssignmentWithIdentifier(tail.identifier, assignment, call),
+        leftTokens,
+      ];
+    }
     return [
-      new AssignmentWithIdentifier(firstToken.value as string, assignment),
+      new AssignmentWithIdentifier(call.value as string, assignment),
       leftTokens,
     ];
   }
@@ -478,7 +552,7 @@ export function makeFanctor(tokens: Token[]): [Fanctor, Token[]] {
 export function makeUnary(tokens: Token[]): [Unary, Token[]] {
   const token = tokens[0];
 
-  if (token.type == TokenType.Bang || token.type == TokenType.Minus) {
+  if (token?.type == TokenType.Bang || token?.type == TokenType.Minus) {
     const operator = token.type == TokenType.Bang
       ? OperatorForUnary.Bang
       : OperatorForUnary.Minus;
@@ -494,18 +568,34 @@ export function makeCall(tokens: Token[]): [Call, Token[]] {
   let leftTokens: Token[];
   [primary, leftTokens] = makePrimary(tokens);
 
-  const argsList: Arguments[] = [];
+  const argumentsOrGetters: ArgumentsOrGetter[] = [];
   let nextToken = leftTokens[0];
-  while (nextToken && nextToken.type == TokenType.ParenLeft) {
-    let args: Arguments;
-    [args, leftTokens] = makeArguments(leftTokens);
-    argsList.push(args);
-
-    nextToken = leftTokens[0];
+  while (nextToken) {
+    if (nextToken.type == TokenType.ParenLeft) {
+      let args: Arguments;
+      [args, leftTokens] = makeArguments(leftTokens);
+      argumentsOrGetters.push(args);
+      nextToken = leftTokens[0];
+    } else if (nextToken.type == TokenType.Dot) {
+      let getter: Getter;
+      [getter, leftTokens] = makeGetter(leftTokens);
+      argumentsOrGetters.push(getter);
+      nextToken = leftTokens[0];
+    } else break;
   }
 
-  if (argsList.length == 0) return [primary, leftTokens];
-  return [new PrimaryWithArguments(primary, argsList), leftTokens];
+  if (argumentsOrGetters.length == 0) return [primary, leftTokens];
+  return [
+    new PrimaryWithArgumentsOrGetters(primary, argumentsOrGetters),
+    leftTokens,
+  ];
+}
+
+export function makeGetter(tokens: Token[]): [Getter, Token[]] {
+  let leftTokens = tokens.slice(1); // consume "."
+  const token = leftTokens[0];
+  leftTokens = leftTokens.slice(1); // consume IDENTIFIER
+  return [new Getter(token.value as string), leftTokens];
 }
 
 export function makeArguments(
@@ -540,7 +630,7 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
   const token = tokens[0];
   const leftTokens = tokens.slice(1);
 
-  switch (token.type) {
+  switch (token?.type) {
     case TokenType.False:
       return [new Primary(PrimaryType.False), leftTokens];
     case TokenType.True:
@@ -551,12 +641,14 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
       return [new Primary(PrimaryType.Number, token.value), leftTokens];
     case TokenType.String:
       return [new Primary(PrimaryType.String, token.value), leftTokens];
+    case TokenType.This:
+      return [new Primary(PrimaryType.Identifier, "this"), leftTokens];
     case TokenType.Identifier:
       return [new Primary(PrimaryType.Identifier, token.value), leftTokens];
   }
 
   // A grouped expression
-  if (token.type == TokenType.ParenLeft) {
+  if (token?.type == TokenType.ParenLeft) {
     let leftTokens = tokens.slice(1); // consume "("
     let expression: Expression;
     [expression, leftTokens] = makeExpression(leftTokens);

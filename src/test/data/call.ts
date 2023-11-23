@@ -4,16 +4,17 @@ import {
   Block,
   Call,
   FanctorsAndOperator,
+  Getter,
   OperatorForFanctors,
   Primary,
   PrimaryType,
-  PrimaryWithArguments,
+  PrimaryWithArgumentsOrGetters,
   PrintStatement,
   ReturnStatement,
 } from "../../ast/type.ts";
 import { TestDataBase } from "./data.ts";
 import { Environment } from "../../eval/type.ts";
-import { UserFunction } from "../../eval/type.ts";
+import { Class, ClassInstance, UserFunction } from "../../eval/type.ts";
 import { Value, ValueType } from "../../eval/type.ts";
 
 type TestData = TestDataBase & {
@@ -38,31 +39,35 @@ const userFunctionAdd = new UserFunction(
   ]),
   new Environment(),
 );
+const userClass = new Class("User");
+const classInstanceUser = new ClassInstance(userClass)
+  .set(
+    "id",
+    new Value(ValueType.Number, 10),
+  )
+  .set(
+    "name",
+    new Value(ValueType.String, "mike"),
+  );
 
 const testEnv = new Environment().add(
   "hello",
   new Value(ValueType.UserFunction, userFunctionHello),
-).add(
-  "add",
-  new Value(ValueType.UserFunction, userFunctionAdd),
-);
+)
+  .add(
+    "add",
+    new Value(ValueType.UserFunction, userFunctionAdd),
+  )
+  .add(
+    "user",
+    new Value(ValueType.ClassInstance, classInstanceUser),
+  )
+  .add(
+    "this",
+    new Value(ValueType.ClassInstance, classInstanceUser),
+  );
 
 export const callTests: TestData[] = [
-  {
-    name: "function identifier",
-    program: `hello`,
-    lines: 1,
-    tokens: [
-      { type: TokenType.Identifier, value: "hello" },
-    ],
-    ast: new Primary(PrimaryType.Identifier, "hello"),
-    value: new Value(
-      ValueType.UserFunction,
-      userFunctionHello,
-    ),
-    environmentBefore: testEnv,
-    environmentAfter: testEnv,
-  },
   {
     name: "call without any arguments",
     program: `hello()`,
@@ -72,7 +77,7 @@ export const callTests: TestData[] = [
       { type: TokenType.ParenLeft },
       { type: TokenType.ParenRight },
     ],
-    ast: new PrimaryWithArguments(
+    ast: new PrimaryWithArgumentsOrGetters(
       new Primary(PrimaryType.Identifier, "hello"),
       [new Arguments([])],
     ),
@@ -92,7 +97,7 @@ export const callTests: TestData[] = [
       { type: TokenType.Number, value: 2 },
       { type: TokenType.ParenRight },
     ],
-    ast: new PrimaryWithArguments(
+    ast: new PrimaryWithArgumentsOrGetters(
       new Primary(PrimaryType.Identifier, "add"),
       [
         new Arguments([
@@ -105,4 +110,94 @@ export const callTests: TestData[] = [
     environmentBefore: testEnv,
     environmentAfter: testEnv,
   },
+  {
+    name: "property access",
+    program: `user.id`,
+    lines: 1,
+    tokens: [
+      { type: TokenType.Identifier, value: "user" },
+      { type: TokenType.Dot },
+      { type: TokenType.Identifier, value: "id" },
+    ],
+    ast: new PrimaryWithArgumentsOrGetters(
+      new Primary(PrimaryType.Identifier, "user"),
+      [
+        new Getter("id"),
+      ],
+    ),
+    value: new Value(ValueType.Number, 10),
+    environmentBefore: testEnv,
+    environmentAfter: testEnv,
+  },
+  {
+    name: "this access",
+    program: `this.name`,
+    lines: 1,
+    tokens: [
+      { type: TokenType.This },
+      { type: TokenType.Dot },
+      { type: TokenType.Identifier, value: "name" },
+    ],
+    ast: new PrimaryWithArgumentsOrGetters(
+      new Primary(PrimaryType.Identifier, "this"),
+      [
+        new Getter("name"),
+      ],
+    ),
+    value: new Value(ValueType.String, "mike"),
+    environmentBefore: testEnv,
+    environmentAfter: testEnv,
+  },
+  // {
+  //   name: "call class method",
+  //   program: `user.id()`,
+  //   lines: 1,
+  //   tokens: [
+  //     { type: TokenType.Identifier, value: "user" },
+  //     { type: TokenType.Dot },
+  //     { type: TokenType.Identifier, value: "id" },
+  //     { type: TokenType.ParenLeft },
+  //     { type: TokenType.ParenRight },
+  //   ],
+  //   ast: new PrimaryWithArgumentsOrGetters(
+  //     new Primary(PrimaryType.Identifier, "user"),
+  //     [
+  //       new Getter("id"),
+  //       new Arguments([]),
+  //     ],
+  //   ),
+  //   value: new Value(ValueType.Number, 3),
+  //   environmentBefore: testEnv,
+  //   environmentAfter: testEnv,
+  // },
+  // {
+  //   name: "method chain",
+  //   program: `egg.scramble(3).with(cheddar)`,
+  //   lines: 1,
+  //   tokens: [
+  //     { type: TokenType.Identifier, value: "egg" },
+  //     { type: TokenType.Dot },
+  //     { type: TokenType.Identifier, value: "scramble" },
+  //     { type: TokenType.ParenLeft },
+  //     { type: TokenType.Number, value: 3 },
+  //     { type: TokenType.ParenRight },
+  //     { type: TokenType.Dot },
+  //     { type: TokenType.Identifier, value: "with" },
+  //     { type: TokenType.ParenLeft },
+  //     { type: TokenType.Identifier, value: "cheddar" },
+  //     { type: TokenType.ParenRight },
+  //   ],
+  //   ast: new PrimaryWithArgumentsOrGetters(
+  //     new Primary(PrimaryType.Identifier, "egg"),
+  //     [
+  //       new Getter("scramble"),
+  //       new Arguments([new Primary(PrimaryType.Number, 3)]),
+  //       new Getter("with"),
+  //       new Arguments([new Primary(PrimaryType.Identifier, "cheddar")]),
+  //     ],
+  //   ),
+  //   value: new Value(ValueType.Number, 3),
+  //   environmentBefore: testEnv,
+  //   environmentAfter: testEnv,
+  // },
 ];

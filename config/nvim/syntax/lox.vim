@@ -5,6 +5,7 @@ syntax keyword function mod
 syntax keyword function clock
 syntax keyword function fun
 
+syntax keyword statement class
 syntax keyword statement if
 syntax keyword statement else
 syntax keyword statement for
@@ -33,6 +34,7 @@ syntax keyword operator >
 syntax keyword operator <
 syntax keyword operator =
 
+highlight link class Class
 highlight link nil Special
 highlight link function Function
 highlight link var Define

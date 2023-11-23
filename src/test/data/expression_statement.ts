@@ -1,4 +1,4 @@
-import { Token, TokenType } from "../../token/type.ts";
+import { TokenType } from "../../token/type.ts";
 import {
   ExpressionStatement,
   FanctorsAndOperator,
@@ -6,12 +6,10 @@ import {
   Primary,
   PrimaryType,
 } from "../../ast/type.ts";
+import { TestDataBase } from "./data.ts";
+import { Environment, Value, ValueType } from "../../eval/type.ts";
 
-type TestData = {
-  name: string;
-  program: string;
-  lines: number;
-  tokens: Token[];
+type TestData = TestDataBase & {
   ast: ExpressionStatement;
 };
 
@@ -33,5 +31,8 @@ export const expressionStatementTests: TestData[] = [
         new Primary(PrimaryType.Number, 1),
       ),
     ),
+    value: new Value(ValueType.Number, 2),
+    environmentBefore: new Environment(),
+    environmentAfter: new Environment(),
   },
 ];

@@ -1,5 +1,5 @@
 import { Block } from "../ast/type.ts";
-import { UndefinedVariableError } from "./error.ts";
+import { UndefinedClassMember, UndefinedVariableError } from "./error.ts";
 
 export class ReturnValueError extends Error {
   value: Value;
@@ -15,8 +15,63 @@ export enum ValueType {
   Number = "[number]",
   Boolean = "[boolean]",
   Nil = "[nil]",
+  Class = "[class]",
+  ClassInstance = "[class instance]",
+  ClassMethod = "[class method]",
   UserFunction = "[user function]",
   NativeFunction = "[native function]",
+}
+
+export class Class {
+  name: string;
+  private fields: Map<string, Value>;
+
+  constructor(name: string) {
+    this.name = name;
+    this.fields = new Map();
+  }
+
+  has(key: string): boolean {
+    return this.fields.has(key);
+  }
+
+  get(key: string): Value {
+    if (!this.fields.has(key)) {
+      throw new UndefinedClassMember(this.name, key);
+    }
+    return this.fields.get(key)!;
+  }
+
+  set(key: string, val: Value): Class {
+    this.fields.set(key, val);
+    return this;
+  }
+}
+
+export class ClassInstance {
+  cls: Class;
+  fields: Map<string, Value>;
+
+  constructor(cls: Class) {
+    this.cls = cls;
+    this.fields = new Map();
+  }
+
+  get(key: string): Value {
+    if (this.fields.has(key)) {
+      return this.fields.get(key)!;
+    }
+    if (this.cls.has(key)) {
+      return this.cls.get(key);
+    }
+
+    throw new UndefinedClassMember(this.cls.name, key);
+  }
+
+  set(key: string, val: Value): ClassInstance {
+    this.fields.set(key, val);
+    return this;
+  }
 }
 
 export class UserFunction {
@@ -31,13 +86,30 @@ export class UserFunction {
   }
 }
 
+export class ClassMethod {
+  parameters: string[];
+  block: Block;
+  environment: Environment;
+
+  constructor(parameters: string[], block: Block, environment: Environment) {
+    this.parameters = parameters;
+    this.block = block;
+    this.environment = environment;
+  }
+}
+
+export type NativeFunction = (...args: any[]) => any;
+
 export type ValueTypeInTS =
   | string
   | number
   | boolean
   | null
+  | Class
+  | ClassInstance
+  | ClassMethod
   | UserFunction
-  | ((...args: any[]) => any);
+  | NativeFunction;
 
 export class Value {
   type: ValueType;

@@ -14,7 +14,21 @@ export class Program {
 /**
  * Declaration
  */
-export type Declaration = FunctionDeclaration | VariableDeclaration | Statement;
+export type Declaration =
+  | ClassDeclaration
+  | FunctionDeclaration
+  | VariableDeclaration
+  | Statement;
+
+export class ClassDeclaration {
+  identifier: string;
+  methods: FunctionDeclaration[];
+
+  constructor(identifier: string, methods: FunctionDeclaration[]) {
+    this.identifier = identifier;
+    this.methods = methods;
+  }
+}
 
 export class FunctionDeclaration {
   identifier: string;
@@ -158,10 +172,12 @@ export class EqualitiesWithAnd {
 export class AssignmentWithIdentifier {
   identifier: string;
   assignment: Assignment;
+  call?: Call;
 
-  constructor(identifier: string, assignment: Assignment) {
+  constructor(identifier: string, assignment: Assignment, call?: Call) {
     this.identifier = identifier;
     this.assignment = assignment;
+    this.call = call;
   }
 }
 
@@ -282,17 +298,22 @@ export class UnaryWithOperator {
 /**
  * Call
  */
-export type Call = Primary | PrimaryWithArguments;
+export type Call = Primary | PrimaryWithArgumentsOrGetters;
 
-export class PrimaryWithArguments {
+export class PrimaryWithArgumentsOrGetters {
   primary: Primary;
-  arguments: Arguments[];
+  argumentsOrGetters: ArgumentsOrGetter[];
 
-  constructor(primary: Primary, args: Arguments[]) {
+  constructor(
+    primary: Primary,
+    argumentsOrGetters: ArgumentsOrGetter[],
+  ) {
     this.primary = primary;
-    this.arguments = args;
+    this.argumentsOrGetters = argumentsOrGetters;
   }
 }
+
+export type ArgumentsOrGetter = Arguments | Getter;
 
 /**
  * Arguments
@@ -306,6 +327,17 @@ export class Arguments {
 }
 
 /**
+ * Property Access
+ */
+export class Getter {
+  identifier: string;
+
+  constructor(identifier: string) {
+    this.identifier = identifier;
+  }
+}
+
+/**
  * Primary
  */
 export enum PrimaryType {
@@ -314,17 +346,17 @@ export enum PrimaryType {
   True = "[true]",
   False = "[false]",
   Nil = "[nil]",
-  Identifier = "[Identifier]",
+  Identifier = "[identifier]",
   Group = "[group]",
 }
 
 export class Primary {
   type: PrimaryType;
-  value?: string | number | Group;
+  value?: string | number | boolean | Group;
 
   constructor(
     type: PrimaryType,
-    value?: string | number | Group,
+    value?: string | number | boolean | Group,
   ) {
     this.type = type;
     this.value = value;
