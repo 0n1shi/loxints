@@ -2,12 +2,7 @@ class User {
   id () {
     return 3;
   }
-  getName () {
-    return name;
-  }
 }
 
 var mike = User();
-mike.name = "Mike";
 print mike.id();
-print mike.getName();

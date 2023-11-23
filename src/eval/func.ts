@@ -543,10 +543,37 @@ export function evaluateCall(call: Call, environment: Environment): Value {
 
     // class initializer
     if (returned!.type == ValueType.Class) {
-      returned = new Value(
+      const classInstance = new ClassInstance(returned!.value as Class);
+      const classInstanceValue = new Value(
         ValueType.ClassInstance,
-        new ClassInstance(returned!.value as Class),
+        classInstance,
       );
+
+      if ((returned!.value as Class).has("init")) {
+        const init = (returned!.value as Class)
+          .get("init")
+          .value as ClassMethod;
+
+        // evaluate args
+        const values: Value[] = [];
+        for (const expression of argOrGetter.expressions) {
+          const val = evaluateExpression(expression, environment);
+          values.push(val);
+        }
+
+        // bind args into env for the function
+        const envForCall = new Environment(init.environment);
+        init.parameters.forEach((v, i) => {
+          envForCall.add(v, values[i]);
+        });
+
+        envForCall.add("this", classInstanceValue);
+
+        evaluateBlock(init.block, envForCall);
+      }
+
+      returned = classInstanceValue;
+
       return;
     }
 

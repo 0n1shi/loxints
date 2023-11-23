@@ -1,0 +1,16 @@
+class User {
+  init (id, name) {
+    this.id = id;
+    this.name = name;
+  }
+  getID() {
+    return this.id;
+  }
+  getName () {
+    return this.name;
+  }
+}
+
+var mike = User(100, "mike");
+print mike.getID();
+print mike.getName();
