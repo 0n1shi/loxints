@@ -1,0 +1,9 @@
+class User {
+  getName () {
+    return this.name;
+  }
+}
+
+var mike = User();
+mike.name = "Mike";
+print mike.getName();

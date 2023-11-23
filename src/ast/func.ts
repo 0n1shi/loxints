@@ -641,6 +641,8 @@ export function makePrimary(tokens: Token[]): [Primary, Token[]] {
       return [new Primary(PrimaryType.Number, token.value), leftTokens];
     case TokenType.String:
       return [new Primary(PrimaryType.String, token.value), leftTokens];
+    case TokenType.This:
+      return [new Primary(PrimaryType.Identifier, "this"), leftTokens];
     case TokenType.Identifier:
       return [new Primary(PrimaryType.Identifier, token.value), leftTokens];
   }

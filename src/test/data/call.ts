@@ -40,21 +40,32 @@ const userFunctionAdd = new UserFunction(
   new Environment(),
 );
 const userClass = new Class("User");
-const classInstanceUser = new ClassInstance(userClass).set(
-  "id",
-  new Value(ValueType.Number, 10),
-);
+const classInstanceUser = new ClassInstance(userClass)
+  .set(
+    "id",
+    new Value(ValueType.Number, 10),
+  )
+  .set(
+    "name",
+    new Value(ValueType.String, "mike"),
+  );
 
 const testEnv = new Environment().add(
   "hello",
   new Value(ValueType.UserFunction, userFunctionHello),
-).add(
-  "add",
-  new Value(ValueType.UserFunction, userFunctionAdd),
-).add(
-  "user",
-  new Value(ValueType.ClassInstance, classInstanceUser),
-);
+)
+  .add(
+    "add",
+    new Value(ValueType.UserFunction, userFunctionAdd),
+  )
+  .add(
+    "user",
+    new Value(ValueType.ClassInstance, classInstanceUser),
+  )
+  .add(
+    "this",
+    new Value(ValueType.ClassInstance, classInstanceUser),
+  );
 
 export const callTests: TestData[] = [
   {
@@ -115,6 +126,25 @@ export const callTests: TestData[] = [
       ],
     ),
     value: new Value(ValueType.Number, 10),
+    environmentBefore: testEnv,
+    environmentAfter: testEnv,
+  },
+  {
+    name: "this access",
+    program: `this.name`,
+    lines: 1,
+    tokens: [
+      { type: TokenType.This },
+      { type: TokenType.Dot },
+      { type: TokenType.Identifier, value: "name" },
+    ],
+    ast: new PrimaryWithArgumentsOrGetters(
+      new Primary(PrimaryType.Identifier, "this"),
+      [
+        new Getter("name"),
+      ],
+    ),
+    value: new Value(ValueType.String, "mike"),
     environmentBefore: testEnv,
     environmentAfter: testEnv,
   },

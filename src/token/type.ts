@@ -71,7 +71,7 @@ export const keywords = [
 
 export type Token = {
   type: TokenType;
-  value?: string | number;
+  value?: string | number | boolean;
 };
 
 export type LineNumber = number;

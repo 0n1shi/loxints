@@ -346,17 +346,17 @@ export enum PrimaryType {
   True = "[true]",
   False = "[false]",
   Nil = "[nil]",
-  Identifier = "[Identifier]",
+  Identifier = "[identifier]",
   Group = "[group]",
 }
 
 export class Primary {
   type: PrimaryType;
-  value?: string | number | Group;
+  value?: string | number | boolean | Group;
 
   constructor(
     type: PrimaryType,
-    value?: string | number | Group,
+    value?: string | number | boolean | Group,
   ) {
     this.type = type;
     this.value = value;

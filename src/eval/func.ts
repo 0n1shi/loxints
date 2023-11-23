@@ -525,13 +525,17 @@ export function evaluateCall(call: Call, environment: Environment): Value {
   let returned = environment.get(name);
   if (returned == undefined) throw new UndefinedError(name);
 
+  // resolve "this" keyword
+  if (returned.type == ValueType.ClassInstance) {
+    environment.add("this", environment.get(name)!);
+  }
+
   const argsOrGetters = call.argumentsOrGetters;
   argsOrGetters.forEach((argOrGetter) => {
     // property access
     if (argOrGetter instanceof Getter) {
-      returned = (returned!.value as ClassInstance | Class).get(
-        argOrGetter.identifier,
-      );
+      const propertyName = argOrGetter.identifier;
+      returned = (returned!.value as ClassInstance | Class).get(propertyName);
       return;
     }
 
