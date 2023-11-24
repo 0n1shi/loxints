@@ -89,10 +89,20 @@ export function makeClassDeclaration(
   let leftTokens = tokens.slice(1); // consume "class"
 
   const identifider = leftTokens[0].value as string; // must be class name
-  leftTokens = leftTokens.slice(2); // consume "[identifider]" and "{"
+  leftTokens = leftTokens.slice(1); // consume IDENTIFIDER
+
+  // check if inheritance
+  let superClassName: string | undefined = undefined;
+  let nextToken = leftTokens[0];
+  if (nextToken && nextToken.type == TokenType.Less) {
+    const identifider = leftTokens[1].value as string;
+    superClassName = identifider;
+    leftTokens = leftTokens.slice(2); // consume "<" and IDENTIFIER
+  }
+  leftTokens = leftTokens.slice(1); // consume "{"
 
   const methods: FunctionDeclaration[] = [];
-  let nextToken = leftTokens[0];
+  nextToken = leftTokens[0];
   while (nextToken && nextToken.type != TokenType.BraceRight) {
     let classMethod: FunctionDeclaration;
     [classMethod, leftTokens] = makeClassMethodDeclaration(leftTokens);
@@ -101,7 +111,7 @@ export function makeClassDeclaration(
   }
   leftTokens = leftTokens.slice(1); // consume "}"
 
-  return [new ClassDeclaration(identifider, methods), leftTokens];
+  return [new ClassDeclaration(identifider, methods, superClassName), leftTokens];
 }
 
 function makeClassMethodDeclaration(

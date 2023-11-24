@@ -144,4 +144,45 @@ export const classDeclarationTests: TestData[] = [
       ),
     ),
   },
+  {
+    name: "class inheritance",
+    program: `class Taxi < Car {}`,
+    lines: 1,
+    tokens: [
+      { type: TokenType.Class },
+      { type: TokenType.Identifier, value: "Taxi" },
+      { type: TokenType.Less },
+      { type: TokenType.Identifier, value: "Car" },
+      { type: TokenType.BraceLeft },
+      { type: TokenType.BraceRight },
+    ],
+    ast: new ClassDeclaration("Taxi", [], "Car"),
+    value: new Value(ValueType.Nil, null),
+    environmentBefore: adminClassTestEnvrionment,
+    environmentAfter: new Environment().add(
+      "Admin",
+      new Value(
+        ValueType.Class,
+        new Class("Admin").set(
+          "hi",
+          new Value(
+            ValueType.ClassMethod,
+            new ClassMethod(
+              ["name"],
+              new Block([
+                new PrintStatement(
+                  new FanctorsAndOperator(
+                    new Primary(PrimaryType.String, "hi, "),
+                    OperatorForFanctors.Plus,
+                    new Primary(PrimaryType.Identifier, "name"),
+                  ),
+                ),
+              ]),
+              adminClassTestEnvrionment,
+            ),
+          ),
+        ),
+      ),
+    ),
+  },
 ];

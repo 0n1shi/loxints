@@ -1,0 +1,15 @@
+class Member {
+  greet() {
+    print "I am a member.";
+  }
+}
+
+class User < Member {
+  greet() {
+    print "I am a user.";
+  }
+}
+
+var testUser = User();
+
+testUser.greet();

@@ -25,21 +25,27 @@ export enum ValueType {
 export class Class {
   name: string;
   private fields: Map<string, Value>;
+  private superClass?: Class;
 
-  constructor(name: string) {
+  constructor(name: string, superClass?: Class) {
     this.name = name;
     this.fields = new Map();
+    this.superClass = superClass;
   }
 
   has(key: string): boolean {
-    return this.fields.has(key);
+    return this.fields.has(key) ||
+      (this.superClass != undefined && this.superClass.has(key));
   }
 
   get(key: string): Value {
-    if (!this.fields.has(key)) {
-      throw new UndefinedClassMember(this.name, key);
+    if (this.fields.has(key)) {
+      return this.fields.get(key)!;
     }
-    return this.fields.get(key)!;
+    if (this.superClass && this.superClass.has(key)) {
+      return this.superClass.get(key);
+    }
+    throw new UndefinedClassMember(this.name, key);
   }
 
   set(key: string, val: Value): Class {

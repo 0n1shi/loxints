@@ -90,7 +90,15 @@ export function evaluateClassDeclaration(
   if (environment.has(identifier)) {
     throw new DefinedClassError(identifier);
   }
-  const declaredClass = new Class(identifier);
+
+  let superClass: Class | undefined = undefined;
+  if (classDeclaration.superClassName) {
+    superClass = environment.get(classDeclaration.superClassName)
+      ?.value as Class;
+  }
+
+  const declaredClass = new Class(identifier, superClass);
+
   for (const method of classDeclaration.methods) {
     declaredClass.set(
       method.identifier,
@@ -100,6 +108,7 @@ export function evaluateClassDeclaration(
       ),
     );
   }
+
   environment.add(
     identifier,
     new Value(ValueType.Class, declaredClass),
