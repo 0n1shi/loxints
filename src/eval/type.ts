@@ -25,7 +25,7 @@ export enum ValueType {
 export class Class {
   name: string;
   private fields: Map<string, Value>;
-  private superClass?: Class;
+  superClass?: Class;
 
   constructor(name: string, superClass?: Class) {
     this.name = name;

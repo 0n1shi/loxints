@@ -6,6 +6,7 @@ class Member {
 
 class User < Member {
   greet() {
+    super.greet();
     print "I am a user.";
   }
 }

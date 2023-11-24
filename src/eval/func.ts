@@ -536,7 +536,12 @@ export function evaluateCall(call: Call, environment: Environment): Value {
 
   // resolve "this" keyword
   if (returned.type == ValueType.ClassInstance) {
-    environment.add("this", environment.get(name)!);
+    const classValue = environment.get(name)!;
+    environment.add("this", classValue);
+    const superClass = (classValue.value as ClassInstance).cls.superClass;
+    if (superClass) {
+      environment.add("super", new Value(ValueType.Class, superClass));
+    }
   }
 
   const argsOrGetters = call.argumentsOrGetters;
@@ -577,6 +582,10 @@ export function evaluateCall(call: Call, environment: Environment): Value {
         });
 
         envForCall.add("this", classInstanceValue);
+        const superClass = (classInstanceValue.value as Class).superClass;
+        if (superClass) {
+          envForCall.add("super", new Value(ValueType.Class, superClass));
+        }
 
         evaluateBlock(init.block, envForCall);
       }
