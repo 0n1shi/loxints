@@ -90,7 +90,15 @@ export function evaluateClassDeclaration(
   if (environment.has(identifier)) {
     throw new DefinedClassError(identifier);
   }
-  const declaredClass = new Class(identifier);
+
+  let superClass: Class | undefined = undefined;
+  if (classDeclaration.superClassName) {
+    superClass = environment.get(classDeclaration.superClassName)
+      ?.value as Class;
+  }
+
+  const declaredClass = new Class(identifier, superClass);
+
   for (const method of classDeclaration.methods) {
     declaredClass.set(
       method.identifier,
@@ -100,6 +108,7 @@ export function evaluateClassDeclaration(
       ),
     );
   }
+
   environment.add(
     identifier,
     new Value(ValueType.Class, declaredClass),
@@ -527,7 +536,12 @@ export function evaluateCall(call: Call, environment: Environment): Value {
 
   // resolve "this" keyword
   if (returned.type == ValueType.ClassInstance) {
-    environment.add("this", environment.get(name)!);
+    const classValue = environment.get(name)!;
+    environment.add("this", classValue);
+    const superClass = (classValue.value as ClassInstance).cls.superClass;
+    if (superClass) {
+      environment.add("super", new Value(ValueType.Class, superClass));
+    }
   }
 
   const argsOrGetters = call.argumentsOrGetters;
@@ -568,6 +582,10 @@ export function evaluateCall(call: Call, environment: Environment): Value {
         });
 
         envForCall.add("this", classInstanceValue);
+        const superClass = (classInstanceValue.value as Class).superClass;
+        if (superClass) {
+          envForCall.add("super", new Value(ValueType.Class, superClass));
+        }
 
         evaluateBlock(init.block, envForCall);
       }

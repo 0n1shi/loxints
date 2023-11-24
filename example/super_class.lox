@@ -1,0 +1,9 @@
+class Member {
+  greet() {
+    print "Hello";
+  }
+}
+
+class User < Member {}
+
+User().greet();

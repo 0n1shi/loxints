@@ -23,10 +23,16 @@ export type Declaration =
 export class ClassDeclaration {
   identifier: string;
   methods: FunctionDeclaration[];
+  superClassName?: string;
 
-  constructor(identifier: string, methods: FunctionDeclaration[]) {
+  constructor(
+    identifier: string,
+    methods: FunctionDeclaration[],
+    superClassName?: string,
+  ) {
     this.identifier = identifier;
     this.methods = methods;
+    this.superClassName = superClassName;
   }
 }
 
